@@ -21,6 +21,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
         private static readonly Stack<string> ParsingFiles = new();
 
         /// <summary>
+        /// Called when a deserializer is being configured.
+        /// </summary>
+        public static event EventHandler<ConfigureDeserializerEventArgs> OnConfigureDeserializer;
+
+        /// <summary>
         /// Gets the path of the current file being processed.
         /// If no file is being processed, returns null.
         /// </summary>
@@ -132,13 +137,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
 
         private static IDeserializer BuildDeserializer()
         {
-            return new DeserializerBuilder()
+            var builder = new DeserializerBuilder()
                     .WithNamingConvention(NamingConvention)
                     .WithNodeTypeResolver(new ImportNodeTypeResolver(), s => s.OnTop())
                     .WithNodeDeserializer(new ImportDeserializer(), s => s.OnTop())
                     .WithNodeDeserializer(new DuckTypeDeserializer(), s => s.OnTop())
-                    .WithNodeDeserializer(objectDeserializer => new NodeDeserializer(objectDeserializer), s => s.InsteadOf<ObjectNodeDeserializer>())
-                    .Build();
+                    .WithNodeDeserializer(objectDeserializer => new NodeDeserializer(objectDeserializer), s => s.InsteadOf<ObjectNodeDeserializer>());
+
+            var e = new ConfigureDeserializerEventArgs(builder);
+            OnConfigureDeserializer?.Invoke(null, e);
+
+            return builder.Build();
         }
     }
 }
