@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Rules for StyleCop.Analyzers" Description="Code analysis rules for StyleCop.Analyzers.csproj." ToolsVersion="14.0">
+    <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+        <!-- Do not require file headers -->
+        <Rule Id="SA1633" Action="None"/>
+        <!-- We do not want to produce xml documentation -->
+        <Rule Id="SA0001" Action="None"/>
+        <!-- "space after new" disagrees with the C# formatter, and I can't find any way to configure the latter. -->
+        <Rule Id="SA1000" Action="None"/>
+    </Rules>
+    <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.Features" RuleNamespace="Microsoft.CodeAnalysis.CSharp.Features">
+        <!-- Do not allow removal of 'this' for instance member access; conflicts with StyleCop.Analyzers rule -->
+        <Rule Id="IDE0003" Action="None" />
+    </Rules>
+    <Rules AnalyzerId="Roslynator.CSharp.Analyzers" RuleNamespace="Roslynator.CSharp.Analyzers">
+        <!-- Do not require exceptions to have specific constructors.  Some of our exceptions require particular data. -->
+        <Rule Id="RCS1194" Action="None" />
+        <!-- Do not require `if() { return false }; return true` to be condensed to one return -->
+        <Rule Id="RCS1073" Action="None" />
+    </Rules>
+</RuleSet>
