@@ -87,7 +87,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
                 var deserializer = BuildDeserializer();
                 return deserializer.Deserialize(parser, type);
             }
-            catch (YamlException ex) when (!(ex is YamlFileException))
+            catch (YamlException ex) when (ex is not YamlFileException)
             {
                 throw new YamlFileException(CurrentFilePath, ex.Start, ex.End, ex.Message, ex);
             }
@@ -125,7 +125,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
                 var parser = new MergingParser(new Parser(new StringReader(fileContents)));
                 return func(parser);
             }
-            catch (YamlException ex) when (!(ex is YamlFileException))
+            catch (YamlException ex) when (ex is not YamlFileException)
             {
                 throw new YamlFileException(CurrentFilePath, ex.Start, ex.End, ex.Message, ex);
             }

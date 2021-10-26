@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>RoboPhredDev.PotionCraft.Crucible.GameAPI</RootNamespace>
+    <LangVersion>preview</LangVersion>
+    <CodeAnalysisRuleSet>../StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>../StyleCop.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="../stylecop.json"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx.Harmony" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\BepInEx.Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\0Harmony.dll</HintPath>
+    </Reference>
+
+    <Reference Include="UnityEngine" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
+
+    <Reference Include="Assembly-CSharp" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\Assembly-CSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
+  </ItemGroup>
+</Project>
