@@ -3,69 +3,27 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using HarmonyLib;
-    using LocalizationSystem;
     using UnityEngine;
+    using Utils.BezierCurves;
 
     /// <summary>
-    /// API object providing access to and manipulations of PotionCraft ingredients.
+    /// Wraps an <see cref="Ingredient"/> to provide an api for mod use.
     /// </summary>
-    public sealed class CrucibleIngredient
+    public sealed class CrucibleIngredient : CrucibleInventoryItem
     {
         private CrucibleIngredient(Ingredient ingredient)
+        : base(ingredient)
         {
-            this.RawObject = ingredient;
         }
 
         /// <summary>
         /// Gets the raw object used by PotionCraft for this ingredient.
         /// </summary>
-        public Ingredient RawObject
-        {
-            get;
-        }
-
-        /// <summary>
-        /// Gets the ID (internal name) of this ingredient.
-        /// </summary>
-        public string ID
+        public Ingredient Ingredient
         {
             get
             {
-                return this.RawObject.name;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the name of this ingredient in the user's current language.
-        /// </summary>
-        public string LocalizedName
-        {
-            get
-            {
-                return new Key(this.RawObject.name).GetText();
-            }
-
-            set
-            {
-                // TODO: Set the ingredient name in the localization tools.
-                throw new NotImplementedException("Setting localized name");
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the sprite to use for this ingredient in the inventory.
-        /// </summary>
-        public Sprite InventoryIcon
-        {
-            get
-            {
-                return this.RawObject.inventoryIconObject;
-            }
-
-            set
-            {
-                this.RawObject.inventoryIconObject = value;
+                return (Ingredient)this.InventoryItem;
             }
         }
 
@@ -76,12 +34,12 @@
         {
             get
             {
-                return this.RawObject.recipeMarkIcon;
+                return this.Ingredient.recipeMarkIcon;
             }
 
             set
             {
-                this.RawObject.recipeMarkIcon = value;
+                this.Ingredient.recipeMarkIcon = value;
             }
         }
 
@@ -98,32 +56,15 @@
         {
             get
             {
-                return this.RawObject.smallIcon;
+                return this.Ingredient.smallIcon;
             }
 
             set
             {
-                this.RawObject.smallIcon = value;
+                this.Ingredient.smallIcon = value;
 
                 // TODO: Set the atlas injection for this ingredient.
                 throw new NotImplementedException("Atlas injection");
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the base price of this ingredient for buying or selling.
-        /// </summary>
-        /// <value>The price of the ingredient.</value>
-        public float Price
-        {
-            get
-            {
-                return Traverse.Create(this.RawObject).Field<float>("price").Value;
-            }
-
-            set
-            {
-                Traverse.Create(this.RawObject).Field<float>("price").Value = value;
             }
         }
 
@@ -135,12 +76,12 @@
         {
             get
             {
-                return this.RawObject.canBeDamaged;
+                return this.Ingredient.canBeDamaged;
             }
 
             set
             {
-                this.RawObject.canBeDamaged = value;
+                this.Ingredient.canBeDamaged = value;
             }
         }
 
@@ -152,12 +93,23 @@
         {
             get
             {
-                return this.RawObject.isTeleportationIngredient;
+                return this.Ingredient.isTeleportationIngredient;
             }
 
             set
             {
-                this.RawObject.isTeleportationIngredient = value;
+                this.Ingredient.isTeleportationIngredient = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the length of this ingredient's path.
+        /// </summary>
+        public float PathLength
+        {
+            get
+            {
+                return this.Ingredient.path.Length;
             }
         }
 
@@ -167,6 +119,15 @@
         //     throw new NotImplementedException("Auto generate icons");
         // }
 
+        /// <summary>
+        /// Creates a new ingredient with the given id.
+        /// </summary>
+        /// <remarks>
+        /// The ingredient will be created with placeholder data.  It is strongly recommended that
+        /// you set the other properties of the ingredient to customize it after its creation.
+        /// </remarks>
+        /// <param name="id">The id to create the ingredient with.</param>
+        /// <returns>An object to configure the new ingredient.</returns>
         public static CrucibleIngredient Create(string id)
         {
             if (Get(id) != null)
@@ -186,6 +147,7 @@
                 CanBeDamaged = true,
                 IsTeleportationIngredient = false,
             };
+            crucibleIngredient.SetPath(new[] { CrucibleIngredientPathSegment.LineTo(1f, 0) });
 
             var ingredientBase = Managers.Ingredient.ingredients.Find(x => x.name == "Waterbloom");
 
@@ -240,6 +202,37 @@
         public static IEnumerable<CrucibleIngredient> GetAll()
         {
             return Managers.Ingredient.ingredients.Select(x => new CrucibleIngredient(x));
+        }
+
+        /// <summary>
+        /// Gets an enumerable enumerating the potion path for this ingredient.
+        /// </summary>
+        /// <returns>An enumerable of the potion path for this ingredient.</returns>
+        public IEnumerable<CrucibleIngredientPathSegment> GetPath()
+        {
+            foreach (var part in this.Ingredient.path.path)
+            {
+                yield return CrucibleIngredientPathSegment.FromPotioncraftCurve(part);
+            }
+        }
+
+        /// <summary>
+        /// Sets the ingredient's potion path to the given path.
+        /// </summary>
+        /// <param name="path">The path to set the ingredient's path to.</param>
+        public void SetPath(IEnumerable<CrucibleIngredientPathSegment> path)
+        {
+            var list = new List<CubicBezierCurve>();
+
+            var start = Vector2.zero;
+            foreach (var part in path)
+            {
+                var curve = part.ToPotioncraftCurve(start);
+                list.Add(curve);
+                start = curve.PLast;
+            }
+
+            this.Ingredient.path.path = list;
         }
     }
 }
