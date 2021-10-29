@@ -42,8 +42,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             set
             {
-                // TODO: Set the item name in the localization tools.
-                throw new NotImplementedException("Setting localized name");
+                CrucibleLocalization.SetLocalizationKey(this.InventoryItem.name, value);
             }
         }
 

@@ -16,7 +16,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// <returns>An enumerable of configuration roots.</returns>
         public static IEnumerable<Type> GetConfigRoots()
         {
-            foreach (var candidate in CrucibleRegistry.GetTypesByAttribute<CrucibleConfigRootAttribute>())
+            foreach (var candidate in CrucibleTypeRegistry.GetTypesByAttribute<CrucibleConfigRootAttribute>())
             {
                 if (!typeof(CrucibleConfigRoot).IsAssignableFrom(candidate))
                 {
@@ -34,7 +34,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// <returns>An enumerable of types that instantiate classes implementing <see cref="ICrucibleConfigExtension"/> and targeting the given subject.</returns>
         public static IEnumerable<Type> GetSubjectExtensionTypes<TSubject>()
         {
-            foreach (var candidate in CrucibleRegistry.GetTypesByAttribute<CrucibleConfigExtensionAttribute>())
+            foreach (var candidate in CrucibleTypeRegistry.GetTypesByAttribute<CrucibleConfigExtensionAttribute>())
             {
                 if (!typeof(CrucibleConfigExtension<>).MakeGenericType(typeof(TSubject)).IsAssignableFrom(candidate))
                 {

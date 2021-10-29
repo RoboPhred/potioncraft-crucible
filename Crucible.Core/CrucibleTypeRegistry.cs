@@ -8,7 +8,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
     /// <summary>
     /// A registry for obtaining types from attributes.
     /// </summary>
-    public static class CrucibleRegistry
+    public static class CrucibleTypeRegistry
     {
         private static bool initialized = false;
 
