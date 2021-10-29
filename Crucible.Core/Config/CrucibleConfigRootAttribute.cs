@@ -7,6 +7,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     /// Such classes will be deserialized from the root of each mod configuration.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
+    [CrucibleRegistryAttribute]
     public class CrucibleConfigRootAttribute : Attribute
     {
     }

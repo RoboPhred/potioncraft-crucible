@@ -8,6 +8,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     /// of the given subject.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
+    [CrucibleRegistryAttribute]
     public class CrucibleConfigExtensionAttribute : Attribute
     {
         /// <summary>

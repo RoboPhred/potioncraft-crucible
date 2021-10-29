@@ -67,9 +67,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this segment's points are relative to the previous segment.
+        /// Gets a value indicating whether this segment's points are relative to the previous segment.
         /// </summary>
-        public bool IsRelative { get; set; } = false;
+        public bool IsRelative { get; }
 
         /// <summary>
         /// Gets or sets the first control point for this cubic bezier curve segment.
@@ -86,21 +86,43 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         public Vector2 End { get; set; } = Vector2.zero;
 
+        /// <summary>
+        /// Creates a segment specifying a line to the given endpoint in absolute coordinates.
+        /// </summary>
+        /// <param name="end">The point to specify the line to.</param>
+        /// <returns>A path segment representing an absolute coordinate line.</returns>
         public static CrucibleIngredientPathSegment LineTo(Vector2 end)
         {
             return new CrucibleIngredientPathSegment(end);
         }
 
+        /// <summary>
+        /// Creates a segment specifying a line to the given endpoint in absolute coordinates.
+        /// </summary>
+        /// <param name="x">The x coordinate of the line endpoint.</param>
+        /// <param name="y">The y coordinate of the line endpoint.</param>
+        /// <returns>A path segment representing an absolute coordinate line.</returns>
         public static CrucibleIngredientPathSegment LineTo(float x, float y)
         {
             return new CrucibleIngredientPathSegment(new Vector2(x, y));
         }
 
+        /// <summary>
+        /// Creates a segment specifying a line to the given endpoint in relative coordinates.
+        /// </summary>
+        /// <param name="end">The point to specify the line to.</param>
+        /// <returns>A path segment representing an relative coordinate line.</returns>
         public static CrucibleIngredientPathSegment RelativeLineTo(Vector2 end)
         {
             return new CrucibleIngredientPathSegment(end, true);
         }
 
+        /// <summary>
+        /// Creates a segment specifying a line to the given endpoint in relative coordinates.
+        /// </summary>
+        /// <param name="x">The x coordinate of the line endpoint.</param>
+        /// <param name="y">The y coordinate of the line endpoint.</param>
+        /// <returns>A path segment representing an relative coordinate line.</returns>
         public static CrucibleIngredientPathSegment RelativeLineTo(float x, float y)
         {
             return new CrucibleIngredientPathSegment(new Vector2(x, y), true);
@@ -116,6 +138,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return new CrucibleIngredientPathSegment(p1, p2, endpoint, true);
         }
 
+        /// <summary>
+        /// Create a path segment from a potioncraft cubic bezier curve.
+        /// </summary>
+        /// <param name="curve">The curve to produce a segment from.</param>
+        /// <returns>An absolute coordinate path segment generated from the given curve.</returns>
         internal static CrucibleIngredientPathSegment FromPotioncraftCurve(CubicBezierCurve curve)
         {
             return new CrucibleIngredientPathSegment(curve.P1, curve.P2, curve.PLast);

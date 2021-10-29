@@ -1,5 +1,6 @@
 namespace RoboPhredDev.PotionCraft.Crucible.Config
 {
+    using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
@@ -8,19 +9,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     /// extension config entries to apply their configuration to the subject.
     /// </summary>
     /// <typeparam name="TSubject">The subject object created as a result of this configuration entry.</typeparam>
-    public abstract class CrucibleConfigObjectElement<TSubject> : IDeserializeExtraData
+    public abstract class CrucibleConfigSubjectObject<TSubject> : IDeserializeExtraData
     {
-        /// <summary>
-        /// Gets the subject object created by this configuration element.
-        /// </summary>
-        public TSubject Subject { get; private set; }
+        private readonly List<ICrucibleConfigExtension<TSubject>> extensions = new();
 
         /// <summary>
-        /// Applies this configuration element to the subject.
+        /// Applies the configuration node.
         /// </summary>
-        /// <param name="subject">The subject to apply configuration to.</param>
-        public virtual void OnApplyConfiguration(TSubject subject)
+        public void ApplyConfiguration()
         {
+            var subject = this.GetSubject();
+            foreach (var extension in this.extensions)
+            {
+                extension.OnApplyConfiguration(subject);
+            }
         }
 
         /// <summary>
@@ -29,17 +31,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// <param name="parser">The parser containing this configuration object.</param>
         void IDeserializeExtraData.OnDeserializeExtraData(ReplayParser parser)
         {
-            var subject = this.GetSubject();
-            this.Subject = subject;
+            this.extensions.Clear();
 
-            this.OnApplyConfiguration(subject);
-
-            var extensionTypes = CrucibleConfigElementRegistry.GetSubjectExtensionTypes<TSubject>();
-            foreach (var extensionType in extensionTypes)
+            foreach (var extensionType in CrucibleConfigElementRegistry.GetSubjectExtensionTypes<TSubject>())
             {
                 parser.Reset();
                 var extension = (ICrucibleConfigExtension<TSubject>)Deserializer.DeserializeFromParser(extensionType, parser);
-                extension.OnApplyConfiguration(subject);
+                this.extensions.Add(extension);
             }
         }
 

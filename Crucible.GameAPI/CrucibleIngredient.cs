@@ -113,6 +113,34 @@
             }
         }
 
+        /// <summary>
+        /// Gets or sets the percent of the path that is available by default without grinding.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This value controls the amount of the path that is accessible if the ingredient is dropped into the cauldron without any grinding.
+        /// Grinding this ingredient will unlock more of the path.
+        /// </para>
+        /// The value is a percentage.  A value of 0.5 will make 50% of the path be pre-ground, with the remaining 50% of the path unlocked by grinding.
+        /// </remarks>
+        public float PathPregrindPercentage
+        {
+            get
+            {
+                return this.Ingredient.path.grindedPathStartsFrom;
+            }
+
+            set
+            {
+                if (value < 0 || value >= 1)
+                {
+                    throw new ArgumentOutOfRangeException("value", "Grind percentage must be at least 0 and less than 1.");
+                }
+
+                this.Ingredient.path.grindedPathStartsFrom = value;
+            }
+        }
+
         // public void SetIconsFromTexture(Texture2D ingredientImage)
         // {
         //     // TODO: Automatically set up icons with appropriate size and padding.
@@ -123,16 +151,25 @@
         /// Creates a new ingredient with the given id.
         /// </summary>
         /// <remarks>
-        /// The ingredient will be created with placeholder data.  It is strongly recommended that
-        /// you set the other properties of the ingredient to customize it after its creation.
+        /// The ingredient will be created by cloning the data from the ingredient specified by <paramref cref="copyFromId"/>.
+        /// You can then use the properties and functions of the resultant <see cref="CrucibleIngredient"/> to customize
+        /// its appearance and behavior.
         /// </remarks>
         /// <param name="id">The id to create the ingredient with.</param>
+        /// <param name="copyFromId">The id of the ingredient to copy from.</param>
         /// <returns>An object to configure the new ingredient.</returns>
-        public static CrucibleIngredient Create(string id)
+        public static CrucibleIngredient CreateIngredient(string id, string copyFromId = "Waterbloom")
         {
-            if (Get(id) != null)
+            // TODO: names are namespaced among all inventory items.  Should check other types to make sure the id does not collide.
+            if (GetIngredient(id) != null)
             {
-                throw new ArgumentException("An ingredient with the given id already exists.");
+                throw new ArgumentException($"An ingredient with the given id of \"{id}\" already exists.");
+            }
+
+            var ingredientBase = Managers.Ingredient.ingredients.Find(x => x.name == copyFromId);
+            if (ingredientBase == null)
+            {
+                throw new ArgumentException($"Cannot find ingredient \"{copyFromId}\" to copy settings from.");
             }
 
             var ingredient = ScriptableObject.CreateInstance<Ingredient>();
@@ -140,16 +177,23 @@
 
             var crucibleIngredient = new CrucibleIngredient(ingredient)
             {
-                InventoryIcon = SpriteUtilities.Placeholder,
-                RecipeStepIcon = SpriteUtilities.Placeholder,
-                IngredientListIcon = SpriteUtilities.Placeholder,
-                Price = 1f,
-                CanBeDamaged = true,
-                IsTeleportationIngredient = false,
-            };
-            crucibleIngredient.SetPath(new[] { CrucibleIngredientPathSegment.LineTo(1f, 0) });
+                InventoryIcon = ingredientBase.inventoryIconObject,
+                RecipeStepIcon = ingredientBase.recipeMarkIcon,
 
-            var ingredientBase = Managers.Ingredient.ingredients.Find(x => x.name == "Waterbloom");
+                // FIXME: We want to copy from copyFromId, but base ingredients do not have a readable smallIcon texture.
+                // Setting this to ingredientBase.smallIcon will throw an error when building the atlas.
+                IngredientListIcon = SpriteUtilities.Placeholder,
+
+                Price = ingredientBase.GetPrice(),
+                CanBeDamaged = ingredientBase.canBeDamaged,
+                IsTeleportationIngredient = ingredientBase.isTeleportationIngredient,
+            };
+
+            ingredient.path = new IngredientPath
+            {
+                path = ingredientBase.path.path.ToList(),
+                grindedPathStartsFrom = ingredientBase.path.grindedPathStartsFrom,
+            };
 
             // TODO: Get access to these from the crucible api.
             ingredient.itemStackPrefab = ingredientBase.itemStackPrefab;
@@ -174,17 +218,12 @@
             return crucibleIngredient;
         }
 
-        public static CrucibleIngredient GetOrCreate(string id)
-        {
-            return Get(id) ?? Create(id);
-        }
-
         /// <summary>
         /// Gets an existing ingredient by its id.
         /// </summary>
         /// <param name="id">The internal name of the ingredient to get.</param>
         /// <returns>The ingredient if found, or null if no ingredient exists by the given id.</returns>
-        public static CrucibleIngredient Get(string id)
+        public static CrucibleIngredient GetIngredient(string id)
         {
             var ingredient = Managers.Ingredient.ingredients.Find(x => x.name == id);
             if (ingredient == null)
@@ -199,7 +238,7 @@
         /// Gets all ingredients present in the game.
         /// </summary>
         /// <returns>An enumerable of all ingredients.</returns>
-        public static IEnumerable<CrucibleIngredient> GetAll()
+        public static IEnumerable<CrucibleIngredient> GetAllIngredients()
         {
             return Managers.Ingredient.ingredients.Select(x => new CrucibleIngredient(x));
         }

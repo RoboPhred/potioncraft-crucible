@@ -13,6 +13,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="BepInEx" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\BepInEx.dll</HintPath>
+    </Reference>
+
+    <Reference Include="UnityEngine" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
     <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
