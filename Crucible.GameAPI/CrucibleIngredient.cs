@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
     using UnityEngine;
     using Utils.BezierCurves;
 
@@ -11,6 +12,9 @@
     /// </summary>
     public sealed class CrucibleIngredient : CrucibleInventoryItem
     {
+        private static readonly HashSet<Ingredient> AtlasOverriddenIngredients = new();
+        private static CrucibleSpriteAtlas spriteAtlas;
+
         private CrucibleIngredient(Ingredient ingredient)
         : base(ingredient)
         {
@@ -44,7 +48,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the sprite to use when displaying this ingredient in the ingredients list.
+        /// Gets or sets the image to use when displaying this ingredient in the ingredients list.
         /// </summary>
         /// <remarks>
         /// This sprite will appear in:
@@ -61,10 +65,19 @@
 
             set
             {
+                if (!value.texture.isReadable)
+                {
+                    throw new ArgumentException("IngredientListIcon can only be set to sprites with readable textures.  The texture data must be available to bake into a sprite atlas.");
+                }
+
+                if (value.packed)
+                {
+                    throw new ArgumentException("IngredientListIcon only supports sprites that are not derived from sprite sheets.  The texture data must be available to bake into a sprite atlas.");
+                }
+
                 this.Ingredient.smallIcon = value;
 
-                // TODO: Set the atlas injection for this ingredient.
-                throw new NotImplementedException("Atlas injection");
+                SetIngredientIcon(this.Ingredient, value.texture);
             }
         }
 
@@ -141,11 +154,24 @@
             }
         }
 
-        // public void SetIconsFromTexture(Texture2D ingredientImage)
-        // {
-        //     // TODO: Automatically set up icons with appropriate size and padding.
-        //     throw new NotImplementedException("Auto generate icons");
-        // }
+        private static void SetIngredientIcon(Ingredient ingredient, Texture2D texture)
+        {
+            if (spriteAtlas == null)
+            {
+                spriteAtlas = new CrucibleSpriteAtlas("CrucibleIngredients");
+                IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
+                {
+                    if (AtlasOverriddenIngredients.Contains(e.Object))
+                    {
+                        e.AtlasResult = spriteAtlas.AtlasName;
+                    }
+                };
+            }
+
+            spriteAtlas.AddIcon($"{ingredient.name} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
+
+            AtlasOverriddenIngredients.Add(ingredient);
+        }
 
         /// <summary>
         /// Creates a new ingredient with the given id.

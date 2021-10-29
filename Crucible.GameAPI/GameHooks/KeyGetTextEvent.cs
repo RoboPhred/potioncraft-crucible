@@ -5,11 +5,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using HarmonyLib;
     using LocalizationSystem;
 
-    internal static class KeyGetTextEvent
+    /// <summary>
+    /// Provides an event to intercept and override the return value of <see cref="Key.GetText"/>.
+    /// </summary>
+    public static class KeyGetTextEvent
     {
         private static bool patchApplied = false;
         private static EventHandler<KeyGetTextEventArgs> onGetText;
 
+        /// <summary>
+        /// Raised when the text for a localization key is resolving.
+        /// </summary>
         public static event EventHandler<KeyGetTextEventArgs> OnGetText
         {
             add
@@ -35,9 +41,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             patchApplied = true;
         }
 
-        static bool Prefix(Key __instance, ref string __result)
+        private static bool Prefix(Key __instance, ref string __result)
         {
-            var key = new Traverse(__instance).Field<string>("key").Value;
+            var key = Traverse.Create(__instance).Field<string>("key").Value;
             var e = new KeyGetTextEventArgs(key);
             onGetText?.Invoke(__instance, e);
             if (e.Result != null)

@@ -30,6 +30,13 @@
       <HintPath>..\externals\UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
 
+    <Reference Include="Unity.TextMeshPro" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextCoreModule" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.TextCoreModule.dll</HintPath>
+    </Reference>
+
     <Reference Include="Assembly-CSharp" CopyToPublishDirectory="Never">
       <HintPath>..\externals\Assembly-CSharp.dll</HintPath>
     </Reference>

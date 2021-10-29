@@ -4,7 +4,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using System.Reflection;
     using HarmonyLib;
 
-    internal static class RecipeMapObjectAwakeEvent
+    /// <summary>
+    /// Provides an event to be notified when the <see cref="RecipeMapObject"/> is awakened.
+    /// </summary>
+    public static class RecipeMapObjectAwakeEvent
     {
         private static bool patchApplied = false;
         private static EventHandler onRecipeMapObjectAwake;
@@ -34,9 +37,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             patchApplied = true;
         }
 
-        static void Postfix(RecipeMapObject __instance)
+        private static void Postfix()
         {
-            onRecipeMapObjectAwake?.Invoke(__instance, EventArgs.Empty);
+            onRecipeMapObjectAwake?.Invoke(null, EventArgs.Empty);
         }
     }
 }
