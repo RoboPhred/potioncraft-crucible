@@ -3,11 +3,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     /// <summary>
     /// Defines a configuration object root.
     /// </summary>
-    public interface ICrucibleConfigRoot
+    public abstract class CrucibleConfigRoot : CrucibleConfigNode
     {
         /// <summary>
         /// Apply this configuration node.
         /// </summary>
-        void OnApplyConfiguration();
+        public abstract void OnApplyConfiguration();
     }
 }

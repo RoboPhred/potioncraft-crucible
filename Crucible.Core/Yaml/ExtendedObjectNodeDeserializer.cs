@@ -4,19 +4,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
     using YamlDotNet.Core;
     using YamlDotNet.Core.Events;
     using YamlDotNet.Serialization;
+    using YamlDotNet.Serialization.NodeDeserializers;
 
     /// <summary>
-    /// Wraps a <see cref="INodeDeserializer"/> with our own modifications.
+    /// Wraps <see cref="ObjectNodeDeserializer"/> with our own modifications.
     /// </summary>
-    public class NodeDeserializer : INodeDeserializer
+    public class ExtendedObjectNodeDeserializer : INodeDeserializer
     {
         private readonly INodeDeserializer nodeDeserializer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="NodeDeserializer"/> class.
+        /// Initializes a new instance of the <see cref="ExtendedObjectNodeDeserializer"/> class.
         /// </summary>
         /// <param name="nodeDeserializer">The ancestor deserializer to use.</param>
-        public NodeDeserializer(INodeDeserializer nodeDeserializer)
+        public ExtendedObjectNodeDeserializer(INodeDeserializer nodeDeserializer)
         {
             this.nodeDeserializer = nodeDeserializer;
         }

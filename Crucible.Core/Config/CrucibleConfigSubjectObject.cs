@@ -11,7 +11,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     /// <typeparam name="TSubject">The subject object created as a result of this configuration entry.</typeparam>
     public abstract class CrucibleConfigSubjectObject<TSubject> : IDeserializeExtraData
     {
-        private readonly List<ICrucibleConfigExtension<TSubject>> extensions = new();
+        private readonly List<CrucibleConfigExtension<TSubject>> extensions = new();
 
         /// <summary>
         /// Applies the configuration node.
@@ -36,7 +36,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
             foreach (var extensionType in CrucibleConfigElementRegistry.GetSubjectExtensionTypes<TSubject>())
             {
                 parser.Reset();
-                var extension = (ICrucibleConfigExtension<TSubject>)Deserializer.DeserializeFromParser(extensionType, parser);
+                var extension = (CrucibleConfigExtension<TSubject>)Deserializer.DeserializeFromParser(extensionType, parser);
                 this.extensions.Add(extension);
             }
         }

@@ -18,7 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         {
             foreach (var candidate in CrucibleRegistry.GetTypesByAttribute<CrucibleConfigRootAttribute>())
             {
-                if (!typeof(ICrucibleConfigRoot).IsAssignableFrom(candidate))
+                if (!typeof(CrucibleConfigRoot).IsAssignableFrom(candidate))
                 {
                     WarnMisimplementedRoot(candidate);
                 }
@@ -36,7 +36,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         {
             foreach (var candidate in CrucibleRegistry.GetTypesByAttribute<CrucibleConfigExtensionAttribute>())
             {
-                if (!typeof(ICrucibleConfigExtension<>).MakeGenericType(typeof(TSubject)).IsAssignableFrom(candidate))
+                if (!typeof(CrucibleConfigExtension<>).MakeGenericType(typeof(TSubject)).IsAssignableFrom(candidate))
                 {
                     WarnMisimplementedExtension(candidate, typeof(TSubject));
                     continue;
@@ -50,7 +50,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         {
             if (WarnedTypes.Add(type))
             {
-                CrucibleLog.LogInScope("net.robophreddev.PotionCraft.Crucible", $"Cannot use {type.FullName} as a config root because it lacks the appropriate {typeof(ICrucibleConfigRoot).Name} interface.");
+                CrucibleLog.LogInScope("net.robophreddev.PotionCraft.Crucible", $"Cannot use {type.FullName} as a config root because it lacks the appropriate {typeof(CrucibleConfigRoot).Name} interface.");
             }
         }
 
@@ -58,7 +58,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         {
             if (WarnedTypes.Add(type))
             {
-                CrucibleLog.LogInScope("net.robophreddev.PotionCraft.Crucible", $"Cannot use {type.FullName} as a config extension for {subjectType.Name} because it lacks the appropriate {typeof(ICrucibleConfigExtension<>).Name} interface.");
+                CrucibleLog.LogInScope("net.robophreddev.PotionCraft.Crucible", $"Cannot use {type.FullName} as a config extension for {subjectType.Name} because it lacks the appropriate {typeof(CrucibleConfigExtension<>).Name} interface.");
             }
         }
     }

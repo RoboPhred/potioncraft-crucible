@@ -39,7 +39,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
         public static void Log(string message, params object[] logParams)
         {
             var caller = Assembly.GetCallingAssembly();
-            var scope = GetLogNamespace(caller);
+            var scope = GetLogGUID(caller);
 
             WriteToLog(scope, message, logParams);
         }
@@ -50,12 +50,12 @@ namespace RoboPhredDev.PotionCraft.Crucible
         /// <remarks>
         /// Log messages will be associated with the BepInEx mod implemented in the currently active mod context, defaulting to the caller's assembly.
         /// </remarks>
-        /// <param name="modScope">The GUID of the mod that logged this message.</param>
+        /// <param name="modGUID">The GUID of the mod that logged this message.</param>
         /// <param name="message">The message to log.</param>
         /// <param name="logParams">Parameters for the message.</param>
-        public static void LogInScope(string modScope, string message, params object[] logParams)
+        public static void LogInScope(string modGUID, string message, params object[] logParams)
         {
-            WriteToLog(modScope, message, logParams);
+            WriteToLog(modGUID, message, logParams);
         }
 
         /// <summary>
@@ -65,18 +65,18 @@ namespace RoboPhredDev.PotionCraft.Crucible
         /// <param name="action">The action to scope log messages for.</param>
         public static void RunInLogScope(Assembly modAssembly, Action action)
         {
-            var scope = GetLogNamespace(modAssembly);
-            RunInLogScope(scope, action);
+            var guid = GetLogGUID(modAssembly);
+            RunInLogScope(guid, action);
         }
 
         /// <summary>
         /// Run the given action and associate all log messages to the given mod name.
         /// </summary>
-        /// <param name="scope">The name of the mod to tag logs with.</param>
+        /// <param name="modGUID">The name of the mod to tag logs with.</param>
         /// <param name="action">The action to scope log messages for.</param>
-        public static void RunInLogScope(string scope, Action action)
+        public static void RunInLogScope(string modGUID, Action action)
         {
-            LogScopeStack.Push(scope);
+            LogScopeStack.Push(modGUID);
             try
             {
                 action();
@@ -87,14 +87,14 @@ namespace RoboPhredDev.PotionCraft.Crucible
             }
         }
 
-        private static void WriteToLog(string modGuid, string message, params object[] logParams)
+        private static void WriteToLog(string modGUID, string message, params object[] logParams)
         {
-            UnityEngine.Debug.Log($"[{modGuid}]: " + string.Format(message, logParams));
+            UnityEngine.Debug.Log($"[{modGUID}]: " + string.Format(message, logParams));
 
             // Should we also log to a specific file for the given namespace?
         }
 
-        private static string GetLogNamespace(Assembly assembly)
+        private static string GetLogGUID(Assembly assembly)
         {
             if (LogScopeStack.Count > 0)
             {

@@ -21,11 +21,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
         private static readonly Stack<string> ParsingFiles = new();
 
         /// <summary>
-        /// Called when a deserializer is being configured.
-        /// </summary>
-        public static event EventHandler<ConfigureDeserializerEventArgs> OnConfigureDeserializer;
-
-        /// <summary>
         /// Gets the path of the current file being processed.
         /// If no file is being processed, returns null.
         /// </summary>
@@ -137,15 +132,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
 
         private static IDeserializer BuildDeserializer()
         {
-            var builder = new DeserializerBuilder()
-                    .WithNamingConvention(NamingConvention)
-                    .WithNodeTypeResolver(new ImportNodeTypeResolver(), s => s.OnTop())
-                    .WithNodeDeserializer(new ImportDeserializer(), s => s.OnTop())
-                    .WithNodeDeserializer(new DuckTypeDeserializer(), s => s.OnTop())
-                    .WithNodeDeserializer(objectDeserializer => new NodeDeserializer(objectDeserializer), s => s.InsteadOf<ObjectNodeDeserializer>());
+            var builder = new DeserializerBuilder();
 
-            var e = new ConfigureDeserializerEventArgs(builder);
-            OnConfigureDeserializer?.Invoke(null, e);
+            builder.WithNamingConvention(NamingConvention)
+            .WithNodeTypeResolver(new ImportNodeTypeResolver(), s => s.OnTop())
+            .WithNodeDeserializer(new ImportDeserializer(), s => s.OnTop())
+            .WithNodeDeserializer(new DuckTypeDeserializer(), s => s.OnTop())
+            .WithNodeDeserializer(objectDeserializer => new ExtendedObjectNodeDeserializer(objectDeserializer), s => s.InsteadOf<ObjectNodeDeserializer>());
 
             return builder.Build();
         }
