@@ -6,6 +6,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
     /// Marks a <see cref="INodeDeserializer"/> for registration with the yaml <see cref="Deserializer"/>.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
+    [CrucibleRegistryAttribute]
     public class YamlDeserializerAttribute : Attribute
     {
         /// <summary>

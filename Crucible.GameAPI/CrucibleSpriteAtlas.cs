@@ -92,6 +92,37 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Sets the given icon to the specified texture.
+        /// </summary>
+        /// <param name="iconName">The name of the icon in the atlas.</param>
+        /// <param name="icon">The texture to use for the icon.</param>
+        public void SetIcon(string iconName, Texture2D icon)
+        {
+            this.SetIcon(iconName, icon, 0, 0, 0);
+        }
+
+        /// <summary>
+        /// Sets the given icon to the specified texture.
+        /// </summary>
+        /// <param name="iconName">The name of the icon in the atlas.</param>
+        /// <param name="icon">The texture to use for the icon.</param>
+        /// <param name="xOffset">The x offset of the icon.</param>
+        /// <param name="yOffset">The y offset of the icon.</param>
+        /// <param name="scale">The scale of the icon.</param>
+        public void SetIcon(string iconName, Texture2D icon, float xOffset, float yOffset, float scale)
+        {
+            this.items[iconName] = new SpriteAtlasItem
+            {
+                Texture = icon,
+                XOffset = xOffset,
+                YOffset = yOffset,
+                Scale = scale,
+            };
+
+            this.InvalidateAsset();
+        }
+
+        /// <summary>
         /// Removes the icon from the atlas.
         /// </summary>
         /// <param name="iconName">The name of the icon to remove.</param>
@@ -105,7 +136,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         private static void ResetAssetCache()
         {
-            var instance = Traverse.Create<MaterialReferenceManager>().Field<MaterialReferenceManager>("s_Instance");
+            var instance = Traverse.Create<MaterialReferenceManager>().Field<MaterialReferenceManager>("s_Instance").Value;
             if (instance == null)
             {
                 return;

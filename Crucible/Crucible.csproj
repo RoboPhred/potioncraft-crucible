@@ -16,6 +16,13 @@
       <HintPath>..\externals\BepInEx.dll</HintPath>
     </Reference>
 
+    <Reference Include="UnityEngine" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    
     <Reference Include="Assembly-CSharp" CopyToPublishDirectory="Never">
       <HintPath>..\externals\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -27,5 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Crucible.Core\Crucible.Core.csproj" />
+    <ProjectReference Include="..\Crucible.GameAPI\Crucible.GameAPI.csproj" />
+    <ProjectReference Include="..\Crucible.Ingredients\Crucible.Ingredients.csproj" />
   </ItemGroup>
 </Project>

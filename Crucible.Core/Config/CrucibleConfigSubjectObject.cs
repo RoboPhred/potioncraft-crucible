@@ -19,6 +19,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         public void ApplyConfiguration()
         {
             var subject = this.GetSubject();
+            this.OnApplyConfiguration(subject);
             foreach (var extension in this.extensions)
             {
                 extension.OnApplyConfiguration(subject);

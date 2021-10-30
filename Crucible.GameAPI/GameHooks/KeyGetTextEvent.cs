@@ -37,7 +37,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 return;
             }
 
-            HarmonyInstance.Instance.Patch(typeof(Key).GetMethod("GetText", BindingFlags.NonPublic | BindingFlags.Instance), prefix: new HarmonyMethod(typeof(RecipeMapObjectAwakeEvent).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic)));
+            var getTextMethod = typeof(Key).GetMethod("GetText", BindingFlags.Public | BindingFlags.Instance);
+            var prefixMethod = typeof(KeyGetTextEvent).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic);
+            HarmonyInstance.Instance.Patch(getTextMethod, prefix: new HarmonyMethod(prefixMethod));
             patchApplied = true;
         }
 

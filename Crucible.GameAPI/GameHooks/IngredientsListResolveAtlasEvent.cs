@@ -41,11 +41,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             }
 
             var panelUpdateIngredientsMethod = typeof(PotionCraftPanel.PotionCraftPanel).GetMethod("UpdateIngredientsList", BindingFlags.NonPublic | BindingFlags.Instance);
-            var transpilePanelMethod = typeof(RecipeMapObjectAwakeEvent).GetMethod("TranspilePotionCraftPanelUpdateIngredientsList", BindingFlags.Static | BindingFlags.NonPublic);
+            var transpilePanelMethod = typeof(IngredientsListResolveAtlasEvent).GetMethod("TranspilePotionCraftPanelUpdateIngredientsList", BindingFlags.Static | BindingFlags.NonPublic);
             HarmonyInstance.Instance.Patch(panelUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpilePanelMethod));
 
             var recipeUpdateIngredientsMethod = typeof(RecipeBookLeftPageContent).GetMethod("UpdateIngredientsList", BindingFlags.NonPublic | BindingFlags.Instance);
-            var transpileRecipeMethod = typeof(RecipeMapObjectAwakeEvent).GetMethod("TranspileRecipeBookLeftPageContentUpdateIngredientsList", BindingFlags.Static | BindingFlags.NonPublic);
+            var transpileRecipeMethod = typeof(IngredientsListResolveAtlasEvent).GetMethod("TranspileRecipeBookLeftPageContentUpdateIngredientsList", BindingFlags.Static | BindingFlags.NonPublic);
             HarmonyInstance.Instance.Patch(recipeUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpileRecipeMethod));
 
             patchApplied = true;

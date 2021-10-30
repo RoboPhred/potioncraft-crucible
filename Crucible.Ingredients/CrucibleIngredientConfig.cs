@@ -8,7 +8,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     /// <summary>
     /// Configuration subject for a PotionCraft ingredient.
     /// </summary>
-    [CrucibleConfigExtension(typeof(CrucibleIngredient))]
     public class CrucibleIngredientConfig : CrucibleConfigSubjectObject<CrucibleIngredient>
     {
         private string id;
@@ -125,6 +124,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(CrucibleIngredient subject)
         {
+            CrucibleLog.Log($"Applying ingredient configuration to \"{this.Name}\" ({this.id}) from mod {this.Mod.Name}");
             subject.Name = this.Name;
             subject.Description = this.Description;
             subject.InventoryIcon = this.InventoryImage;

@@ -70,17 +70,40 @@ namespace RoboPhredDev.PotionCraft.Crucible
         {
             var registryAttributeTypes = GetCrucibleRegistryAttributes().ToArray();
 
+            // FIXME: Nice and compat way of doing the below.  It is crashing with an empty string error message on ToHashSet()
             // Search all loaded types for any type that has been marked with an attribute that is marked with CrucibleRegistryAttribute.
-            var candidates = from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                             from type in assembly.GetTypes()
-                             from typeAttribute in type.GetCustomAttributes(true)
-                             from registryAttribute in
-                                 from registryAttribute in registryAttributeTypes
-                                 where registryAttribute.IsAssignableFrom(typeAttribute.GetType())
-                                 select registryAttribute
-                             group type by registryAttribute into attributesByType
-                             select attributesByType;
-            typesByAttribute = candidates.ToDictionary(x => x.Key, x => x.ToHashSet());
+            // var candidates = from assembly in AppDomain.CurrentDomain.GetAssemblies()
+            //                  from type in assembly.GetTypes()
+            //                  from registryAttribute in
+            //                      from registryAttribute in registryAttributeTypes
+            //                      where type.GetCustomAttribute(registryAttribute, true) != null
+            //                      select registryAttribute
+            //                  group type by registryAttribute into attributesByType
+            //                  select attributesByType;
+            // typesByAttribute = candidates.ToDictionary(x => x.Key, x => x.ToHashSet());
+
+            var types = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                         from type in assembly.GetTypes()
+                         select type).ToArray();
+
+            typesByAttribute = new Dictionary<Type, HashSet<Type>>();
+            foreach (var type in types)
+            {
+                foreach (var registryAttribute in registryAttributeTypes)
+                {
+                    var attribute = type.GetCustomAttribute(registryAttribute, true);
+                    if (attribute != null)
+                    {
+                        if (!typesByAttribute.TryGetValue(registryAttribute, out HashSet<Type> typesForAttribute))
+                        {
+                            typesForAttribute = new HashSet<Type>();
+                            typesByAttribute.Add(registryAttribute, typesForAttribute);
+                        }
+
+                        typesForAttribute.Add(type);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -91,7 +114,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
         {
             return from assembly in AppDomain.CurrentDomain.GetAssemblies()
                    from type in assembly.GetTypes()
-                   where type.GetCustomAttribute<CrucibleRegistryAttributeAttribute>() != null
+                   where type.GetCustomAttribute<CrucibleRegistryAttributeAttribute>(true) != null
                    select type;
         }
     }

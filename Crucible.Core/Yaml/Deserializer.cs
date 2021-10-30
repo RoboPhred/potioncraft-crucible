@@ -134,10 +134,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
         {
             var builder = new DeserializerBuilder();
 
-            builder.WithNamingConvention(NamingConvention)
-            .WithNodeTypeResolver(new ImportNodeTypeResolver(), s => s.OnTop())
-            .WithNodeDeserializer(new ImportDeserializer(), s => s.OnTop())
-            .WithNodeDeserializer(new DuckTypeDeserializer(), s => s.OnTop());
+            builder
+                .WithNamingConvention(NamingConvention)
+                .IgnoreUnmatchedProperties()
+                .WithNodeTypeResolver(new ImportNodeTypeResolver(), s => s.OnTop())
+                .WithNodeDeserializer(new ImportDeserializer(), s => s.OnTop())
+                .WithNodeDeserializer(new DuckTypeDeserializer(), s => s.OnTop());
 
             foreach (var type in CrucibleTypeRegistry.GetTypesByAttribute<YamlDeserializerAttribute>())
             {

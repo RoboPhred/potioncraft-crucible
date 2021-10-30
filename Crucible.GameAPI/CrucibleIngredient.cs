@@ -248,6 +248,8 @@
 
             ingredient.OnAwake();
 
+            Managers.Ingredient.ingredients.Add(ingredient);
+
             return crucibleIngredient;
         }
 
@@ -319,9 +321,11 @@
                         e.AtlasResult = spriteAtlas.AtlasName;
                     }
                 };
+
+                CrucibleSpriteAtlasManager.AddAtlas(spriteAtlas);
             }
 
-            spriteAtlas.AddIcon($"{ingredient.name} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
+            spriteAtlas.SetIcon($"{ingredient.name} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
 
             AtlasOverriddenIngredients.Add(ingredient);
         }

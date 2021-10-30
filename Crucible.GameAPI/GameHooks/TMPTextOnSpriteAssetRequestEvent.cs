@@ -53,7 +53,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 }
 
                 // Call the old handler, if any, to support other mods loaded before us.
-                return oldSpriteAssetRequest(hashCode, assetName);
+                if (oldSpriteAssetRequest != null)
+                {
+                    return oldSpriteAssetRequest(hashCode, assetName);
+                }
+
+                return null;
             };
         }
     }

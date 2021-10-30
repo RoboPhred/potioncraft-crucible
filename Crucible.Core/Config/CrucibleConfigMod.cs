@@ -1,5 +1,6 @@
 namespace RoboPhredDev.PotionCraft.Crucible.Config
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
     using RoboPhredDev.PotionCraft.Crucible.Resources;
@@ -9,11 +10,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     /// The root configuration element.
     /// This is the top level configuration object supplied by config mods.
     /// </summary>
-    public sealed class CrucibleConfigMod : DirectoryResourceProvider, IDeserializeExtraData
+    public sealed class CrucibleConfigMod : DirectoryResourceProvider
     {
         private static List<CrucibleConfigNode> loadingNodes;
-
-        private readonly List<CrucibleConfigRoot> parsedRoots = new();
 
         private CrucibleConfigModRoot root;
 
@@ -72,9 +71,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
             try
             {
                 var mod = new CrucibleConfigMod(modFolder);
-                mod.root = CrucibleResources.WithResourceProvider(mod, () => Deserializer.Deserialize<CrucibleConfigModRoot>(Path.Combine(modFolder, "package.yml")));
+                var packagePath = Path.Combine(modFolder, "package.yml");
+                mod.root = CrucibleResources.WithResourceProvider(mod, () => Deserializer.Deserialize<CrucibleConfigModRoot>(packagePath));
                 loadingNodes.ForEach(x => x.SetConfigMod(mod));
                 return mod;
+            }
+            catch (Exception ex)
+            {
+                throw new CrucibleConfigModException($"Failed to load crucible mod \"{Path.GetDirectoryName(modFolder)}\": " + ex.Message, ex);
             }
             finally
             {
@@ -87,19 +91,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// </summary>
         public void ApplyConfiguration()
         {
-            this.parsedRoots.ForEach(x => x.ApplyConfiguration());
-        }
-
-        /// <inheritdoc/>
-        void IDeserializeExtraData.OnDeserializeExtraData(ReplayParser parser)
-        {
-            this.parsedRoots.Clear();
-
-            foreach (var rootType in CrucibleConfigElementRegistry.GetConfigRoots())
-            {
-                parser.Reset();
-                this.parsedRoots.Add((CrucibleConfigRoot)Deserializer.DeserializeFromParser(rootType, parser));
-            }
+            this.root.ParsedRoots.ForEach(x => x.ApplyConfiguration());
         }
 
         /// <summary>
@@ -110,14 +102,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         {
             if (loadingNodes == null)
             {
-                throw new System.Exception("Cannot instantiate a CrucibleConfigNode when no CrucibleConfigMod is loading.");
+                throw new Exception("Cannot instantiate a CrucibleConfigNode when no CrucibleConfigMod is loading.");
             }
 
             loadingNodes.Add(node);
         }
 
-        private class CrucibleConfigModRoot
+        private class CrucibleConfigModRoot : IDeserializeExtraData
         {
+            public List<CrucibleConfigRoot> ParsedRoots { get; } = new();
+
             /// <summary>
             /// Gets or sets the name of this mod.
             /// </summary>
@@ -132,6 +126,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
             /// Gets or sets the version of this mod.
             /// </summary>
             public string Version { get; set; }
+
+            /// <inheritdoc/>
+            void IDeserializeExtraData.OnDeserializeExtraData(ReplayParser parser)
+            {
+                this.ParsedRoots.Clear();
+
+                foreach (var rootType in CrucibleConfigElementRegistry.GetConfigRoots())
+                {
+                    CrucibleLog.Log($"Loading root \"{rootType.FullName}\".");
+                    parser.Reset();
+                    this.ParsedRoots.Add((CrucibleConfigRoot)Deserializer.DeserializeFromParser(rootType, parser));
+                }
+            }
         }
     }
 }

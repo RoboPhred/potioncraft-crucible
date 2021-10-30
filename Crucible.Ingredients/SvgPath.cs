@@ -45,7 +45,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
 
         private static string GetToken(ref string svgPath)
         {
-            var token = "";
+            var token = string.Empty;
             int i = 0;
             bool? isAlphanumeric = null;
             for (; i < svgPath.Length; i++)
@@ -57,6 +57,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                     {
                         break;
                     }
+
                     continue;
                 }
 
