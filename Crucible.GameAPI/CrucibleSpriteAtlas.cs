@@ -55,25 +55,24 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
-        private static void ResetAssetCache()
-        {
-            var instance = Traverse.Create<MaterialReferenceManager>().Field<MaterialReferenceManager>("s_Instance");
-            if (instance == null)
-            {
-                return;
-            }
-
-            Traverse.Create(instance).Field<Dictionary<int, Material>>("m_FontMaterialReferenceLookup").Value.Clear();
-            Traverse.Create(instance).Field<Dictionary<int, TMP_FontAsset>>("m_FontAssetReferenceLookup").Value.Clear();
-            Traverse.Create(instance).Field<Dictionary<int, TMP_SpriteAsset>>("m_SpriteAssetReferenceLookup").Value.Clear();
-            Traverse.Create(instance).Field<Dictionary<int, TMP_ColorGradient>>("m_ColorGradientReferenceLookup").Value.Clear();
-        }
-
+        /// <summary>
+        /// Adds the texture to the atlas as a named icon.
+        /// </summary>
+        /// <param name="iconName">The name of the icon in the atlas.</param>
+        /// <param name="icon">The icon to add.</param>
         public void AddIcon(string iconName, Texture2D icon)
         {
             this.AddIcon(iconName, icon, 0, 0, 0);
         }
 
+        /// <summary>
+        /// Adds the texture to the atlas as a named icon.
+        /// </summary>
+        /// <param name="iconName">The name of the icon in the atlas.</param>
+        /// <param name="icon">The icon to add.</param>
+        /// <param name="xOffset">The x offset of the icon.</param>
+        /// <param name="yOffset">The y offset of the icon.</param>
+        /// <param name="scale">The scale of the icon.</param>
         public void AddIcon(string iconName, Texture2D icon, float xOffset, float yOffset, float scale)
         {
             if (this.items.ContainsKey(iconName))
@@ -92,11 +91,31 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             this.InvalidateAsset();
         }
 
+        /// <summary>
+        /// Removes the icon from the atlas.
+        /// </summary>
+        /// <param name="iconName">The name of the icon to remove.</param>
+        /// <returns>True if the icon was removed, or false if the icon was not in the atlas.</returns>
         public bool RemoveIcon(string iconName)
         {
             var result = this.items.Remove(iconName);
             this.InvalidateAsset();
             return result;
+        }
+
+        private static void ResetAssetCache()
+        {
+            var instance = Traverse.Create<MaterialReferenceManager>().Field<MaterialReferenceManager>("s_Instance");
+            if (instance == null)
+            {
+                return;
+            }
+
+            var instanceTraverse = Traverse.Create(instance);
+            instanceTraverse.Field<Dictionary<int, Material>>("m_FontMaterialReferenceLookup").Value.Clear();
+            instanceTraverse.Field<Dictionary<int, TMP_FontAsset>>("m_FontAssetReferenceLookup").Value.Clear();
+            instanceTraverse.Field<Dictionary<int, TMP_SpriteAsset>>("m_SpriteAssetReferenceLookup").Value.Clear();
+            instanceTraverse.Field<Dictionary<int, TMP_ColorGradient>>("m_ColorGradientReferenceLookup").Value.Clear();
         }
 
         private void InvalidateAsset()
@@ -115,7 +134,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             asset.name = this.AtlasName;
             asset.spriteInfoList = new List<TMP_Sprite>();
 
-            var texture = new Texture2D(0, 0, TextureFormat.ARGB32, false, false);
+            var texture = new Texture2D(0, 0, TextureFormat.ARGB32, false, false)
+            {
+                filterMode = FilterMode.Bilinear,
+            };
 
             var pairs = this.items.ToArray();
 
@@ -168,7 +190,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     sprite = spriteInfo.sprite,
                     metrics = new GlyphMetrics(spriteInfo.width, spriteInfo.height, spriteInfo.xOffset, spriteInfo.yOffset, spriteInfo.xAdvance),
                     glyphRect = new GlyphRect((int)spriteInfo.x, (int)spriteInfo.y, (int)spriteInfo.width, (int)spriteInfo.height),
-                    scale = 1f, // FIXME: Code we copied from hard codes this to 1.  Should we set it to scale?
+                    scale = 1f, // TMP UpgradeSpriteAsset sets this to 1, but is this another bug?  Should we set it to scale?
                     atlasIndex = 0,
                 };
                 asset.spriteGlyphTable.Add(tmpSpriteGlyph);
@@ -176,7 +198,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 var tmpSpriteCharacter = new TMP_SpriteCharacter
                 {
                     glyph = tmpSpriteGlyph,
-                    glyphIndex = (uint)index,
+                    glyphIndex = (uint)index, // This is the bug fix against UpgradeSpriteAsset.  Original function saets this to 0 at all times.
                     unicode = 65534U,
                     name = spriteInfo.name,
                     scale = spriteInfo.scale,

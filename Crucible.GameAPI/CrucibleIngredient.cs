@@ -154,25 +154,6 @@
             }
         }
 
-        private static void SetIngredientIcon(Ingredient ingredient, Texture2D texture)
-        {
-            if (spriteAtlas == null)
-            {
-                spriteAtlas = new CrucibleSpriteAtlas("CrucibleIngredients");
-                IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
-                {
-                    if (AtlasOverriddenIngredients.Contains(e.Object))
-                    {
-                        e.AtlasResult = spriteAtlas.AtlasName;
-                    }
-                };
-            }
-
-            spriteAtlas.AddIcon($"{ingredient.name} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
-
-            AtlasOverriddenIngredients.Add(ingredient);
-        }
-
         /// <summary>
         /// Creates a new ingredient with the given id.
         /// </summary>
@@ -206,9 +187,8 @@
                 InventoryIcon = ingredientBase.inventoryIconObject,
                 RecipeStepIcon = ingredientBase.recipeMarkIcon,
 
-                // FIXME: We want to copy from copyFromId, but base ingredients do not have a readable smallIcon texture.
-                // Setting this to ingredientBase.smallIcon will throw an error when building the atlas.
-                IngredientListIcon = SpriteUtilities.Placeholder,
+                // We cannot copy the existing icon because it is a non-readable texture.
+                IngredientListIcon = SpriteUtilities.CreateBlankSprite(32, 32, Color.red),
 
                 Price = ingredientBase.GetPrice(),
                 CanBeDamaged = ingredientBase.canBeDamaged,
@@ -298,6 +278,25 @@
             }
 
             this.Ingredient.path.path = list;
+        }
+
+        private static void SetIngredientIcon(Ingredient ingredient, Texture2D texture)
+        {
+            if (spriteAtlas == null)
+            {
+                spriteAtlas = new CrucibleSpriteAtlas("CrucibleIngredients");
+                IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
+                {
+                    if (AtlasOverriddenIngredients.Contains(e.Object))
+                    {
+                        e.AtlasResult = spriteAtlas.AtlasName;
+                    }
+                };
+            }
+
+            spriteAtlas.AddIcon($"{ingredient.name} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
+
+            AtlasOverriddenIngredients.Add(ingredient);
         }
     }
 }
