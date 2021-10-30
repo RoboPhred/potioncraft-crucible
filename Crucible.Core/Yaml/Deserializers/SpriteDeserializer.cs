@@ -41,7 +41,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
 
             var resource = scalar.Value;
 
-            var data = CrucibleResources.CurrentResource.ReadAllBytes(resource);
+            var data = CrucibleResources.ReadAllBytes(resource);
 
             // Do not create mip levels for this texture, use it as-is.
             var tex = new Texture2D(0, 0, TextureFormat.ARGB32, false, false)
