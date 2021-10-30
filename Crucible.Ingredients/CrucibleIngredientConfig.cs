@@ -65,6 +65,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public float Price { get; set; }
 
         /// <summary>
+        /// Gets or sets the ingredient path for this ingredient.
+        /// </summary>
+        public SvgPath Path { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value specifying what percentage of the ingredient is pre-ground.
+        /// </summary>
+        public float GrindStartPercent { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this ingredient teleports during movement.
+        /// </summary>
+        public bool IsTeleportationIngredient { get; set; }
+
+        /// <summary>
         /// Gets or sets the sprite to use for this ingredient in the recipe book.
         /// </summary>
         // For backwards compatibility with pantry.
@@ -79,6 +94,24 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             set
             {
                 this.RecipeStepImage = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this ingredient is a crystal.
+        /// </summary>
+        // For backwards compatibility with pantry.
+        [Obsolete("Use IsTeleportationIngredient instead.")]
+        internal bool IsCrystal
+        {
+            get
+            {
+                return this.IsTeleportationIngredient;
+            }
+
+            set
+            {
+                this.IsTeleportationIngredient = value;
             }
         }
 
@@ -98,6 +131,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             subject.RecipeStepIcon = this.RecipeStepImage;
             subject.IngredientListIcon = this.IconImage;
             subject.Price = this.Price;
+            subject.IsTeleportationIngredient = this.IsTeleportationIngredient;
+            subject.PathPregrindPercentage = this.GrindStartPercent;
+            subject.SetPath(this.Path);
         }
     }
 }
