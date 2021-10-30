@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using LocalizationSystem;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
     using UnityEngine;
     using Utils.BezierCurves;
@@ -28,6 +29,32 @@
             get
             {
                 return (Ingredient)this.InventoryItem;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the name of this ingredient in the user's current language.
+        /// </summary>
+        public string Name
+        {
+            get => new Key($"#ingredient_{this.InventoryItem.name}").GetText();
+
+            set
+            {
+                CrucibleLocalization.SetLocalizationKey($"ingredient_{this.InventoryItem.name}", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the description of this item in the user's current language.
+        /// </summary>
+        public string Description
+        {
+            get => new Key($"#ingredient_{this.InventoryItem.name}_description").GetText();
+
+            set
+            {
+                CrucibleLocalization.SetLocalizationKey($"ingredient_{this.InventoryItem.name}_description", value);
             }
         }
 

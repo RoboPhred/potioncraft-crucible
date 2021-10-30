@@ -137,8 +137,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
             builder.WithNamingConvention(NamingConvention)
             .WithNodeTypeResolver(new ImportNodeTypeResolver(), s => s.OnTop())
             .WithNodeDeserializer(new ImportDeserializer(), s => s.OnTop())
-            .WithNodeDeserializer(new DuckTypeDeserializer(), s => s.OnTop())
-            .WithNodeDeserializer(objectDeserializer => new ExtendedObjectNodeDeserializer(objectDeserializer), s => s.InsteadOf<ObjectNodeDeserializer>());
+            .WithNodeDeserializer(new DuckTypeDeserializer(), s => s.OnTop());
+
+            foreach (var type in CrucibleTypeRegistry.GetTypesByAttribute<YamlDeserializerAttribute>())
+            {
+                if (Activator.CreateInstance(type) is not INodeDeserializer deserializer)
+                {
+                    // TODO: Warn wrong type.
+                    continue;
+                }
+
+                builder.WithNodeDeserializer(deserializer, s => s.OnTop());
+            }
+
+            builder.WithNodeDeserializer(objectDeserializer => new ExtendedObjectNodeDeserializer(objectDeserializer), s => s.InsteadOf<ObjectNodeDeserializer>());
 
             return builder.Build();
         }

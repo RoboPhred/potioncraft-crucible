@@ -30,22 +30,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets or sets the name of this item in the user's current language.
-        /// </summary>
-        public string LocalizedName
-        {
-            get
-            {
-                return new Key(this.InventoryItem.name).GetText();
-            }
-
-            set
-            {
-                CrucibleLocalization.SetLocalizationKey(this.InventoryItem.name, value);
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the sprite to use for this item in the inventory.
         /// </summary>
         public Sprite InventoryIcon

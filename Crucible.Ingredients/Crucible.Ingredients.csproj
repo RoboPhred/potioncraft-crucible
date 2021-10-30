@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <RootNamespace>RoboPhredDev.PotionCraft.Crucible.Core</RootNamespace>
+    <RootNamespace>RoboPhredDev.PotionCraft.Crucible.Ingredients</RootNamespace>
     <LangVersion>preview</LangVersion>
     <CodeAnalysisRuleSet>../StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRuleSet>../StyleCop.ruleset</CodeAnalysisRuleSet>
@@ -13,9 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="BepInEx" CopyToPublishDirectory="Never">
-      <HintPath>..\externals\BepInEx.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\Crucible.Core\Crucible.Core.csproj" />
+    <ProjectReference Include="..\Crucible.GameAPI\Crucible.GameAPI.csproj" />
 
     <Reference Include="UnityEngine" CopyToPublishDirectory="Never">
       <HintPath>..\externals\UnityEngine.dll</HintPath>
@@ -23,17 +21,9 @@
     <Reference Include="UnityEngine.CoreModule" CopyToPublishDirectory="Never">
       <HintPath>..\externals\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.ImageConversionModule" CopyToPublishDirectory="Never">
-      <HintPath>..\externals\UnityEngine.ImageConversionModule.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
-    <PackageReference Include="YamlDotNet" Version="8.1.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Crucible.GameAPI\Crucible.GameAPI.csproj" />
   </ItemGroup>
 </Project>

@@ -2,29 +2,49 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
 {
     using System.Collections.Generic;
     using System.IO;
+    using RoboPhredDev.PotionCraft.Crucible.Resources;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
     /// The root configuration element.
     /// This is the top level configuration object supplied by config mods.
     /// </summary>
-    public sealed class CrucibleConfigMod : IDeserializeExtraData
+    public sealed class CrucibleConfigMod : DirectoryResourceProvider, IDeserializeExtraData
     {
         private static List<CrucibleConfigNode> loadingNodes;
 
         private readonly List<CrucibleConfigRoot> parsedRoots = new();
 
+        private CrucibleConfigModRoot root;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CrucibleConfigMod"/> class.
         /// </summary>
-        private CrucibleConfigMod()
+        private CrucibleConfigMod(string directory)
+            : base(directory)
         {
+            this.FileName = Path.GetFileName(directory);
         }
+
+        /// <summary>
+        /// Gets the name of this mod.
+        /// </summary>
+        public string Name => this.root.Name ?? this.FileName;
+
+        /// <summary>
+        /// Gets the author of this mod.
+        /// </summary>
+        public string Author => this.root.Author;
+
+        /// <summary>
+        /// Gets the version of this mod.
+        /// </summary>
+        public string Version => this.root.Version;
 
         /// <summary>
         /// Gets the file name for this mod.
         /// </summary>
-        public string FileName { get; private set; }
+        public string FileName { get; }
 
         /// <summary>
         /// Gets the namespace for this mod.
@@ -42,21 +62,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         }
 
         /// <summary>
-        /// Gets or sets the name of this mod.
-        /// </summary>
-        public string Name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the author of this mod.
-        /// </summary>
-        public string Author { get; set; }
-
-        /// <summary>
-        /// Gets or sets the version of this mod.
-        /// </summary>
-        public string Version { get; set; }
-
-        /// <summary>
         /// Loads the config mod from the specified folder.
         /// </summary>
         /// <param name="modFolder">The folder of the mod to load.</param>
@@ -66,8 +71,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
             loadingNodes = new List<CrucibleConfigNode>();
             try
             {
-                var mod = Deserializer.Deserialize<CrucibleConfigMod>(Path.Combine(modFolder, "package.yml"));
-                mod.FileName = Path.GetFileName(modFolder);
+                var mod = new CrucibleConfigMod(modFolder);
+                mod.root = CrucibleResources.WithResourceProvider(mod, () => Deserializer.Deserialize<CrucibleConfigModRoot>(Path.Combine(modFolder, "package.yml")));
                 loadingNodes.ForEach(x => x.SetConfigMod(mod));
                 return mod;
             }
@@ -82,7 +87,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// </summary>
         public void ApplyConfiguration()
         {
-            this.parsedRoots.ForEach(x => x.OnApplyConfiguration());
+            this.parsedRoots.ForEach(x => x.ApplyConfiguration());
         }
 
         /// <inheritdoc/>
@@ -109,6 +114,24 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
             }
 
             loadingNodes.Add(node);
+        }
+
+        private class CrucibleConfigModRoot
+        {
+            /// <summary>
+            /// Gets or sets the name of this mod.
+            /// </summary>
+            public string Name { get; set; }
+
+            /// <summary>
+            /// Gets or sets the author of this mod.
+            /// </summary>
+            public string Author { get; set; }
+
+            /// <summary>
+            /// Gets or sets the version of this mod.
+            /// </summary>
+            public string Version { get; set; }
         }
     }
 }

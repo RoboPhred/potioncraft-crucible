@@ -9,7 +9,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     /// extension config entries to apply their configuration to the subject.
     /// </summary>
     /// <typeparam name="TSubject">The subject object created as a result of this configuration entry.</typeparam>
-    public abstract class CrucibleConfigSubjectObject<TSubject> : IDeserializeExtraData
+    public abstract class CrucibleConfigSubjectObject<TSubject> : CrucibleConfigNode, IDeserializeExtraData
     {
         private readonly List<CrucibleConfigExtension<TSubject>> extensions = new();
 
@@ -51,5 +51,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// </remarks>
         /// <returns>The subject to which configuration options should be applied.</returns>
         protected abstract TSubject GetSubject();
+
+        /// <summary>
+        /// Apply the configuration to the subject.
+        /// </summary>
+        /// <param name="subject">The subject to apply configuration to.</param>
+        protected abstract void OnApplyConfiguration(TSubject subject);
     }
 }

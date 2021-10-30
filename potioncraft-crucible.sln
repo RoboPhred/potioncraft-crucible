@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible.Core", "Crucible.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible.GameAPI", "Crucible.GameAPI\Crucible.GameAPI.csproj", "{1537D981-A25A-4B6F-A8EE-E3D9BF9BA145}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible", "Crucible\Crucible.csproj", "{298FAFAD-03C3-43F9-8439-DD35D948975D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible.Ingredients", "Crucible.Ingredients\Crucible.Ingredients.csproj", "{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +48,29 @@ Global
 		{1537D981-A25A-4B6F-A8EE-E3D9BF9BA145}.Release|x64.Build.0 = Release|Any CPU
 		{1537D981-A25A-4B6F-A8EE-E3D9BF9BA145}.Release|x86.ActiveCfg = Release|Any CPU
 		{1537D981-A25A-4B6F-A8EE-E3D9BF9BA145}.Release|x86.Build.0 = Release|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Debug|x64.Build.0 = Debug|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Debug|x86.Build.0 = Debug|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Release|x64.ActiveCfg = Release|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Release|x64.Build.0 = Release|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Release|x86.ActiveCfg = Release|Any CPU
+		{298FAFAD-03C3-43F9-8439-DD35D948975D}.Release|x86.Build.0 = Release|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Debug|x64.Build.0 = Debug|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Debug|x86.Build.0 = Debug|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Release|x64.ActiveCfg = Release|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Release|x64.Build.0 = Release|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Release|x86.ActiveCfg = Release|Any CPU
+		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

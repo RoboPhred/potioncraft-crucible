@@ -8,6 +8,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// <summary>
         /// Apply this configuration node.
         /// </summary>
-        public abstract void OnApplyConfiguration();
+        public abstract void ApplyConfiguration();
     }
 }
