@@ -31,6 +31,11 @@ namespace RoboPhredDev.PotionCraft.Crucible
         /// <returns>An enumerable of all discovered types with the given attribute.</returns>
         public static IEnumerable<Type> GetTypesByAttribute(Type t)
         {
+            if (t.GetCustomAttribute<CrucibleRegistryAttributeAttribute>() == null)
+            {
+                throw new ArgumentException("Target attribute must be marked with CrucibleRegistryAttributeAttribute.", "t");
+            }
+
             EnsureTypesLoaded();
 
             if (typesByAttribute.TryGetValue(t, out HashSet<Type> types))

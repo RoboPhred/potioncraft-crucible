@@ -2,6 +2,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using UnityEngine;
 
@@ -78,7 +79,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
 
         private static string GetToken(ref string svgPath)
         {
-            var token = string.Empty;
+            var token = new StringBuilder();
             int i = 0;
             bool? isAlphanumeric = null;
             for (; i < svgPath.Length; i++)
@@ -103,7 +104,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                     break;
                 }
 
-                token += c;
+                token.Append(c);
             }
 
             svgPath = svgPath.Substring(i);
@@ -113,7 +114,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 return null;
             }
 
-            return token;
+            return token.ToString();
         }
 
         private static float GetFloatTokenOrFail(ref string svgPath)
@@ -123,6 +124,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             {
                 throw new Exception($"Failed to parse decimal value: \"{token}\".");
             }
+
             return result;
         }
 

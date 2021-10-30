@@ -1,7 +1,6 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using HarmonyLib;
-    using LocalizationSystem;
     using UnityEngine;
 
     /// <summary>
