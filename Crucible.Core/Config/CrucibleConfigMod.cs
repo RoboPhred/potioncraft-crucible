@@ -78,6 +78,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
             }
             catch (Exception ex)
             {
+                // TODO: Collect exceptions for display to the user, return mod anyway.
                 throw new CrucibleConfigModException($"Failed to load crucible mod \"{Path.GetDirectoryName(modFolder)}\": " + ex.Message, ex);
             }
             finally
@@ -91,7 +92,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// </summary>
         public void ApplyConfiguration()
         {
-            this.root.ParsedRoots.ForEach(x => x.ApplyConfiguration());
+            // TODO: Collect exceptions for display to the user.
+            CrucibleResources.WithResourceProvider(this, () => CrucibleLog.RunInLogScope(this.Namespace, () => this.root.ParsedRoots.ForEach(x => x.ApplyConfiguration())));
         }
 
         /// <summary>

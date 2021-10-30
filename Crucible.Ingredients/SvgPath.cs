@@ -8,16 +8,47 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     /// <summary>
     /// A list of <see cref="CrucibleIngredientPathSegment"/>s parsable from an SVG Path.
     /// </summary>
-    public class SvgPath : List<CrucibleIngredientPathSegment>
+    public class SvgPath
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SvgPath"/> class.
+        /// </summary>
+        public SvgPath()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SvgPath"/> class.
+        /// </summary>
+        /// <param name="path">The SVG path data.</param>
+        public SvgPath(string path)
+        {
+            this.Data = path;
+        }
+
+        /// <summary>
+        /// Gets or sets the svg path data.
+        /// </summary>
+        public string Data { get; set; }
+
+        /// <summary>
+        /// Gets or sets the x axis scaling.
+        /// </summary>
+        public float ScaleX { get; set; } = 1;
+
+        /// <summary>
+        /// Gets or sets the y axis scaling.
+        /// </summary>
+        public float ScaleY { get; set; } = 1;
+
         /// <summary>
         /// Parses an SVG Path into a list of <see cref="CrucibleIngredientPathSegment"/>s.
         /// </summary>
-        /// <param name="path">The path to parse.</param>
-        /// <returns>The list of path segments.</returns>
-        public static SvgPath Parse(string path)
+        /// <returns>An enumerable of path segments derived from the svg path.</returns>
+        public IEnumerable<CrucibleIngredientPathSegment> ToPathSegments()
         {
-            var curves = new SvgPath();
+            var path = this.Data;
+            var scale = new Vector2(this.ScaleX, this.ScaleY * -1);
             var lastEnd = Vector2.zero;
             CrucibleIngredientPathSegment curve;
             while ((curve = PartToCurve(ref path, lastEnd)) != null)
@@ -28,6 +59,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                     continue;
                 }
 
+                curve.P1 *= scale;
+                curve.P2 *= scale;
+                curve.End *= scale;
+
                 if (curve.IsRelative)
                 {
                     lastEnd += curve.End;
@@ -37,10 +72,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                     lastEnd = curve.End;
                 }
 
-                curves.Add(curve);
+                yield return curve;
             }
-
-            return curves;
         }
 
         private static string GetToken(ref string svgPath)

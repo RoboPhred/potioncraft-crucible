@@ -133,7 +133,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             subject.Price = this.Price;
             subject.IsTeleportationIngredient = this.IsTeleportationIngredient;
             subject.PathPregrindPercentage = this.GrindStartPercent;
-            subject.SetPath(this.Path);
+            if (this.Path != null)
+            {
+                subject.SetPath(this.Path.ToPathSegments());
+            }
         }
     }
 }

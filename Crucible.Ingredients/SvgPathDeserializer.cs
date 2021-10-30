@@ -12,18 +12,39 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     [YamlDeserializer]
     public class SvgPathDeserializer : INodeDeserializer
     {
+        private bool suppressDeserializer = false;
+
         /// <inheritdoc/>
         public bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
+            if (this.suppressDeserializer)
+            {
+                value = null;
+                return false;
+            }
+
             if (expectedType != typeof(SvgPath))
             {
                 value = null;
                 return false;
             }
 
-            var scalar = reader.Consume<Scalar>();
-            value = SvgPath.Parse(scalar.Value);
-            return true;
+            if (reader.TryConsume<Scalar>(out var scalar))
+            {
+                value = new SvgPath(scalar.Value);
+                return true;
+            }
+
+            this.suppressDeserializer = true;
+            try
+            {
+                value = nestedObjectDeserializer(reader, typeof(SvgPath));
+                return true;
+            }
+            finally
+            {
+                this.suppressDeserializer = false;
+            }
         }
     }
 }
