@@ -31,9 +31,16 @@ namespace RoboPhredDev.PotionCraft.Crucible
         /// <returns>An enumerable of all discovered types with the given attribute.</returns>
         public static IEnumerable<Type> GetTypesByAttribute(Type t)
         {
+            if (typeof(Attribute).IsAssignableFrom(t))
+            {
+                throw new ArgumentException("The provided type must be an attribute.", nameof(t));
+            }
+
+            // Note: Originally required attributes to specify the searchable attributes so we can scan all types just once.
+            // However, it might be more flexible to forgo this requirement and re-scan all types whenever a new/unknown attribute is requested.
             if (t.GetCustomAttribute<CrucibleRegistryAttributeAttribute>() == null)
             {
-                throw new ArgumentException("Target attribute must be marked with CrucibleRegistryAttributeAttribute.", "t");
+                throw new ArgumentException("Target attribute must be marked with CrucibleRegistryAttributeAttribute.", nameof(t));
             }
 
             EnsureTypesLoaded();
