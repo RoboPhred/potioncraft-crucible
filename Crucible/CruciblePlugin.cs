@@ -24,7 +24,6 @@ namespace RoboPhredDev.PotionCraft.Crucible
 
             CrucibleLog.Log("Loading Crucible mods.");
             this.mods = LoadAllConfigMods();
-            CrucibleLog.Log($"> Loaded {this.mods.Count} mods.");
 
             CrucibleGameEvents.OnGameLoaded += (_, __) =>
             {
@@ -47,7 +46,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
             {
                 try
                 {
-                    CrucibleLog.Log($"Loading module {dllFilePath}");
+                    CrucibleLog.Log($"> Loading module {dllFilePath}");
                     Assembly.LoadFile(dllFilePath);
                 }
                 catch (Exception e)

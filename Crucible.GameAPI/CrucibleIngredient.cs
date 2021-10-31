@@ -9,7 +9,7 @@
     using Utils.BezierCurves;
 
     /// <summary>
-    /// Wraps an <see cref="Ingredient"/> to provide an api for mod use.
+    /// Provides an API for creating and managing ingredients.
     /// </summary>
     public sealed class CrucibleIngredient : CrucibleInventoryItem
     {
@@ -37,11 +37,11 @@
         /// </summary>
         public string Name
         {
-            get => new Key($"#ingredient_{this.InventoryItem.name}").GetText();
+            get => new Key($"#ingredient_{this.InventoryItem.name.ToLowerInvariant()}").GetText();
 
             set
             {
-                CrucibleLocalization.SetLocalizationKey($"ingredient_{this.InventoryItem.name}", value);
+                CrucibleLocalization.SetLocalizationKey($"ingredient_{this.InventoryItem.name.ToLowerInvariant()}", value);
             }
         }
 
@@ -50,11 +50,11 @@
         /// </summary>
         public string Description
         {
-            get => new Key($"#ingredient_{this.InventoryItem.name}_description").GetText();
+            get => new Key($"#ingredient_{this.InventoryItem.name.ToLowerInvariant()}_description").GetText();
 
             set
             {
-                CrucibleLocalization.SetLocalizationKey($"ingredient_{this.InventoryItem.name}_description", value);
+                CrucibleLocalization.SetLocalizationKey($"ingredient_{this.InventoryItem.name.ToLowerInvariant()}_description", value);
             }
         }
 

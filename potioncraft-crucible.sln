@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible", "Crucible\Crucib
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible.Ingredients", "Crucible.Ingredients\Crucible.Ingredients.csproj", "{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible.PotionBases", "Crucible.PotionBases\Crucible.PotionBases.csproj", "{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,17 @@ Global
 		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Release|x64.Build.0 = Release|Any CPU
 		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Release|x86.ActiveCfg = Release|Any CPU
 		{CDD56E62-537F-4AB5-B6CF-5FBF2A03A972}.Release|x86.Build.0 = Release|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Debug|x64.Build.0 = Debug|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Debug|x86.Build.0 = Debug|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Release|x64.ActiveCfg = Release|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Release|x64.Build.0 = Release|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Release|x86.ActiveCfg = Release|Any CPU
+		{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

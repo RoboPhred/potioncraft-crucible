@@ -136,7 +136,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
 
                 foreach (var rootType in CrucibleConfigElementRegistry.GetConfigRoots())
                 {
-                    CrucibleLog.Log($"Loading root \"{rootType.FullName}\".");
                     parser.Reset();
                     this.ParsedRoots.Add((CrucibleConfigRoot)Deserializer.DeserializeFromParser(rootType, parser));
                 }
