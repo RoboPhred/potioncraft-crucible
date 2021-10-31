@@ -112,7 +112,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     throw new ArgumentException("IngredientListIcon only supports sprites that are not derived from sprite sheets.  The texture data must be available to bake into a sprite atlas.");
                 }
 
-
                 // TODO: Set up the custom atlas for this.
                 this.mapState.potionBase.smallIconSprite = value;
 

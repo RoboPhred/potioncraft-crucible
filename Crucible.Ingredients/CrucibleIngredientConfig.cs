@@ -61,7 +61,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <summary>
         /// Gets or sets the bace price for this ingredient.
         /// </summary>
-        public float Price { get; set; }
+        public float? Price { get; set; }
 
         /// <summary>
         /// Gets or sets the ingredient path for this ingredient.
@@ -71,12 +71,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <summary>
         /// Gets or sets a value specifying what percentage of the ingredient is pre-ground.
         /// </summary>
-        public float GrindStartPercent { get; set; }
+        public float? GrindStartPercent { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this ingredient teleports during movement.
         /// </summary>
-        public bool IsTeleportationIngredient { get; set; }
+        public bool? IsTeleportationIngredient { get; set; }
 
         /// <summary>
         /// Gets or sets the sprite to use for this ingredient in the recipe book.
@@ -101,7 +101,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// </summary>
         // For backwards compatibility with pantry.
         [Obsolete("Use IsTeleportationIngredient instead.")]
-        internal bool IsCrystal
+        internal bool? IsCrystal
         {
             get
             {
@@ -124,15 +124,46 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(CrucibleIngredient subject)
         {
-            CrucibleLog.Log($"Applying ingredient configuration to \"{this.Name}\" ({this.id}) from mod {this.Mod.Name}");
-            subject.Name = this.Name;
-            subject.Description = this.Description;
-            subject.InventoryIcon = this.InventoryImage;
-            subject.RecipeStepIcon = this.RecipeStepImage;
-            subject.IngredientListIcon = this.IconImage;
-            subject.Price = this.Price;
-            subject.IsTeleportationIngredient = this.IsTeleportationIngredient;
-            subject.PathPregrindPercentage = this.GrindStartPercent;
+            if (!string.IsNullOrEmpty(this.Name))
+            {
+                subject.Name = this.Name;
+            }
+
+            if (!string.IsNullOrEmpty(this.Description))
+            {
+                subject.Description = this.Description;
+            }
+
+            if (this.InventoryImage != null)
+            {
+                subject.InventoryIcon = this.InventoryImage;
+            }
+
+            if (this.RecipeStepImage != null)
+            {
+                subject.RecipeStepIcon = this.RecipeStepImage;
+            }
+
+            if (this.IconImage != null)
+            {
+                subject.IngredientListIcon = this.IconImage;
+            }
+
+            if (this.Price.HasValue)
+            {
+                subject.Price = this.Price.Value;
+            }
+
+            if (this.IsTeleportationIngredient.HasValue)
+            {
+                subject.IsTeleportationIngredient = this.IsTeleportationIngredient.Value;
+            }
+
+            if (this.GrindStartPercent.HasValue)
+            {
+                subject.PathPregrindPercentage = this.GrindStartPercent.Value;
+            }
+
             if (this.Path != null)
             {
                 subject.SetPath(this.Path.ToPathSegments());
