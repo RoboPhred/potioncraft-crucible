@@ -31,6 +31,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
         /// <returns>An enumerable of all discovered types with the given attribute.</returns>
         public static IEnumerable<Type> GetTypesByAttribute(Type t)
         {
+            /*
             if (typeof(Attribute).IsAssignableFrom(t))
             {
                 throw new ArgumentException("The provided type must be an attribute.", nameof(t));
@@ -42,6 +43,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
             {
                 throw new ArgumentException("Target attribute must be marked with CrucibleRegistryAttributeAttribute.", nameof(t));
             }
+            */
 
             EnsureTypesLoaded();
 

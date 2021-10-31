@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>RoboPhredDev.PotionCraft.Crucible</RootNamespace>
@@ -36,4 +36,9 @@
     <ProjectReference Include="..\Crucible.Core\Crucible.Core.csproj" />
     <ProjectReference Include="..\Crucible.GameAPI\Crucible.GameAPI.csproj" />
   </ItemGroup>
+  
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /y /d  &quot;$(ProjectDir)bin\Debug\net48\Crucible.dll&quot; &quot;$(POTION_CRAFT_PATH)\BepInEx\plugins\Crucible&quot;&#xD;&#xA;xcopy /y /d  &quot;$(ProjectDir)bin\Debug\net48\Crucible.Core.dll&quot; &quot;$(POTION_CRAFT_PATH)\BepInEx\plugins\Crucible&quot;&#xD;&#xA;xcopy /y /d  &quot;$(ProjectDir)bin\Debug\net48\Crucible.GameAPI.dll&quot; &quot;$(POTION_CRAFT_PATH)\BepInEx\plugins\Crucible&quot;" />
+  </Target>
+  
 </Project>

@@ -6,6 +6,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
     using System.Linq;
     using System.Reflection;
     using BepInEx;
+    using BepInEx.Configuration;
     using RoboPhredDev.PotionCraft.Crucible.Config;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using UnityEngine;
@@ -14,16 +15,20 @@ namespace RoboPhredDev.PotionCraft.Crucible
     public class CruciblePlugin : BaseUnityPlugin
     {
         private ICollection<CrucibleConfigMod> mods;
+        private CrucibleConfig config;
 
         public void Awake()
         {
             // FIXME: Come up with a better way to do this.
             // We might want to have config files define these.
+
+            this.config = new CrucibleConfig(this.Config);
+
             CrucibleLog.Log("Loading Crucible modules.");
-            LoadAllModules();
+            this.LoadAllModules();
 
             CrucibleLog.Log("Loading Crucible mods.");
-            this.mods = LoadAllConfigMods();
+            this.mods = this.LoadAllConfigMods();
             CrucibleLog.Log($"> Loaded {this.mods.Count} mods.");
 
             CrucibleGameEvents.OnGameLoaded += (_, __) =>
@@ -36,14 +41,16 @@ namespace RoboPhredDev.PotionCraft.Crucible
             };
         }
 
-        private static void LoadAllModules()
+        private void LoadAllModules()
         {
-            if (!Directory.Exists("crucible/modules"))
+            string modulePath = this.config.ModulePath.Value;
+
+            if (!Directory.Exists(modulePath))
             {
                 return;
             }
 
-            foreach (var dllFilePath in Directory.GetFiles("crucible/modules", "*.dll"))
+            foreach (var dllFilePath in Directory.GetFiles(modulePath, "*.dll"))
             {
                 try
                 {
@@ -57,19 +64,28 @@ namespace RoboPhredDev.PotionCraft.Crucible
             }
         }
 
-        private static ICollection<CrucibleConfigMod> LoadAllConfigMods()
+        private ICollection<CrucibleConfigMod> LoadAllConfigMods()
         {
-            if (!Directory.Exists("crucible/mods"))
+
+            string modPath = this.config.ModPath.Value;
+
+            if (!Directory.Exists(modPath))
             {
                 return new List<CrucibleConfigMod>();
             }
 
-            var folders = Directory.GetDirectories("crucible/mods");
-            return folders.Select(folder => TryLoadMod(folder)).Where(x => x != null).ToList();
+            var folders = Directory.GetDirectories(modPath);
+            return folders.Select(folder => this.TryLoadMod(folder)).Where(x => x != null).ToList();
         }
 
-        private static CrucibleConfigMod TryLoadMod(string modFolder)
+        private CrucibleConfigMod TryLoadMod(string modFolder)
         {
+
+            if(!File.Exists(modFolder + "/package.yml"))
+            {
+                return null;
+            }
+
             try
             {
                 var mod = CrucibleConfigMod.Load(modFolder);

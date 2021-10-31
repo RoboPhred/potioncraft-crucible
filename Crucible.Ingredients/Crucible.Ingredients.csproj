@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>RoboPhredDev.PotionCraft.Crucible.Ingredients</RootNamespace>
@@ -26,4 +26,8 @@
   <ItemGroup>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy /y /d  &quot;$(ProjectDir)bin\Debug\net48\Crucible.Ingredients.dll&quot; &quot;$(POTION_CRAFT_PATH)\BepInEx\plugins\crucible&quot;" />
+  </Target>
 </Project>
