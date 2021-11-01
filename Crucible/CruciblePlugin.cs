@@ -36,7 +36,14 @@ namespace RoboPhredDev.PotionCraft.Crucible
                 CrucibleLog.Log("Activating Crucible mods.");
                 foreach (var mod in this.mods)
                 {
-                    mod.ApplyConfiguration();
+                    try
+                    {
+                        mod.ApplyConfiguration();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log(ex.ToExpandedString());
+                    }
                 }
             };
         }
