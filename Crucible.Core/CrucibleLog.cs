@@ -2,8 +2,6 @@ namespace RoboPhredDev.PotionCraft.Crucible
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.IO;
     using System.Linq;
     using System.Reflection;
     using BepInEx;
@@ -14,19 +12,6 @@ namespace RoboPhredDev.PotionCraft.Crucible
     public static class CrucibleLog
     {
         private static readonly Stack<string> LogScopeStack = new();
-
-        /// <summary>
-        /// Gets the path to the log folder.
-        /// </summary>
-        public static string LogFolderPath
-        {
-            get
-            {
-                var assembly = Assembly.GetEntryAssembly();
-                var versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-                return Path.Combine(Environment.GetEnvironmentVariable("AppData"), "..", "LocalLow", versionInfo.CompanyName, versionInfo.ProductName);
-            }
-        }
 
         /// <summary>
         /// Logs the given message.
