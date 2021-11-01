@@ -1,5 +1,6 @@
 namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
 {
+    using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.Config;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using UnityEngine;
@@ -9,7 +10,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
     /// </summary>
     public class CruciblePotionBaseConfig : CrucibleConfigSubjectObject<CruciblePotionBase>
     {
+        private static readonly HashSet<string> UnlockIdsOnStart = new();
+
         private string id;
+
+        static CruciblePotionBaseConfig()
+        {
+            CrucibleGameEvents.OnSaveLoaded += (_, __) =>
+            {
+                foreach (var potionBaseId in UnlockIdsOnStart)
+                {
+                    var potionBase = CruciblePotionBase.GetPotionBase(potionBaseId);
+                    potionBase?.GiveToPlayer();
+                }
+            };
+        }
 
         /// <summary>
         /// Gets or sets the ID of this ingredient.
@@ -36,6 +51,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         /// Gets or sets the description of this potion base.
         /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this potion base is available from the start of the game.
+        /// </summary>
+        public bool UnlockedOnStart { get; set; }
 
         /// <summary>
         /// Gets or sets the small icon to display for this potion base in tooltips and ingredient lists.
@@ -149,6 +169,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
             if (this.MapItemImage != null)
             {
                 subject.MapIcon = this.MapItemImage;
+            }
+
+            if (this.UnlockedOnStart)
+            {
+                UnlockIdsOnStart.Add(subject.ID);
+            }
+            else
+            {
+                UnlockIdsOnStart.Remove(subject.ID);
             }
         }
     }

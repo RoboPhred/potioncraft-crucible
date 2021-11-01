@@ -17,11 +17,25 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public sealed class CruciblePotionBase
     {
-        private static readonly HashSet<PotionBase> AtlasOverriddenIngredients = new();
+        private static readonly HashSet<MapState> CustomMapStates = new();
+        private static readonly HashSet<PotionBase> AtlasOverriddenPotionBases = new();
         private static CrucibleSpriteAtlas spriteAtlas;
         private static GameObject blankMapPrefab;
 
         private readonly MapState mapState;
+
+        static CruciblePotionBase()
+        {
+            // Custom map states may not have existed when the current save was last
+            // saved, so we need to initialize their fog
+            CrucibleGameEvents.OnSaveLoaded += (_, __) =>
+            {
+                foreach (var mapState in CustomMapStates)
+                {
+                    ClearInitialFog(mapState);
+                }
+            };
+        }
 
         private CruciblePotionBase(MapState mapState)
         {
@@ -232,7 +246,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 var potionBaseItem = this.MapGameObject.GetComponentInChildren<PotionBaseMapItem>();
                 if (potionBaseItem)
                 {
-                    UnityEngine.Debug.Log($"Setting map icon sprite for {this.Name}");
                     Traverse.Create(potionBaseItem).Method("UpdateSprites").GetValue();
                 }
             }
@@ -258,7 +271,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             get
             {
-                return $"#potion_base_{this.ID.ToLowerInvariant().Replace(" ", "_")}";
+                return $"potion_base_{this.ID.ToLowerInvariant().Replace(" ", "_")}";
             }
         }
 
@@ -321,11 +334,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
                 Managers.RecipeMap.fogOfWar.InitializeMap(index);
 
-                // TODO: This code should be ran when a new game starts or when a save is loaded.
-                /*
-                Managers.RecipeMap.fogOfWar.ClearFogAroundIndicator(false);
-                */
-
                 RegisterMapStatePhysics(mapState);
             }
             finally
@@ -350,6 +358,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             return new CruciblePotionBase(mapState);
+        }
+
+        /// <summary>
+        /// Unlocks the potion base and makes it available for use.
+        /// </summary>
+        public void GiveToPlayer()
+        {
+            Managers.RecipeMap.potionBaseSubManager.UnlockPotionBase(this.mapState.potionBase);
         }
 
         private static GameObject GetBlankMapPrefab()
@@ -454,7 +470,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 spriteAtlas = new CrucibleSpriteAtlas("CruciblePotionBases");
                 IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
                 {
-                    if (AtlasOverriddenIngredients.Contains(e.Object))
+                    if (AtlasOverriddenPotionBases.Contains(e.Object))
                     {
                         e.AtlasResult = spriteAtlas.AtlasName;
                     }
@@ -465,7 +481,25 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             spriteAtlas.SetIcon($"PotionBase {potionBase.name} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
 
-            AtlasOverriddenIngredients.Add(potionBase);
+            AtlasOverriddenPotionBases.Add(potionBase);
+        }
+
+        private static void ClearInitialFog(MapState mapState)
+        {
+            var oldCurrentMap = Managers.RecipeMap.currentMap;
+            Managers.RecipeMap.currentMap = mapState;
+            try
+            {
+                // ClearFogAroundIndicator can't be used, as the game save might have a potion in progress
+                Managers.RecipeMap.fogOfWar.FogShow(
+                    Vector2.zero,
+                    Managers.RecipeMap.fogOfWar.settings.visibilityRadiusAroundIndicator + Managers.RecipeMap.fogOfWar.exploringRadiusAddendum,
+                    false);
+            }
+            finally
+            {
+                Managers.RecipeMap.currentMap = oldCurrentMap;
+            }
         }
     }
 }

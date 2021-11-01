@@ -61,7 +61,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static void EnsurePatches()
         {
-            var loadLastProgressFromPool = AccessTools.Method(typeof(SaveLoadManager), "LoadLastProgressFromPool", new[] { typeof(File) });
+            var loadLastProgressFromPool = AccessTools.Method(typeof(SaveLoadManager), "LoadLastProgressFromPool");
             if (loadLastProgressFromPool == null)
             {
                 Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate game load function!");
@@ -83,10 +83,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
         {
             var raiseGameLoadedMethodInfo = AccessTools.Method(typeof(SaveLoadEvent), nameof(RaiseGameLoaded));
 
+            var managersGetMenuMethodInfo = AccessTools.PropertyGetter(typeof(Managers), "Menu");
+
             var found = false;
             foreach (var instruction in instructions)
             {
-                if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo methodInfo && methodInfo == AccessTools.PropertyGetter(typeof(MenuManager), "Menu"))
+                if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo methodInfo && methodInfo == managersGetMenuMethodInfo)
                 {
                     found = true;
                     yield return new CodeInstruction(OpCodes.Ldloc_0); // file

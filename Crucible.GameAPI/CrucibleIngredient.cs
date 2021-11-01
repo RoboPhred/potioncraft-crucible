@@ -185,7 +185,7 @@
         {
             get
             {
-                return $"ingredient_{this.InventoryItem.name.ToLowerInvariant().Replace(" ", "_")}";
+                return $"ingredient_{this.InventoryItem.name}";
             }
         }
 
