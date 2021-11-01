@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="Rules for StyleCop.Analyzers" Description="Code analysis rules for StyleCop.Analyzers.csproj." ToolsVersion="14.0">
     <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
-        <!-- Do not require file headers -->
-        <Rule Id="SA1633" Action="None"/>
         <!-- We do not want to produce xml documentation -->
         <Rule Id="SA0001" Action="None"/>
         <!-- "space after new" disagrees with the C# formatter, and I can't find any way to configure the latter. -->
