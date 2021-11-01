@@ -341,6 +341,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 Managers.RecipeMap.currentMap = oldCurrentMap;
             }
 
+            CustomMapStates.Add(mapState);
+
             return new CruciblePotionBase(mapState);
         }
 
