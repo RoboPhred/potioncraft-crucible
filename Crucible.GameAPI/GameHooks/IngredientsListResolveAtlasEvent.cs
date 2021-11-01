@@ -2,7 +2,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
     using System.Reflection.Emit;
     using Books.RecipeBook;
     using HarmonyLib;
@@ -40,13 +39,27 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 return;
             }
 
-            var panelUpdateIngredientsMethod = typeof(PotionCraftPanel.PotionCraftPanel).GetMethod("UpdateIngredientsList", BindingFlags.NonPublic | BindingFlags.Instance);
-            var transpilePanelMethod = typeof(IngredientsListResolveAtlasEvent).GetMethod("TranspilePotionCraftPanelUpdateIngredientsList", BindingFlags.Static | BindingFlags.NonPublic);
-            HarmonyInstance.Instance.Patch(panelUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpilePanelMethod));
+            var panelUpdateIngredientsMethod = AccessTools.Method(typeof(PotionCraftPanel.PotionCraftPanel), "UpdateIngredientsList");
+            if (panelUpdateIngredientsMethod == null)
+            {
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate potion craft panel ingredients list update function!");
+            }
+            else
+            {
+                var transpiler = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(TranspilePotionCraftPanelUpdateIngredientsList));
+                HarmonyInstance.Instance.Patch(panelUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpiler));
+            }
 
-            var recipeUpdateIngredientsMethod = typeof(RecipeBookLeftPageContent).GetMethod("UpdateIngredientsList", BindingFlags.NonPublic | BindingFlags.Instance);
-            var transpileRecipeMethod = typeof(IngredientsListResolveAtlasEvent).GetMethod("TranspileRecipeBookLeftPageContentUpdateIngredientsList", BindingFlags.Static | BindingFlags.NonPublic);
-            HarmonyInstance.Instance.Patch(recipeUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpileRecipeMethod));
+            var recipeUpdateIngredientsMethod = AccessTools.Method(typeof(RecipeBookLeftPageContent), "UpdateIngredientsList");
+            if (recipeUpdateIngredientsMethod == null)
+            {
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate recipe book ingredients list update function!");
+            }
+            else
+            {
+                var transpiler = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(TranspileRecipeBookLeftPageContentUpdateIngredientsList));
+                HarmonyInstance.Instance.Patch(recipeUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpiler));
+            }
 
             patchApplied = true;
         }
@@ -66,6 +79,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static IEnumerable<CodeInstruction> TranspilePotionCraftPanelUpdateIngredientsList(IEnumerable<CodeInstruction> instructions)
         {
+            var getAtlasForUsedComponentIndexMethod = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(GetAtlasForUsedComponentIndex));
             var found = false;
             foreach (var instruction in instructions)
             {
@@ -75,7 +89,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 {
                     found = true;
                     yield return new CodeInstruction(OpCodes.Ldloc_3); // index
-                    yield return new CodeInstruction(OpCodes.Call, typeof(IngredientsListResolveAtlasEvent).GetMethod("GetAtlasForUsedComponentIndex", BindingFlags.Static | BindingFlags.NonPublic));
+                    yield return new CodeInstruction(OpCodes.Call, getAtlasForUsedComponentIndexMethod);
                 }
                 else
                 {
@@ -91,23 +105,23 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static IEnumerable<CodeInstruction> TranspileRecipeBookLeftPageContentUpdateIngredientsList(IEnumerable<CodeInstruction> instructions)
         {
+            var getAtlasForUsedComponentMethod = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(GetAtlasForUsedComponent));
             var found = false;
             foreach (var instruction in instructions)
             {
                 if (!found && instruction.opcode == OpCodes.Ldloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 5 && localBuilder.LocalType == typeof(Potion.UsedComponent))
                 {
+                    // We should now be right before the if statement checking if the current potion is in stock
                     found = true;
 
-                    // We should now be right before the if statement checking if the current potion is in stock
-
                     yield return new CodeInstruction(OpCodes.Ldloc_S, 5); // currentPotion
-                    yield return new CodeInstruction(OpCodes.Call, typeof(IngredientsListResolveAtlasEvent).GetMethod("GetAtlasForUsedComponent", BindingFlags.Static | BindingFlags.NonPublic));
+                    yield return new CodeInstruction(OpCodes.Call, getAtlasForUsedComponentMethod);
+
                     // Store the result into ingredientsAtlasName so it will be used in one of the two branching string constructions.
                     yield return new CodeInstruction(OpCodes.Stloc_0);
 
                     // Return the first part of the if-check and continue as normal.
                     yield return instruction;
-
                 }
                 else
                 {

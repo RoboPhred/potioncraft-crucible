@@ -25,7 +25,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
             CrucibleLog.Log("Loading Crucible mods.");
             this.mods = LoadAllConfigMods();
 
-            CrucibleGameEvents.OnGameLoaded += (_, __) =>
+            CrucibleGameEvents.OnGameInitialized += (_, __) =>
             {
                 CrucibleLog.Log("Activating Crucible mods.");
                 foreach (var mod in this.mods)

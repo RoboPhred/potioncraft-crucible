@@ -1,9 +1,9 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
-    using System.Reflection;
     using HarmonyLib;
     using ObjectBased.UIElements.Tooltip;
+    using UnityEngine;
 
     /// <summary>
     /// Provides an event to resolve <see cref="TooltipContent"/>s.
@@ -37,11 +37,23 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 return;
             }
 
-            HarmonyInstance.Instance.Patch(typeof(Ingredient).GetMethod("GetTooltipContent", BindingFlags.NonPublic | BindingFlags.Instance), prefix: new HarmonyMethod(typeof(GetTooltipContentEvent).GetMethod("IngredientGetTooltipContentPrefix", BindingFlags.Static | BindingFlags.NonPublic)));
+            var getTooltipContentMethod = AccessTools.Method(typeof(Ingredient), "GetTooltipContent");
+            if (getTooltipContentMethod == null)
+            {
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to find Ingredient GetTooltipContent function!");
+            }
+            else
+            {
+                var prefixMethod = AccessTools.Method(typeof(GetTooltipContentEvent), nameof(IngredientGetTooltipContentPrefix));
+                HarmonyInstance.Instance.Patch(getTooltipContentMethod, prefix: new HarmonyMethod(prefixMethod));
+            }
+
             patchApplied = true;
         }
 
+#pragma warning disable SA1313
         private static bool IngredientGetTooltipContentPrefix(Ingredient __instance, ref TooltipContent __result)
+#pragma warning restore SA1313
         {
             var e = new GetTooltipContentEventArgs<Ingredient>(__instance);
             onIngredientTooltipRequested?.Invoke(__instance, e);
