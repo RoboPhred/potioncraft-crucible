@@ -16,7 +16,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             get
             {
-                return harmony ??= new Harmony("RoboPhredDev.PotionCraft.Crucible");
+                return harmony ??= new Harmony("RoboPhredDev.PotionCraft.Crucible.GameAPI");
             }
         }
     }
