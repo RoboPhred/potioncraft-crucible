@@ -10,6 +10,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public static class CrucibleGameFolders
     {
+        // Untested, and neither the potioncraft executable nor the assembly dll have any company or product name specified.
+        /*
         /// <summary>
         /// Gets the path to the folder containing user data, such as logs and saves.
         /// </summary>
@@ -22,5 +24,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 return Path.Combine(Environment.GetEnvironmentVariable("AppData"), "..", "LocalLow", versionInfo.CompanyName, versionInfo.ProductName);
             }
         }
+        */
     }
 }
