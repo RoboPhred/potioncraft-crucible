@@ -52,10 +52,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         public string Name
         {
-            get => new Key($"#potion_base_{this.ID.ToLowerInvariant()}").GetText();
+            get => new Key(this.LocalizationKey).GetText();
             set
             {
-                CrucibleLocalization.SetLocalizationKey($"potion_base_{this.ID.ToLowerInvariant()}", value);
+                CrucibleLocalization.SetLocalizationKey(this.LocalizationKey, value);
             }
         }
 
@@ -64,10 +64,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         public string Description
         {
-            get => new Key($"#potion_base_{this.ID.ToLowerInvariant()}_description").GetText();
+            get => new Key($"{this.LocalizationKey}_description").GetText();
             set
             {
-                CrucibleLocalization.SetLocalizationKey($"potion_base_{this.ID.ToLowerInvariant()}_description", value);
+                CrucibleLocalization.SetLocalizationKey($"{this.LocalizationKey}_description", value);
             }
         }
 
@@ -251,6 +251,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             set
             {
                 this.mapState.potionBase.recipeMarkIcon = value;
+            }
+        }
+
+        private string LocalizationKey
+        {
+            get
+            {
+                return $"#potion_base_{this.ID.ToLowerInvariant().Replace(" ", "_")}";
             }
         }
 

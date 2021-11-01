@@ -37,11 +37,11 @@
         /// </summary>
         public string Name
         {
-            get => new Key($"#ingredient_{this.InventoryItem.name.ToLowerInvariant()}").GetText();
+            get => new Key(this.LocalizationKey).GetText();
 
             set
             {
-                CrucibleLocalization.SetLocalizationKey($"ingredient_{this.InventoryItem.name.ToLowerInvariant()}", value);
+                CrucibleLocalization.SetLocalizationKey(this.LocalizationKey, value);
             }
         }
 
@@ -50,11 +50,11 @@
         /// </summary>
         public string Description
         {
-            get => new Key($"#ingredient_{this.InventoryItem.name.ToLowerInvariant()}_description").GetText();
+            get => new Key($"{this.LocalizationKey}_description").GetText();
 
             set
             {
-                CrucibleLocalization.SetLocalizationKey($"ingredient_{this.InventoryItem.name.ToLowerInvariant()}_description", value);
+                CrucibleLocalization.SetLocalizationKey($"{this.LocalizationKey}_description", value);
             }
         }
 
@@ -178,6 +178,14 @@
                 }
 
                 this.Ingredient.path.grindedPathStartsFrom = value;
+            }
+        }
+
+        private string LocalizationKey
+        {
+            get
+            {
+                return $"ingredient_{this.InventoryItem.name.ToLowerInvariant().Replace(" ", "_")}";
             }
         }
 
