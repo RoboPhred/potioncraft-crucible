@@ -10,11 +10,17 @@ namespace RoboPhredDev.PotionCraft.Crucible
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using UnityEngine;
 
+    /// <summary>
+    /// BepInEx plugin for Crucible Config mods.
+    /// </summary>
     [BepInPlugin("net.robophreddev.PotionCraft.Crucible", "Crucible Modding Framework", "1.0.0.0")]
     public class CruciblePlugin : BaseUnityPlugin
     {
         private ICollection<CrucibleConfigMod> mods;
 
+        /// <summary>
+        /// Called by unity when the plugin loads.
+        /// </summary>
         public void Awake()
         {
             // FIXME: Come up with a better way to do this.

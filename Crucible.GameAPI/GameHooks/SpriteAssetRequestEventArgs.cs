@@ -12,7 +12,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
         /// Initializes a new instance of the <see cref="SpriteAssetRequestEventArgs"/> class.
         /// </summary>
         /// <param name="hashCode">The hash code of the asset name.</param>
-        /// <param name="assetName">The asset name</param>
+        /// <param name="assetName">The asset name.</param>
         public SpriteAssetRequestEventArgs(int hashCode, string assetName)
         {
             this.AssetHashCode = hashCode;

@@ -1,8 +1,8 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
-    using System.Reflection;
     using HarmonyLib;
+    using UnityEngine;
 
     /// <summary>
     /// Provides an event to be notified when the <see cref="RecipeMapObject"/> is awakened.
@@ -12,6 +12,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
         private static bool patchApplied = false;
         private static EventHandler onRecipeMapObjectAwake;
 
+        /// <summary>
+        /// Raised when <see cref="RecipeMapObject"/> has finished awakening.
+        /// </summary>
         public static event EventHandler OnRecipeMapObjectAwake
         {
             add
@@ -33,7 +36,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 return;
             }
 
-            HarmonyInstance.Instance.Patch(typeof(RecipeMapObject).GetMethod("Awake", BindingFlags.NonPublic | BindingFlags.Instance), postfix: new HarmonyMethod(typeof(RecipeMapObjectAwakeEvent).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic)));
+            var recipeMapObjectAwakeMethodInfo = AccessTools.Method(typeof(RecipeMapObject), "Awake");
+            if (recipeMapObjectAwakeMethodInfo == null)
+            {
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to find RecipeMapObject Awake function!");
+            }
+            else
+            {
+                var postfix = AccessTools.Method(typeof(RecipeMapObjectAwakeEvent), nameof(Postfix));
+                HarmonyInstance.Instance.Patch(recipeMapObjectAwakeMethodInfo, postfix: new HarmonyMethod(postfix));
+            }
+
             patchApplied = true;
         }
 
