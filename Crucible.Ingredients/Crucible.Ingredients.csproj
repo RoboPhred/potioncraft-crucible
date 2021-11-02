@@ -28,6 +28,6 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /y /d  &quot;$(ProjectDir)bin\Debug\net48\Crucible.Ingredients.dll&quot; &quot;$(POTION_CRAFT_PATH)\BepInEx\plugins\crucible&quot;" />
+    <Exec Command="xcopy /y /d  &quot;$(ProjectDir)bin\Debug\net48\Crucible.Ingredients.dll&quot; &quot;$(POTION_CRAFT_PATH)\BepInEx\plugins\crucible\modules&quot;" />
   </Target>
 </Project>
