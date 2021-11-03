@@ -20,7 +20,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using UnityEngine;
 
     /// <summary>
-    /// Wraps a <see cref="InventoryItem"/> to provide an api for mod use.
+    /// Provides a stable API for working with PotionCraft <see cref="InventoryItem"/>s.
     /// </summary>
     public abstract class CrucibleInventoryItem
     {

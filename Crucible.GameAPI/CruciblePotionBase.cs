@@ -29,7 +29,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using UnityEngine;
 
     /// <summary>
-    /// Provides an API for creating and modifying potion bases.
+    /// Provides a stable API for working with PotionCraft <see cref="PotionBase"/>s.
     /// </summary>
     public sealed class CruciblePotionBase
     {
@@ -311,7 +311,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             newBase.name = id;
             newBase.mapPrefab = GetBlankMapPrefab();
 
-            newBase.baseColor = Color.red;
+            newBase.baseColor = waterBase.baseColor;
             newBase.smallIconSprite = waterBase.smallIconSprite;
             newBase.markerIconHoverSprite = waterBase.markerIconHoverSprite;
             newBase.markerIconIdleSprite = waterBase.markerIconIdleSprite;
@@ -320,9 +320,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             newBase.ladleIconSprite = waterBase.ladleIconSprite;
             newBase.recipeMarkIcon = waterBase.recipeMarkIcon;
             newBase.mapItemSprite = waterBase.mapItemSprite;
-
-            // TODO: Properties to set these from CruciblePotionBase
-            // What are these for?
             newBase.recipeMapIconSprite = waterBase.recipeMapIconSprite;
 
             var index = MapLoader.loadedMaps.Count;

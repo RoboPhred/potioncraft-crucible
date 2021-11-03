@@ -25,7 +25,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using Utils.BezierCurves;
 
     /// <summary>
-    /// Provides an API for creating and managing ingredients.
+    /// Provides a stable API for working with PotionCraft <see cref="Ingredient"/>s.
     /// </summary>
     public sealed class CrucibleIngredient : CrucibleInventoryItem
     {
