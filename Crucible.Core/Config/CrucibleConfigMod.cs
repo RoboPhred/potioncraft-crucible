@@ -38,7 +38,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         private CrucibleConfigMod(string directory)
             : base(directory)
         {
-            this.FileName = Path.GetFileName(directory);
+            // TODO: Slice off the crucible/mods folder
+            this.FileName = directory;
         }
 
         /// <summary>

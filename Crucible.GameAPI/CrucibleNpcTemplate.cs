@@ -39,6 +39,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public NpcTemplate NpcTemplate { get; }
 
         /// <summary>
+        /// Gets the ID of this npc template.
+        /// </summary>
+        public string ID
+        {
+            get
+            {
+                return this.NpcTemplate.name;
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether this template is a trader.
         /// </summary>
         public bool IsTrader => this.GetAllParts().Any(x => x is TraderSettings);

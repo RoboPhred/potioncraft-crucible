@@ -30,7 +30,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Traders
         /// <summary>
         /// Gets or sets the chance of this item being sold.
         /// </summary>
-        public float Chance { get; set; } = 1f;
+        public float ChanceToAppear { get; set; } = 1f;
 
         /// <summary>
         /// Gets or sets the minimum count of stock the trader will have.
@@ -50,12 +50,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Traders
         {
             foreach (var trader in this.GetTraders())
             {
-                if (!trader.IsTrader)
-                {
-                    continue;
-                }
-
-                trader.AddTraderItem(inventoryItem, this.Chance, this.MinCount, this.MaxCount);
+                trader.AddTraderItem(inventoryItem, this.ChanceToAppear, this.MinCount, this.MaxCount);
             }
         }
 

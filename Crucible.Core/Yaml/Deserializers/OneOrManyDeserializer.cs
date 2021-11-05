@@ -17,6 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using YamlDotNet.Core;
     using YamlDotNet.Core.Events;
@@ -39,18 +40,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
 
             var subjectType = expectedType.GetGenericArguments()[0];
 
-            IEnumerable<object> items;
+            IEnumerable items;
             if (reader.Accept<SequenceStart>(out var _))
             {
-                items = (IEnumerable<object>)nestedObjectDeserializer(reader, typeof(List<>).MakeGenericType(subjectType));
+                items = (IEnumerable)nestedObjectDeserializer(reader, typeof(List<>).MakeGenericType(subjectType));
             }
             else
             {
                 var item = nestedObjectDeserializer(reader, subjectType);
-                items = new[] { item };
+                var array = Array.CreateInstance(subjectType, 1);
+                array.SetValue(item, 0);
+                items = array;
             }
 
-            value = Activator.CreateInstance(expectedType, items);
+            // Pass the ctor args as an array, so the array of a single item is not unwrapped.
+            value = Activator.CreateInstance(expectedType, new[] { items });
             return true;
         }
     }

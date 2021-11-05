@@ -45,6 +45,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
             this.contents = source.ToList();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OneOrMany{T}"/> class.
+        /// </summary>
+        /// <param name="source">The enumerable to copy items from.</param>
+        public OneOrMany(IEnumerable source)
+        {
+            this.contents = source.Cast<T>().ToList();
+        }
+
         /// <inheritdoc/>
         public int Count => this.contents.Count;
 

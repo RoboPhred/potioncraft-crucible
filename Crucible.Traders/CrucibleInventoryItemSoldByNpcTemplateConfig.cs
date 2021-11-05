@@ -35,7 +35,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.Traders
         {
             foreach (string templateName in this.NpcTemplateName)
             {
-                yield return CrucibleNpcTemplate.GetNpcTemplate(templateName);
+                var trader = CrucibleNpcTemplate.GetNpcTemplate(templateName);
+                if (trader == null)
+                {
+                    throw new System.Exception($"NPC template {templateName} not found.");
+                }
+
+                if (!trader.IsTrader)
+                {
+                    throw new System.Exception($"NPC template {templateName} is not a trader.");
+                }
+
+                yield return trader;
             }
         }
     }
