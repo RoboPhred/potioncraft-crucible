@@ -72,7 +72,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <summary>
         /// Gets or sets the small icon to display for this ingredient in tooltips and ingredient lists.
         /// </summary>
-        public Sprite IconImage { get; set; }
+        public Sprite IngredientListIcon { get; set; }
 
         /// <summary>
         /// Gets or sets the bace price for this ingredient.
@@ -93,6 +93,24 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// Gets or sets a value indicating whether this ingredient teleports during movement.
         /// </summary>
         public bool? IsTeleportationIngredient { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ingredient list icon.
+        /// </summary>
+        // For backwards compatibility with pantry.
+        [Obsolete("Use IngredientListIcon instead.")]
+        internal Sprite IconImage
+        {
+            get
+            {
+                return this.IngredientListIcon;
+            }
+
+            set
+            {
+                this.IngredientListIcon = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the sprite to use for this ingredient in the recipe book.
@@ -160,9 +178,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 subject.RecipeStepIcon = this.RecipeStepImage;
             }
 
-            if (this.IconImage != null)
+            if (this.IngredientListIcon != null)
             {
-                subject.IngredientListIcon = this.IconImage;
+                subject.IngredientListIcon = this.IngredientListIcon;
             }
 
             if (this.Price.HasValue)

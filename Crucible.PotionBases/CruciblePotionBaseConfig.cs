@@ -76,32 +76,32 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         /// <summary>
         /// Gets or sets the small icon to display for this potion base in tooltips and ingredient lists.
         /// </summary>
-        public Sprite IconImage { get; set; }
+        public Sprite IngredientListIcon { get; set; }
 
         /// <summary>
         /// Gets or sets the image to use for the potion base in the potion base menu.
         /// </summary>
-        public Sprite MenuImage { get; set; }
+        public Sprite MenuButtonImage { get; set; }
 
         /// <summary>
         /// Gets or sets the image to use for the potion base button when this base is selected.
         /// </summary>
-        public Sprite MenuSelectedImage { get; set; }
+        public Sprite MenuButtonSelectedImage { get; set; }
 
         /// <summary>
         /// Gets or sets the image to use for the potion base in the potion base menu when hovering over the menu.
         /// </summary>
-        public Sprite MenuHoverImage { get; set; }
+        public Sprite MenuButtonHoverImage { get; set; }
 
         /// <summary>
         /// Gets or sets the image to use for the potion base in the potion base menu when the potion base is locked.
         /// </summary>
-        public Sprite MenuLockedImage { get; set; }
+        public Sprite MenuButtonLockedImage { get; set; }
 
         /// <summary>
         /// Gets or sets the tooltip image to use for this potion base when hovering over the base in the potion base menu.
         /// </summary>
-        public Sprite MenuTooltipImage { get; set; }
+        public Sprite TooltipImage { get; set; }
 
         /// <summary>
         /// Gets or sets the image to place on the ladle when this potion base is selected.
@@ -114,9 +114,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         public Sprite RecipeStepImage { get; set; }
 
         /// <summary>
-        /// Gets or sets the image to display on the potion map.
+        /// Gets or sets the image to display at the center of the potion effect map.
         /// </summary>
-        public Sprite MapItemImage { get; set; }
+        public Sprite MapOriginImage { get; set; }
 
         /// <inheritdoc/>
         protected override CruciblePotionBase GetSubject()
@@ -141,35 +141,35 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
             // TODO: From config.  Make a deserializer for the Color class.  Use hex code string or rgba object
             subject.LiquidColor = Color.red;
 
-            if (this.IconImage != null)
+            if (this.IngredientListIcon != null)
             {
-                subject.IngredientListIcon = this.IconImage;
+                subject.IngredientListIcon = this.IngredientListIcon;
             }
 
-            if (this.MenuImage != null)
+            if (this.MenuButtonImage != null)
             {
-                subject.MenuIcon = this.MenuImage;
+                subject.MenuIcon = this.MenuButtonImage;
             }
 
-            if (this.MenuSelectedImage != null)
+            if (this.MenuButtonSelectedImage != null)
             {
-                subject.MenuSelectedIcon = this.MenuSelectedImage;
+                subject.MenuSelectedIcon = this.MenuButtonSelectedImage;
             }
 
-            if (this.MenuHoverImage != null)
+            if (this.MenuButtonHoverImage != null)
             {
-                subject.MenuHoverIcon = this.MenuHoverImage;
+                subject.MenuHoverIcon = this.MenuButtonHoverImage;
             }
 
-            if (this.MenuLockedImage != null)
+            if (this.MenuButtonLockedImage != null)
             {
-                subject.MenuLockedIcon = this.MenuLockedImage;
+                subject.MenuLockedIcon = this.MenuButtonLockedImage;
             }
 
             // FIXME: This isnt working.  Image is missing from tooltip.
-            if (this.MenuTooltipImage != null)
+            if (this.TooltipImage != null)
             {
-                subject.TooltipIcon = this.MenuTooltipImage;
+                subject.TooltipIcon = this.TooltipImage;
             }
 
             if (this.LadleImage != null)
@@ -182,9 +182,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
                 subject.RecipeStepIcon = this.RecipeStepImage;
             }
 
-            if (this.MapItemImage != null)
+            if (this.MapOriginImage != null)
             {
-                subject.MapIcon = this.MapItemImage;
+                subject.MapIcon = this.MapOriginImage;
             }
 
             if (this.UnlockedOnStart)
