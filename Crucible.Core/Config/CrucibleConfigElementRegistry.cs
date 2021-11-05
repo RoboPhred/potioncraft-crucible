@@ -54,17 +54,30 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
             var subjectCandidates = from candidate in CrucibleTypeRegistry.GetTypesByAttribute<CrucibleConfigExtensionAttribute>()
                                     let attribute = (CrucibleConfigExtensionAttribute)Attribute.GetCustomAttribute(candidate, typeof(CrucibleConfigExtensionAttribute))
                                     where attribute.SubjectType.IsAssignableFrom(typeof(TSubject))
-                                    select candidate;
+                                    select new { Type = candidate, Attribute = attribute };
+
             foreach (var candidate in subjectCandidates)
             {
-                if (!typeof(CrucibleConfigExtension<>).MakeGenericType(typeof(TSubject)).IsAssignableFrom(candidate))
+                // Check to see if the candidate implements the expected base type.
+                if (!VerifySubjectExtension(candidate.Type, candidate.Attribute))
                 {
-                    WarnMisimplementedExtension(candidate, typeof(TSubject));
                     continue;
                 }
 
-                yield return candidate;
+                yield return candidate.Type;
             }
+        }
+
+        private static bool VerifySubjectExtension(Type classType, CrucibleConfigExtensionAttribute extensionAttribute)
+        {
+            var expectedAssignable = typeof(ICrucibleConfigExtension<>).MakeGenericType(extensionAttribute.SubjectType);
+            if (!expectedAssignable.IsAssignableFrom(classType) || !classType.BaseTypeIncludes(typeof(CrucibleConfigNode)))
+            {
+                WarnMisimplementedExtension(classType, extensionAttribute.SubjectType);
+                return false;
+            }
+
+            return true;
         }
 
         private static void WarnMisimplementedRoot(Type type)
@@ -79,7 +92,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         {
             if (WarnedTypes.Add(type))
             {
-                CrucibleLog.LogInScope("net.robophreddev.PotionCraft.Crucible", $"Cannot use {type.FullName} as a config extension for {subjectType.Name} because it lacks the appropriate {typeof(CrucibleConfigExtension<>).Name} interface.");
+                CrucibleLog.LogInScope("net.robophreddev.PotionCraft.Crucible", $"Cannot use {type.FullName} as a config extension for {subjectType.Name} because it either lacks the appropriate {typeof(ICrucibleConfigExtension<>).Name} interface, specifies the wrong TSubject, or does not implement {nameof(CrucibleConfigNode)}.");
             }
         }
     }

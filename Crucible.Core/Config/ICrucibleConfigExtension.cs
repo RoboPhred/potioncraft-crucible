@@ -1,4 +1,4 @@
-// <copyright file="CrucibleConfigExtension.cs" company="RoboPhredDev">
+// <copyright file="ICrucibleConfigExtension.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -20,12 +20,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     /// Defines a configuration object extension to a core config subject.
     /// </summary>
     /// <typeparam name="TSubject">The type this configuration is for.</typeparam>
-    public abstract class CrucibleConfigExtension<TSubject> : CrucibleConfigNode
+    public interface ICrucibleConfigExtension<in TSubject>
     {
         /// <summary>
         /// Apply this configuration node to the subject.
         /// </summary>
         /// <param name="subject">The subject created by the root configuration node.</param>
-        public abstract void OnApplyConfiguration(TSubject subject);
+        void OnApplyConfiguration(TSubject subject);
     }
 }
