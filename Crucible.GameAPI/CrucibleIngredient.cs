@@ -348,14 +348,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var stackItem = new GameObject
             {
                 name = "Crucible Test Stack Item 1",
+                active = false,
             };
             stackItem.transform.parent = prefab.transform;
             stackItem.transform.localScale = Vector3.one;
             stackItem.transform.localPosition = Vector3.zero;
             stackItem.transform.localRotation = Quaternion.identity;
 
-            // Must be set up before IngredientFromStack.Initialize is called
-            // TODO: Normally 2 of these, in child game objects.
             var colliderOuter = stackItem.AddComponent<PolygonCollider2D>();
             int shapeCount = sprite.GetPhysicsShapeCount();
             colliderOuter.pathCount = shapeCount;
@@ -370,17 +369,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ifs.spawnAtTheVisualCenterOfTheParent = true;
 
             // TODO: What is the purpose of each of these?
-            // Must be set before ifs.Initialize is called
             ifs.colliderOuter = colliderOuter;
             ifs.colliderInner = colliderOuter;
 
             var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();
             spriteRenderer.sprite = sprite;
 
+            // FIXME:
+            // Making this inactive causes it to clone as inactive, breaking things.
+            // Making this active without Initialize called makes it crash every frame on Update and OnGUI
+            // Making this active and calling Initialize makes it work, but then on instantiate it calls Initialize
+            //  again and creates two GraphicStateMachine components.
             prefab.active = true;
             stackItem.active = true;
-
-            // Requires the object to be awoken.
             ifs.Initialize(stack);
 
             this.Ingredient.itemStackPrefab = prefab;
