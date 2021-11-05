@@ -70,6 +70,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets the potion base controlled by this api object.
+        /// </summary>
+        public PotionBase PotionBase
+        {
+            get
+            {
+                return this.mapState.potionBase;
+            }
+        }
+
+        /// <summary>
         /// Gets the internal ID of this potion base.
         /// </summary>
         public string ID

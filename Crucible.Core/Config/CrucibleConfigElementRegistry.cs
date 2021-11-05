@@ -18,6 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// The registry to store and retrieve configuration class types.
@@ -50,7 +51,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// <returns>An enumerable of types that instantiate classes implementing <see cref="ICrucibleConfigExtension"/> and targeting the given subject.</returns>
         public static IEnumerable<Type> GetSubjectExtensionTypes<TSubject>()
         {
-            foreach (var candidate in CrucibleTypeRegistry.GetTypesByAttribute<CrucibleConfigExtensionAttribute>())
+            var subjectCandidates = from candidate in CrucibleTypeRegistry.GetTypesByAttribute<CrucibleConfigExtensionAttribute>()
+                                    let attribute = (CrucibleConfigExtensionAttribute)Attribute.GetCustomAttribute(candidate, typeof(CrucibleConfigExtensionAttribute))
+                                    where attribute.SubjectType.IsAssignableFrom(typeof(TSubject))
+                                    select candidate;
+            foreach (var candidate in subjectCandidates)
             {
                 if (!typeof(CrucibleConfigExtension<>).MakeGenericType(typeof(TSubject)).IsAssignableFrom(candidate))
                 {
