@@ -42,5 +42,28 @@ namespace RoboPhredDev.PotionCraft.Crucible
 
             return false;
         }
+
+        /// <summary>
+        /// Returns true if the type implements an instantiation of the generic base type.
+        /// </summary>
+        /// <param name="type">The type to check the base types of.</param>
+        /// <param name="genericType">The generic type definition of the generic type to look for.</param>
+        /// <param name="genericInstantiation">If the type implements the given base type, the instantiation of the generic type definition that implements it.</param>
+        /// <returns>True if the type implements concretely the given generic type as a base, or false if it does not.</returns>
+        public static bool BaseTypeIncludesGeneric(this Type type, Type genericType, out Type genericInstantiation)
+        {
+            do
+            {
+                if (type.GetGenericTypeDefinition() == genericType)
+                {
+                    genericInstantiation = type;
+                    return true;
+                }
+            }
+            while ((type = type.BaseType) != null);
+
+            genericInstantiation = null;
+            return false;
+        }
     }
 }
