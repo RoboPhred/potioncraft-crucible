@@ -19,10 +19,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using HarmonyLib;
     using LocalizationSystem;
+    using ObjectBased.Stack;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
+    using SoundSystem.SoundControllers;
     using UnityEngine;
     using Utils.BezierCurves;
+    using Utils.SortingOrderSetter;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="Ingredient"/>s.
@@ -300,6 +304,86 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public static IEnumerable<CrucibleIngredient> GetAllIngredients()
         {
             return Managers.Ingredient.ingredients.Select(x => new CrucibleIngredient(x));
+        }
+
+        [Obsolete("Do not use")]
+        public void DebugTestStack(Sprite sprite)
+        {
+            // Cannot use this because the prefabs are created as incompletely initialized objects, and StackItem
+            // tries to run custom code that crashes when destroyed.
+            /*
+            var prefab = GameObject.Instantiate(this.Ingredient.itemStackPrefab);
+            for (var i = prefab.transform.GetChildCount() - 1; i >= 0; i++)
+            {
+                GameObject.DestroyImmediate(prefab.transform.GetChild(i).gameObject);
+            }
+            */
+
+            var prefab = new GameObject
+            {
+                name = "Crucible Test stack",
+                active = false
+            };
+            prefab.transform.localScale = Vector3.one;
+            prefab.transform.localPosition = Vector3.zero;
+            prefab.transform.localRotation = Quaternion.identity;
+
+            var stack = prefab.AddComponent<Stack>();
+            stack.inventoryItem = this.InventoryItem;
+            var stackTraverse = Traverse.Create(stack);
+            stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new SoundController(stack, this.Ingredient.soundPreset);
+            stackTraverse.Field<float>("assemblingSpeed").Value = 3;
+
+            var visualEffects = prefab.AddComponent<StackVisualEffects>();
+            visualEffects.stackScript = stack;
+
+            var rigidBody = prefab.AddComponent<Rigidbody2D>();
+            rigidBody.mass = 10;
+            rigidBody.centerOfMass = new Vector2(0, 0);
+
+            // How do we set this up?  It does not appear in the component list when in-game, but it is called by
+            // ItemFromInventory.ToForeground when the stack is spawned.
+            var sortingOrderSetter = prefab.AddComponent<SortingOrderSetter>();
+
+            var stackItem = new GameObject
+            {
+                name = "Crucible Test Stack Item 1",
+            };
+            stackItem.transform.parent = prefab.transform;
+            stackItem.transform.localScale = Vector3.one;
+            stackItem.transform.localPosition = Vector3.zero;
+            stackItem.transform.localRotation = Quaternion.identity;
+
+            // Must be set up before IngredientFromStack.Initialize is called
+            // TODO: Normally 2 of these, in child game objects.
+            var colliderOuter = stackItem.AddComponent<PolygonCollider2D>();
+            int shapeCount = sprite.GetPhysicsShapeCount();
+            colliderOuter.pathCount = shapeCount;
+            var points = new List<Vector2>(64);
+            for (int i = 0; i < shapeCount; i++)
+            {
+                sprite.GetPhysicsShape(i, points);
+                colliderOuter.SetPath(i, points);
+            }
+
+            var ifs = stackItem.AddComponent<IngredientFromStack>();
+            ifs.spawnAtTheVisualCenterOfTheParent = true;
+
+            // TODO: What is the purpose of each of these?
+            // Must be set before ifs.Initialize is called
+            ifs.colliderOuter = colliderOuter;
+            ifs.colliderInner = colliderOuter;
+
+            var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = sprite;
+
+            prefab.active = true;
+            stackItem.active = true;
+
+            // Requires the object to be awoken.
+            ifs.Initialize(stack);
+
+            this.Ingredient.itemStackPrefab = prefab;
         }
 
         /// <summary>

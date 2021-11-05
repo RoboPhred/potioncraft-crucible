@@ -91,6 +91,12 @@ Sets:
 
 Stack properties not hidden from inspector
 
+From base class ItemFromInventory
+
+- drawFreeFallingCurve
+- appearState
+- fallingFromPanel
+- itemsPanel
 - isAssembled
   - Do not set. Read and set by game logic.
 - isAssembling

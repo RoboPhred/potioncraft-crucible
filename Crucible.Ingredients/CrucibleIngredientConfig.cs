@@ -202,6 +202,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             {
                 subject.SetPath(this.Path.ToPathSegments());
             }
+
+            // subject.DebugTestStack(this.InventoryImage);
         }
     }
 }
