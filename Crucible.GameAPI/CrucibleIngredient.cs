@@ -340,14 +340,49 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // ItemFromInventory.ToForeground when the stack is spawned.
             var sortingOrderSetter = prefab.AddComponent<SortingOrderSetter>();
 
+            var first = this.DebugCreateStackItem(sprite);
+            first.transform.parent = prefab.transform;
+
+            var ingredientFromStack = first.GetComponent<IngredientFromStack>();
+
+            var childStates = 20;
+            for (var i = 0; i < childStates; i++)
+            {
+                var item = this.DebugCreateStackItem(sprite);
+                var thisI = item.GetComponent<IngredientFromStack>();
+                ingredientFromStack.NextStagePrefabs = new[] { item };
+                ingredientFromStack = thisI;
+            }
+
+            // FIXME: Hacky and sloppy way of doing this.  Causes memory leak
+            // Only do this once, and do it from a single static event handler that handles all ingredients.
+            StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
+            {
+                if (e.Stack.inventoryItem == this.InventoryItem)
+                {
+                    e.GameObject.SetActive(true);
+                }
+            };
+
+            this.Ingredient.itemStackPrefab = prefab;
+
+            Traverse.Create(this.Ingredient).Method("CalculateStatesAndPrefabs").GetValue();
+        }
+
+        private GameObject DebugCreateStackItem(Sprite sprite)
+        {
+            // FIXME: Make one of these and reuse it
+            var dummyDisabledGO = new GameObject
+            {
+                name = "Dummy disabled",
+                active = false,
+            };
+
             var stackItem = new GameObject
             {
                 name = "Crucible Test Stack Item 1",
             };
-            stackItem.transform.parent = prefab.transform;
-            stackItem.transform.localScale = Vector3.one;
-            stackItem.transform.localPosition = Vector3.zero;
-            stackItem.transform.localRotation = Quaternion.identity;
+            stackItem.transform.parent = dummyDisabledGO.transform;
 
             var goOuter = new GameObject
             {
@@ -356,7 +391,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             };
             goOuter.transform.parent = stackItem.transform;
             var colliderOuter = goOuter.AddComponent<PolygonCollider2D>();
-            colliderOuter.SetPath(0, new[] { new Vector2(0, 0), new Vector2(0, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0) });
 
             var goInner = new GameObject
             {
@@ -365,46 +399,33 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             };
             goInner.transform.parent = stackItem.transform;
             var colliderInner = goInner.AddComponent<PolygonCollider2D>();
-            colliderInner.SetPath(0, new[] { new Vector2(0, 0), new Vector2(0, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0) });
 
-            // int shapeCount = sprite.GetPhysicsShapeCount();
-            // colliderOuter.pathCount = shapeCount;
-            // var points = new List<Vector2>(64);
-            // for (int i = 0; i < shapeCount; i++)
-            // {
-            //     sprite.GetPhysicsShape(i, points);
-            //     colliderOuter.SetPath(i, points);
-            // }
+            colliderInner.points = new Vector2[]
+            {
+                new Vector2(0.2f, 0.2f),
+                new Vector2(0.2f, -0.2f),
+                new Vector2(-0.2f, -0.2f),
+            };
+
+            colliderOuter.points = new Vector2[]
+            {
+                new Vector2(0.3f, 0.3f),
+                new Vector2(0.3f, -0.3f),
+                new Vector2(-0.3f, -0.3f),
+            };
+
+            var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = sprite;
 
             var ifs = stackItem.AddComponent<IngredientFromStack>();
+            ifs.spriteRenderers = new[] { spriteRenderer };
+            ifs.NextStagePrefabs = new GameObject[0];
 
             // TODO: What is the purpose of each of these?
             ifs.colliderOuter = colliderOuter;
             ifs.colliderInner = colliderInner;
 
-            var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();
-            spriteRenderer.sprite = sprite;
-
-            // FIXME:
-            // Making this inactive causes it to clone as inactive, breaking things.
-            // Making this active without Initialize called makes it crash every frame on Update and OnGUI
-            // Making this active and calling Initialize makes it work, but then on instantiate it calls Initialize
-            //  again and creates two GraphicStateMachine components.
-            // prefab.active = true;
-            // ifs.Initialize(stack);
-
-            // FIXME: Hacky and sloppy way of doing this.  Causes memory leak
-            // Only do this once, and do it from a single static event handler that handles all ingredients.
-            StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
-            {
-                if (e.Stack.inventoryItem == this.InventoryItem)
-                {
-                    Debug.Log("Initializing custom stack object");
-                    e.GameObject.SetActive(true);
-                }
-            };
-
-            this.Ingredient.itemStackPrefab = prefab;
+            return stackItem;
         }
 
         /// <summary>

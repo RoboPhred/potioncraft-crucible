@@ -70,7 +70,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
                 throw new CrucibleResourceException($"Failed to load image from resource at \"{resource}\".");
             }
 
-            value = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+            var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+            sprite.name = resource;
+            value = sprite;
             return true;
         }
     }

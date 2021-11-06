@@ -70,6 +70,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
                 throw new CrucibleResourceException($"Failed to load image from resource at \"{resource}\".");
             }
 
+            tex.name = resource;
+
             value = tex;
             return true;
         }
