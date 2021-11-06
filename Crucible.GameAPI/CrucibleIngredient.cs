@@ -322,11 +322,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var prefab = new GameObject
             {
                 name = "Crucible Test stack",
-                active = false
+                active = false,
             };
-            prefab.transform.localScale = Vector3.one;
-            prefab.transform.localPosition = Vector3.zero;
-            prefab.transform.localRotation = Quaternion.identity;
 
             var stack = prefab.AddComponent<Stack>();
             stack.inventoryItem = this.InventoryItem;
@@ -346,7 +343,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var stackItem = new GameObject
             {
                 name = "Crucible Test Stack Item 1",
-                active = false,
             };
             stackItem.transform.parent = prefab.transform;
             stackItem.transform.localScale = Vector3.one;
@@ -394,9 +390,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // Making this active without Initialize called makes it crash every frame on Update and OnGUI
             // Making this active and calling Initialize makes it work, but then on instantiate it calls Initialize
             //  again and creates two GraphicStateMachine components.
-            prefab.active = true;
-            stackItem.active = true;
-            ifs.Initialize(stack);
+            // prefab.active = true;
+            // ifs.Initialize(stack);
+
+            // FIXME: Hacky and sloppy way of doing this.  Causes memory leak
+            // Only do this once, and do it from a single static event handler that handles all ingredients.
+            StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
+            {
+                if (e.Stack.inventoryItem == this.InventoryItem)
+                {
+                    Debug.Log("Initializing custom stack object");
+                    e.GameObject.SetActive(true);
+                }
+            };
 
             this.Ingredient.itemStackPrefab = prefab;
         }
