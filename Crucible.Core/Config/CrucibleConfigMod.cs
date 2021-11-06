@@ -38,14 +38,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         private CrucibleConfigMod(string directory)
             : base(directory)
         {
-            // TODO: Slice off the crucible/mods folder
-            this.FileName = directory;
+            this.ID = new DirectoryInfo(directory).Name;
         }
 
         /// <summary>
         /// Gets the name of this mod.
         /// </summary>
-        public string Name => this.root.Name ?? this.FileName;
+        public string Name => this.root.Name ?? this.ID;
 
         /// <summary>
         /// Gets the author of this mod.
@@ -58,9 +57,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         public string Version => this.root.Version;
 
         /// <summary>
-        /// Gets the file name for this mod.
+        /// Gets the ID of this mod.
         /// </summary>
-        public string FileName { get; }
+        /// <remarks>
+        /// The mod ID is the same as the name of the directory that contains its assets.
+        /// </remarks>
+        public string ID { get; }
 
         /// <summary>
         /// Gets the namespace for this mod.
@@ -73,7 +75,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         {
             get
             {
-                return this.FileName.Replace(" ", "_").ToLowerInvariant();
+                return this.ID.Replace(" ", "_").ToLowerInvariant();
             }
         }
 

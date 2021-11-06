@@ -338,8 +338,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             visualEffects.stackScript = stack;
 
             var rigidBody = prefab.AddComponent<Rigidbody2D>();
-            rigidBody.mass = 10;
-            rigidBody.centerOfMass = new Vector2(0, 0);
 
             // How do we set this up?  It does not appear in the component list when in-game, but it is called by
             // ItemFromInventory.ToForeground when the stack is spawned.
@@ -355,22 +353,38 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             stackItem.transform.localPosition = Vector3.zero;
             stackItem.transform.localRotation = Quaternion.identity;
 
-            var colliderOuter = stackItem.AddComponent<PolygonCollider2D>();
-            int shapeCount = sprite.GetPhysicsShapeCount();
-            colliderOuter.pathCount = shapeCount;
-            var points = new List<Vector2>(64);
-            for (int i = 0; i < shapeCount; i++)
+            var goOuter = new GameObject
             {
-                sprite.GetPhysicsShape(i, points);
-                colliderOuter.SetPath(i, points);
-            }
+                name = "Collider Outer",
+                layer = LayerMask.NameToLayer("IngredientsOuter"),
+            };
+            goOuter.transform.parent = stackItem.transform;
+            var colliderOuter = goOuter.AddComponent<PolygonCollider2D>();
+            colliderOuter.SetPath(0, new[] { new Vector2(0, 0), new Vector2(0, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0) });
+
+            var goInner = new GameObject
+            {
+                name = "Collider Inner",
+                layer = LayerMask.NameToLayer("IngredientsInner"),
+            };
+            goInner.transform.parent = stackItem.transform;
+            var colliderInner = goInner.AddComponent<PolygonCollider2D>();
+            colliderInner.SetPath(0, new[] { new Vector2(0, 0), new Vector2(0, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0) });
+
+            // int shapeCount = sprite.GetPhysicsShapeCount();
+            // colliderOuter.pathCount = shapeCount;
+            // var points = new List<Vector2>(64);
+            // for (int i = 0; i < shapeCount; i++)
+            // {
+            //     sprite.GetPhysicsShape(i, points);
+            //     colliderOuter.SetPath(i, points);
+            // }
 
             var ifs = stackItem.AddComponent<IngredientFromStack>();
-            ifs.spawnAtTheVisualCenterOfTheParent = true;
 
             // TODO: What is the purpose of each of these?
             ifs.colliderOuter = colliderOuter;
-            ifs.colliderInner = colliderOuter;
+            ifs.colliderInner = colliderInner;
 
             var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();
             spriteRenderer.sprite = sprite;
