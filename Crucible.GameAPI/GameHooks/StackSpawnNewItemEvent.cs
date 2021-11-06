@@ -24,11 +24,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using ObjectBased.Stack;
     using UnityEngine;
 
+    /// <summary>
+    /// An event raised when a new stack item is spawning.
+    /// </summary>
     public static class StackSpawnNewItemEvent
     {
         private static bool isInitialized;
         private static EventHandler<StackSpawnNewItemEventArgs> onSpawnNewItemPreInitialize;
 
+        /// <summary>
+        /// Raised when a new stack item is spawning.
+        /// </summary>
         public static event EventHandler<StackSpawnNewItemEventArgs> OnSpawnNewItemPreInititialize
         {
             add
@@ -64,9 +70,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             }
         }
 
-        private static void OnSpawnNewItemPreInitialize(Stack stack, GameObject gameObject)
+        private static void OnSpawnNewItemPreInitialize(Stack stack)
         {
-            var e = new StackSpawnNewItemEventArgs(stack, gameObject);
+            var e = new StackSpawnNewItemEventArgs(stack);
             onSpawnNewItemPreInitialize?.Invoke(null, e);
         }
 
@@ -81,8 +87,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 if (!found && instruction.opcode == OpCodes.Callvirt && (MethodInfo)instruction.operand == setTransformPositionPropSetter)
                 {
                     found = true;
-                    yield return new CodeInstruction(OpCodes.Ldloc_0); // this
-                    yield return new CodeInstruction(OpCodes.Ldloc_1); // gameObject
+                    yield return new CodeInstruction(OpCodes.Ldloc_0); // stack
                     yield return new CodeInstruction(OpCodes.Call, onSpawnNewItemPreInitialize);
                 }
 
@@ -94,17 +99,5 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to inject Stack SpawnNewItemStack event caller!");
             }
         }
-    }
-
-    public class StackSpawnNewItemEventArgs : EventArgs
-    {
-        public StackSpawnNewItemEventArgs(Stack stack, GameObject gameObject)
-        {
-            this.Stack = stack;
-            this.GameObject = gameObject;
-        }
-
-        public GameObject GameObject { get; set; }
-        public Stack Stack { get; set; }
     }
 }

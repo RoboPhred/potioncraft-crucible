@@ -19,6 +19,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     using System;
     using RoboPhredDev.PotionCraft.Crucible.Config;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using RoboPhredDev.PotionCraft.Crucible.Yaml;
     using UnityEngine;
 
     /// <summary>
@@ -75,6 +76,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public Sprite IngredientListIcon { get; set; }
 
         /// <summary>
+        /// Gets or sets the color to use for the ground substance.
+        /// </summary>
+        public Color? GroundColor { get; set; }
+
+        /// <summary>
         /// Gets or sets the bace price for this ingredient.
         /// </summary>
         public float? Price { get; set; }
@@ -93,6 +99,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// Gets or sets a value indicating whether this ingredient teleports during movement.
         /// </summary>
         public bool? IsTeleportationIngredient { get; set; }
+
+        /// <summary>
+        /// Gets or sets the stack items for this ingredient.
+        /// </summary>
+        public OneOrMany<CrucibleIngredientStackItemConfig> StackItems { get; set; }
 
         /// <summary>
         /// Gets or sets the ingredient list icon.
@@ -203,7 +214,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 subject.SetPath(this.Path.ToPathSegments());
             }
 
-            // subject.DebugTestStack(this.InventoryImage);
+            if (this.GroundColor.HasValue)
+            {
+                subject.GroundColor = this.GroundColor.Value;
+            }
+
+            if (this.StackItems.Count > 0)
+            {
+                // FIXME: Support multiple starting items
+                subject.SetStack(this.StackItems[0].ToStackItem());
+            }
         }
     }
 }

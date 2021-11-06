@@ -33,7 +33,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public sealed class CrucibleIngredient : CrucibleInventoryItem
     {
+        private static bool overridesInitialized = false;
         private static readonly HashSet<Ingredient> AtlasOverriddenIngredients = new();
+        private static readonly HashSet<Ingredient> StackOverriddenIngredients = new();
+
         private static CrucibleSpriteAtlas spriteAtlas;
 
         private CrucibleIngredient(Ingredient ingredient)
@@ -125,6 +128,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 this.Ingredient.smallIcon = value;
 
                 SetIngredientIcon(this.Ingredient, value.texture);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the color of this ingredient when ground in the mortar.
+        /// </summary>
+        public Color GroundColor
+        {
+            get
+            {
+                return this.Ingredient.grindedSubstanceColor;
+            }
+
+            set
+            {
+                this.Ingredient.grindedSubstanceColor = value;
             }
         }
 
@@ -243,7 +262,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 RecipeStepIcon = ingredientBase.recipeMarkIcon,
 
                 // We cannot copy the existing icon because it is a non-readable texture.
-                IngredientListIcon = SpriteUtilities.CreateBlankSprite(32, 32, Color.red),
+                IngredientListIcon = SpriteUtilities.CreateBlankSprite(16, 16, Color.red),
 
                 Price = ingredientBase.GetPrice(),
                 CanBeDamaged = ingredientBase.canBeDamaged,
@@ -306,24 +325,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return Managers.Ingredient.ingredients.Select(x => new CrucibleIngredient(x));
         }
 
-        [Obsolete("Do not use")]
-        public void DebugTestStack(Sprite sprite)
+        /// <summary>
+        /// Sets the stack for this ingredient.
+        /// </summary>
+        /// <remarks>
+        /// Stack items are the visual representation of the ingredient when it is being dragged or ground.
+        /// </remarks>
+        /// <param name="rootItem">The root item to produce the stack from.</param>
+        public void SetStack(CrucibleIngredientStackItem rootItem)
         {
-            // Cannot use this because the prefabs are created as incompletely initialized objects, and StackItem
-            // tries to run custom code that crashes when destroyed.
-            /*
-            var prefab = GameObject.Instantiate(this.Ingredient.itemStackPrefab);
-            for (var i = prefab.transform.GetChildCount() - 1; i >= 0; i++)
-            {
-                GameObject.DestroyImmediate(prefab.transform.GetChild(i).gameObject);
-            }
-            */
+            EnsureOverrides();
 
             var prefab = new GameObject
             {
-                name = "Crucible Test stack",
-                active = false,
+                name = $"{this.ID} Stack",
             };
+            prefab.SetActive(false);
 
             var stack = prefab.AddComponent<Stack>();
             stack.inventoryItem = this.InventoryItem;
@@ -334,98 +351,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var visualEffects = prefab.AddComponent<StackVisualEffects>();
             visualEffects.stackScript = stack;
 
-            var rigidBody = prefab.AddComponent<Rigidbody2D>();
+            prefab.AddComponent<Rigidbody2D>();
 
-            // How do we set this up?  It does not appear in the component list when in-game, but it is called by
-            // ItemFromInventory.ToForeground when the stack is spawned.
-            var sortingOrderSetter = prefab.AddComponent<SortingOrderSetter>();
+            // Not sure what settings this wants.
+            // It seems to remove itself automatically, as this component does not exist when inspecting the game object later.
+            prefab.AddComponent<SortingOrderSetter>();
 
-            var first = this.DebugCreateStackItem(sprite);
-            first.transform.parent = prefab.transform;
+            var stackItemGO = this.CreateStackItem(rootItem);
+            stackItemGO.transform.parent = prefab.transform;
 
-            var ingredientFromStack = first.GetComponent<IngredientFromStack>();
-
-            var childStates = 20;
-            for (var i = 0; i < childStates; i++)
-            {
-                var item = this.DebugCreateStackItem(sprite);
-                var thisI = item.GetComponent<IngredientFromStack>();
-                ingredientFromStack.NextStagePrefabs = new[] { item };
-                ingredientFromStack = thisI;
-            }
-
-            // FIXME: Hacky and sloppy way of doing this.  Causes memory leak
-            // Only do this once, and do it from a single static event handler that handles all ingredients.
-            StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
-            {
-                if (e.Stack.inventoryItem == this.InventoryItem)
-                {
-                    e.GameObject.SetActive(true);
-                }
-            };
+            StackOverriddenIngredients.Add(this.Ingredient);
 
             this.Ingredient.itemStackPrefab = prefab;
-
             Traverse.Create(this.Ingredient).Method("CalculateStatesAndPrefabs").GetValue();
-        }
-
-        private GameObject DebugCreateStackItem(Sprite sprite)
-        {
-            // FIXME: Make one of these and reuse it
-            var dummyDisabledGO = new GameObject
-            {
-                name = "Dummy disabled",
-                active = false,
-            };
-
-            var stackItem = new GameObject
-            {
-                name = "Crucible Test Stack Item 1",
-            };
-            stackItem.transform.parent = dummyDisabledGO.transform;
-
-            var goOuter = new GameObject
-            {
-                name = "Collider Outer",
-                layer = LayerMask.NameToLayer("IngredientsOuter"),
-            };
-            goOuter.transform.parent = stackItem.transform;
-            var colliderOuter = goOuter.AddComponent<PolygonCollider2D>();
-
-            var goInner = new GameObject
-            {
-                name = "Collider Inner",
-                layer = LayerMask.NameToLayer("IngredientsInner"),
-            };
-            goInner.transform.parent = stackItem.transform;
-            var colliderInner = goInner.AddComponent<PolygonCollider2D>();
-
-            colliderInner.points = new Vector2[]
-            {
-                new Vector2(0.2f, 0.2f),
-                new Vector2(0.2f, -0.2f),
-                new Vector2(-0.2f, -0.2f),
-            };
-
-            colliderOuter.points = new Vector2[]
-            {
-                new Vector2(0.3f, 0.3f),
-                new Vector2(0.3f, -0.3f),
-                new Vector2(-0.3f, -0.3f),
-            };
-
-            var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();
-            spriteRenderer.sprite = sprite;
-
-            var ifs = stackItem.AddComponent<IngredientFromStack>();
-            ifs.spriteRenderers = new[] { spriteRenderer };
-            ifs.NextStagePrefabs = new GameObject[0];
-
-            // TODO: What is the purpose of each of these?
-            ifs.colliderOuter = colliderOuter;
-            ifs.colliderInner = colliderInner;
-
-            return stackItem;
         }
 
         /// <summary>
@@ -459,25 +397,95 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             this.Ingredient.path.path = list;
         }
 
+        private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItemItem)
+        {
+            var stackItem = new GameObject
+            {
+                name = $"{this.ID} Stack Item",
+            };
+            stackItem.transform.parent = GameObjectUtilities.DisabledRoot.transform;
+
+            var goOuter = new GameObject
+            {
+                name = "Collider Outer",
+                layer = LayerMask.NameToLayer("IngredientsOuter"),
+            };
+            goOuter.transform.parent = stackItem.transform;
+            var colliderOuter = goOuter.AddComponent<PolygonCollider2D>();
+
+            var goInner = new GameObject
+            {
+                name = "Collider Inner",
+                layer = LayerMask.NameToLayer("IngredientsInner"),
+            };
+            goInner.transform.parent = stackItem.transform;
+            var colliderInner = goInner.AddComponent<PolygonCollider2D>();
+
+            colliderInner.points = new Vector2[]
+            {
+                new Vector2(0.2f, 0.2f),
+                new Vector2(0.2f, -0.2f),
+                new Vector2(-0.2f, -0.2f),
+            };
+
+            colliderOuter.points = new Vector2[]
+            {
+                new Vector2(0.3f, 0.3f),
+                new Vector2(0.3f, -0.3f),
+                new Vector2(-0.3f, -0.3f),
+            };
+
+            var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();
+            spriteRenderer.sprite = crucibleStackItemItem.Sprite;
+
+            var ifs = stackItem.AddComponent<IngredientFromStack>();
+            ifs.spriteRenderers = new[] { spriteRenderer };
+            ifs.colliderOuter = colliderOuter;
+            ifs.colliderInner = colliderInner;
+            ifs.NextStagePrefabs = crucibleStackItemItem.GrindChildren.Select(x => this.CreateStackItem(x)).ToArray();
+
+            return stackItem;
+        }
+
         private static void SetIngredientIcon(Ingredient ingredient, Texture2D texture)
         {
+            EnsureOverrides();
+
             if (spriteAtlas == null)
             {
                 spriteAtlas = new CrucibleSpriteAtlas("CrucibleIngredients");
-                IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
-                {
-                    if (AtlasOverriddenIngredients.Contains(e.Object))
-                    {
-                        e.AtlasResult = spriteAtlas.AtlasName;
-                    }
-                };
-
                 CrucibleSpriteAtlasManager.AddAtlas(spriteAtlas);
             }
 
             spriteAtlas.SetIcon($"{ingredient.name} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
 
             AtlasOverriddenIngredients.Add(ingredient);
+        }
+
+        private static void EnsureOverrides()
+        {
+            if (overridesInitialized)
+            {
+                return;
+            }
+
+            overridesInitialized = true;
+
+            IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
+            {
+                if (AtlasOverriddenIngredients.Contains(e.Object))
+                {
+                    e.AtlasResult = spriteAtlas.AtlasName;
+                }
+            };
+
+            StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
+            {
+                if (StackOverriddenIngredients.Contains(e.Stack.inventoryItem))
+                {
+                    e.Stack.gameObject.SetActive(true);
+                }
+            };
         }
     }
 }
