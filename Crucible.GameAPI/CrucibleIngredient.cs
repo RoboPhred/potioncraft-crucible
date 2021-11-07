@@ -398,6 +398,47 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             this.Ingredient.path.path = list;
         }
 
+        private static void SetIngredientIcon(Ingredient ingredient, Texture2D texture)
+        {
+            EnsureOverrides();
+
+            if (spriteAtlas == null)
+            {
+                spriteAtlas = new CrucibleSpriteAtlas("CrucibleIngredients");
+                CrucibleSpriteAtlasManager.AddAtlas(spriteAtlas);
+            }
+
+            spriteAtlas.SetIcon($"{ingredient.name} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
+
+            AtlasOverriddenIngredients.Add(ingredient);
+        }
+
+        private static void EnsureOverrides()
+        {
+            if (overridesInitialized)
+            {
+                return;
+            }
+
+            overridesInitialized = true;
+
+            IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
+            {
+                if (AtlasOverriddenIngredients.Contains(e.Object))
+                {
+                    e.AtlasResult = spriteAtlas.AtlasName;
+                }
+            };
+
+            StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
+            {
+                if (StackOverriddenIngredients.Contains(e.Stack.inventoryItem))
+                {
+                    e.Stack.gameObject.SetActive(true);
+                }
+            };
+        }
+
         private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItemItem)
         {
             var stackItem = new GameObject
@@ -446,47 +487,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ifs.NextStagePrefabs = crucibleStackItemItem.GrindChildren.Select(x => this.CreateStackItem(x)).ToArray();
 
             return stackItem;
-        }
-
-        private static void SetIngredientIcon(Ingredient ingredient, Texture2D texture)
-        {
-            EnsureOverrides();
-
-            if (spriteAtlas == null)
-            {
-                spriteAtlas = new CrucibleSpriteAtlas("CrucibleIngredients");
-                CrucibleSpriteAtlasManager.AddAtlas(spriteAtlas);
-            }
-
-            spriteAtlas.SetIcon($"{ingredient.name} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
-
-            AtlasOverriddenIngredients.Add(ingredient);
-        }
-
-        private static void EnsureOverrides()
-        {
-            if (overridesInitialized)
-            {
-                return;
-            }
-
-            overridesInitialized = true;
-
-            IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
-            {
-                if (AtlasOverriddenIngredients.Contains(e.Object))
-                {
-                    e.AtlasResult = spriteAtlas.AtlasName;
-                }
-            };
-
-            StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
-            {
-                if (StackOverriddenIngredients.Contains(e.Stack.inventoryItem))
-                {
-                    e.Stack.gameObject.SetActive(true);
-                }
-            };
         }
     }
 }

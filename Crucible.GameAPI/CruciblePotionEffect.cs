@@ -23,7 +23,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public sealed class CruciblePotionEffect
     {
-        private static readonly SerializableDictionary<string, PotionEffectSettings> registeredEffects = new();
+        // TODO: Load PotionEffectSettings for all the base potion effects.
+        private static readonly SerializableDictionary<string, PotionEffectSettings> RegisteredEffects = new();
 
         private CruciblePotionEffect(PotionEffect potionEffect)
         {
@@ -48,13 +49,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             get
             {
-                if (registeredEffects.TryGetValue(this.PotionEffect.name, out var settings))
+                if (RegisteredEffects.TryGetValue(this.PotionEffect.name, out var settings))
                 {
                     return settings;
                 }
 
                 // TODO: Generate and return a blank saettings object.
-                throw new Exception($"No settings object was found for potion base \"{this.PotionBase.name}\".");
+                throw new Exception($"No settings object was found for potion base \"{this.PotionEffect.name}\".");
             }
         }
 

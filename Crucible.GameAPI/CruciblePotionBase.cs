@@ -22,8 +22,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using HarmonyLib;
     using LocalizationSystem;
     using ObjectBased.RecipeMap;
-    using ObjectBased.RecipeMap.RecipeMapItem.DangerZoneMapItem;
-    using ObjectBased.RecipeMap.RecipeMapItem.VortexMapItem;
     using ObjectOptimizationSystem;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
     using UnityEngine;
@@ -395,7 +393,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public void ClearMap()
         {
             RecipeMapGameObjectUtilities.ClearMap(this.MapGameObject);
-            this.ReinitializeEntities();
+            this.Reinitialize();
         }
 
         /// <summary>
@@ -408,9 +406,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <para>
         /// This should be called after adding or removing game objects on the recipe map.
         /// </para>
-        public void ReinitializeEntities()
+        public void Reinitialize()
         {
-
+            RecipeMapGameObjectUtilities.Reinitialize(this.MapGameObject);
         }
 
         /// <summary>
