@@ -387,6 +387,33 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Clears the recipe map of all entities.
+        /// </summary>
+        /// <remarks>
+        /// This will remove all entities known to Crucible from the map.  Entities added by other mods may not be removed.
+        /// </remarks>
+        public void ClearMap()
+        {
+            RecipeMapGameObjectUtilities.ClearMap(this.MapGameObject);
+            this.ReinitializeEntities();
+        }
+
+        /// <summary>
+        /// Reinitialize entities in the recipe map.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This function scans the map entities and ensures that they are properly linked with the recipe map.
+        /// </para>
+        /// <para>
+        /// This should be called after adding or removing game objects on the recipe map.
+        /// </para>
+        public void ReinitializeEntities()
+        {
+
+        }
+
+        /// <summary>
         /// Unlocks the potion base and makes it available for use.
         /// </summary>
         public void GiveToPlayer()
@@ -408,7 +435,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
                 newMap.name = "Crucible RecipeMap Prefab";
 
-                ClearRecipeMap(newMap);
+                RecipeMapGameObjectUtilities.ClearMap(newMap);
 
                 blankMapPrefab = newMap;
             }
@@ -425,6 +452,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             var physicsOptimizerTraverse = Traverse.Create(typeof(RecipeMapPhysicsOptimizer));
 
+            // Note: If we (or potioncraft itself) ever support varying map sizes, this logic will need to be reset if crucible changes the size.
             Vector2 vector2 = 0.5f * Managers.RecipeMap.currentMap.mapBgRect.size;
             Rect rect = Rect.MinMaxRect(-vector2.x, -vector2.y, vector2.x, vector2.y);
 
@@ -453,40 +481,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             physicsOptimizerTraverse.Field<Dictionary<MapState, HashSet<IRecipeMapObjectOptimizerTarget>>>("optimizerTargetsDictionary").Value.Add(mapState, new HashSet<IRecipeMapObjectOptimizerTarget>());
             physicsOptimizerTraverse.Field<Dictionary<MapState, HashSet<IRecipeMapObjectOptimizerTarget>>>("disabledOptimizerTargetsDictionary").Value.Add(mapState, new HashSet<IRecipeMapObjectOptimizerTarget>());
-        }
-
-        private static void ClearRecipeMap(GameObject gameObject)
-        {
-            foreach (var potionObject in gameObject.GetComponentsInChildren<PotionEffectMapItem>())
-            {
-                UnityEngine.Object.DestroyImmediate(potionObject.gameObject);
-            }
-
-            foreach (var vortexObject in gameObject.GetComponentsInChildren<VortexMapItem>())
-            {
-                UnityEngine.Object.DestroyImmediate(vortexObject.gameObject);
-            }
-
-            foreach (var zoneObject in gameObject.GetComponentsInChildren<DangerZoneMapItem>())
-            {
-                var partsObjectTransform = zoneObject.gameObject.transform.Find("Parts");
-                if (partsObjectTransform != null)
-                {
-                    for (var i = partsObjectTransform.childCount - 1; i >= 0; i--)
-                    {
-                        var pattern = partsObjectTransform.gameObject.transform.GetChild(i);
-                        if (pattern.name.StartsWith("DangerZonePattern"))
-                        {
-                            UnityEngine.Object.DestroyImmediate(pattern.gameObject);
-                        }
-                    }
-                }
-            }
-
-            foreach (var xp in gameObject.GetComponentsInChildren<ExperienceBonusMapItem>())
-            {
-                UnityEngine.Object.DestroyImmediate(xp.gameObject);
-            }
         }
 
         private static void SetPotionBaseIcon(PotionBase potionBase, Texture2D texture)

@@ -1,0 +1,147 @@
+namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
+{
+    using System;
+    using System.Collections.Generic;
+    using HarmonyLib;
+    using ObjectBased.RecipeMap;
+    using ObjectBased.RecipeMap.RecipeMapItem.DangerZoneMapItem;
+    using UnityEngine;
+
+    /// <summary>
+    /// Utilities for working with recipe map game objects.
+    /// </summary>
+    public static class RecipeMapGameObjectUtilities
+    {
+        /// <summary>
+        /// Ensures the supplied game object is a recipe map game object.
+        /// </summary>
+        /// <remarks>
+        /// Valid recipe map game objects are objects that have a <see cref="RecipeMapPrefabController"/> component.
+        /// </remarks>
+        /// <param name="recipeMapGameObject">The game object to validate.</param>
+        /// <param name="argumentName">The argument name to throw a <see cref="ArgumentException"/> for if the game object is not a valid recipe map object.</param>
+        public static void EnsureRecipeMapObject(GameObject recipeMapGameObject, string argumentName = "recipeMapGameObject")
+        {
+            if (recipeMapGameObject.GetComponent<RecipeMapPrefabController>() == null)
+            {
+                throw new ArgumentException("The supplied game object is not a recipe map object.  Valid recipe map game objects have a RecipeMapPrefabController component.", argumentName);
+            }
+        }
+
+        /// <summary>
+        /// Executes the given action within the scope of the given recipe map.
+        /// </summary>
+        /// <param name="recipeMapGameObject">The recipe map game object within whose scope the action is executed.</param>
+        /// <param name="action">The action to execute.</param>
+        /// <remarks>
+        /// Lots of recipe map item initialization logic requires the global current map variable to be set.  This function ensures
+        /// this variable is set, and ensures it is reset back to its old value afterwards, even in the case of thrown exceptions.
+        /// </remarks>
+        public static void ExecuteInRecipeMapScope(GameObject recipeMapGameObject, Action action)
+        {
+            EnsureRecipeMapObject(recipeMapGameObject);
+
+            var rmo = recipeMapGameObject.GetComponent<RecipeMapPrefabController>();
+            var mapState = rmo.mapState;
+            if (mapState.transform != recipeMapGameObject.transform)
+            {
+                throw new InvalidOperationException("The recipe map game object's transform does not match the map state's transform.");
+            }
+
+            var oldMapState = rmo.mapState;
+            Managers.RecipeMap.currentMap = mapState;
+            try
+            {
+                action();
+            }
+            finally
+            {
+                Managers.RecipeMap.currentMap = oldMapState;
+            }
+        }
+
+        /// <summary>
+        /// Clears out the recipe map from all known entities.
+        /// </summary>
+        /// <remarks>
+        /// This will clear out all entities that are known to the base game.
+        /// Custom objects added by mods might not be cleared out.
+        /// </remarks>
+        /// <param name="recipeMapGameObject">The game object to clear.  The game object must follow the base game's recipe map game object design and have a <see cref="RecipeMapObject"/> component.</param>
+        public static void ClearMap(GameObject recipeMapGameObject)
+        {
+            EnsureRecipeMapObject(recipeMapGameObject, nameof(recipeMapGameObject));
+
+            // Clear out map items such as effects, experience, vortecies, etc.
+            foreach (var potionObject in recipeMapGameObject.GetComponentsInChildren<RecipeMapItem>())
+            {
+                UnityEngine.Object.DestroyImmediate(potionObject.gameObject);
+            }
+
+            // Clear out the danger zone pattern containers that the game builds by default.
+            //  This will wipe out all normal danger zone parts supplied by the base game.
+            foreach (var zoneObject in recipeMapGameObject.GetComponentsInChildren<DangerZoneMapItem>())
+            {
+                var partsObjectTransform = zoneObject.gameObject.transform.Find("Parts");
+                if (partsObjectTransform != null)
+                {
+                    for (var i = partsObjectTransform.childCount - 1; i >= 0; i--)
+                    {
+                        var pattern = partsObjectTransform.gameObject.transform.GetChild(i);
+                        if (pattern.name.StartsWith("DangerZonePattern"))
+                        {
+                            UnityEngine.Object.DestroyImmediate(pattern.gameObject);
+                        }
+                    }
+                }
+            }
+
+            // Clear out any existing danger zone parts not in a pattern, such as those added by crucible.
+            foreach (var part in recipeMapGameObject.GetComponentsInChildren<DangerZonePart>())
+            {
+                UnityEngine.Object.DestroyImmediate(part.gameObject);
+            }
+        }
+
+        /// <summary>
+        /// Reinitialize all data associated with the recipe map.
+        /// <para>
+        /// It is recommended that you call this function after adding or removing any child objects to the recipe map.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// Map object child objects in the base game contain lots of cross-referenced data in order to function.  This function will
+        /// scan through the child objects and ensure they are set up to work with the recipe map.
+        /// </remarks>
+        /// <param name="recipeMapGameObject">The recipe map game object to reinitialize.</param>
+        public static void Reinitialize(GameObject recipeMapGameObject)
+        {
+            EnsureRecipeMapObject(recipeMapGameObject, nameof(recipeMapGameObject));
+
+            ExecuteInRecipeMapScope(recipeMapGameObject, () =>
+            {
+                var rmo = recipeMapGameObject.GetComponent<RecipeMapPrefabController>();
+                var mapState = rmo.mapState;
+
+                /*
+                TODO:
+                - Purge RecipeMapPhysicsOptimizer for this map, and call RecipeMapPhysicsOptimizer.AddTarget for each RecipeMapItem as seen in RecipeMapItem.Start()
+                - Run PotionEffectMapItem Awake code, namely
+                    - UpdateSprites();
+                    - Managers.RecipeMap.currentMap.potionEffectsOnMap.Add(this);
+                */
+
+                var listOfLines = Traverse.Create(typeof(DashedLineMapItem)).Field<List<DashedLineMapItem>>("listOfLines").Value;
+                foreach (var line in recipeMapGameObject.GetComponentsInChildren<DashedLineMapItem>())
+                {
+                    listOfLines.Remove(line);
+                    UnityEngine.Object.DestroyImmediate(line.gameObject);
+                }
+
+                var oldMap = Managers.RecipeMap.currentMap;
+                Managers.RecipeMap.currentMap = mapState;
+                DashedLineMapItem.CreateLinesOnMap(mapState);
+            });
+        }
+    }
+}

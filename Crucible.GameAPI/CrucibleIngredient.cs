@@ -33,9 +33,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public sealed class CrucibleIngredient : CrucibleInventoryItem
     {
-        private static bool overridesInitialized = false;
         private static readonly HashSet<Ingredient> AtlasOverriddenIngredients = new();
         private static readonly HashSet<Ingredient> StackOverriddenIngredients = new();
+
+        private static bool overridesInitialized = false;
 
         private static CrucibleSpriteAtlas spriteAtlas;
 
