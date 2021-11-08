@@ -20,7 +20,6 @@ namespace RoboPhredDev.PotionCraft.Crucible
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using BepInEx;
     using RoboPhredDev.PotionCraft.Crucible.Config;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
@@ -39,16 +38,13 @@ namespace RoboPhredDev.PotionCraft.Crucible
         /// </summary>
         public void Awake()
         {
-            // FIXME: Come up with a better way to do this.
-            // We might want to have config files define these.
-            CrucibleLog.Log("Loading Crucible modules.");
-            LoadAllModules();
-
-            CrucibleLog.Log("Loading Crucible mods.");
-            this.mods = LoadAllConfigMods();
-
             CrucibleGameEvents.OnGameInitialized += (_, __) =>
             {
+                // Load mods after the game is initialized, so bepinex plugins have all loaded.
+                // This is because various config mods might rely on yaml deserializers provided by those plugins.
+                CrucibleLog.Log("Loading Crucible mods.");
+                this.mods = LoadAllConfigMods();
+
                 CrucibleLog.Log("Activating Crucible mods.");
                 foreach (var mod in this.mods)
                 {
@@ -62,27 +58,6 @@ namespace RoboPhredDev.PotionCraft.Crucible
                     }
                 }
             };
-        }
-
-        private static void LoadAllModules()
-        {
-            if (!Directory.Exists("crucible/modules"))
-            {
-                return;
-            }
-
-            foreach (var dllFilePath in Directory.GetFiles("crucible/modules", "*.dll"))
-            {
-                try
-                {
-                    CrucibleLog.Log($"> Loading module {dllFilePath}");
-                    Assembly.LoadFile(dllFilePath);
-                }
-                catch (Exception e)
-                {
-                    CrucibleLog.Log($"Failed to load module {dllFilePath}: {e.Message}");
-                }
-            }
         }
 
         private static ICollection<CrucibleConfigMod> LoadAllConfigMods()
