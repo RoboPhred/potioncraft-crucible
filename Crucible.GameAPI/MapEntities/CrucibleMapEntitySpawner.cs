@@ -107,6 +107,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
             finally
             {
                 this.isDisposed = true;
+                this.mapEntityFactories.Clear();
             }
         }
 

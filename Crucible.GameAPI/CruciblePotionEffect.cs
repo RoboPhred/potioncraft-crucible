@@ -63,7 +63,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Gets a potion effect by id.
         /// </summary>
         /// <param name="id">The id of the potion effect to get.</param>
-        /// <returns>A <see cref="CruciblePotionEffect"> object for manipulating the potion effect, or null if no potion effect exists with the given id.</returns>
+        /// <returns>A <see cref="CruciblePotionEffect"/> object for manipulating the potion effect, or null if no potion effect exists with the given id.</returns>
         public static CruciblePotionEffect GetPotionEffect(string id)
         {
             var effect = PotionEffect.allPotionEffects.Find(x => x.name == id);
