@@ -335,6 +335,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="rootItem">The root item to produce the stack from.</param>
         public void SetStack(CrucibleIngredientStackItem rootItem)
         {
+            this.SetStack(new[] { rootItem });
+        }
+
+        /// <summary>
+        /// Sets the stack for this ingredient.
+        /// </summary>
+        /// <remarks>
+        /// Stack items are the visual representation of the ingredient when it is being dragged or ground.
+        /// </remarks>
+        /// <param name="rootItems">An enumerable of root items to produce the stack from.</param>
+        public void SetStack(IEnumerable<CrucibleIngredientStackItem> rootItems)
+        {
             EnsureOverrides();
 
             var prefab = new GameObject
@@ -358,8 +370,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // It seems to remove itself automatically, as this component does not exist when inspecting the game object later.
             prefab.AddComponent<SortingOrderSetter>();
 
-            var stackItemGO = this.CreateStackItem(rootItem);
-            stackItemGO.transform.parent = prefab.transform;
+            foreach (var rootItem in rootItems)
+            {
+                var stackItemGO = this.CreateStackItem(rootItem);
+                stackItemGO.transform.parent = prefab.transform;
+            }
 
             StackOverriddenIngredients.Add(this.Ingredient);
 
@@ -446,6 +461,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 name = $"{this.ID} Stack Item",
             };
             stackItem.transform.parent = GameObjectUtilities.DisabledRoot.transform;
+            stackItem.transform.localPosition = crucibleStackItemItem.PositionInStack;
+            stackItem.transform.localRotation = Quaternion.Euler(0, 0, crucibleStackItemItem.AngleInStack);
 
             var goOuter = new GameObject
             {

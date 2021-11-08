@@ -33,6 +33,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public Sprite Sprite { get; set; }
 
         /// <summary>
+        /// Gets or sets the position of this stack item in the stack when being held.
+        /// </summary>
+        public Vector2 PositionInStack { get; set; }
+
+        /// <summary>
+        /// Gets or sets the angle (in degrees) of this stack item in the stack when being held.
+        /// </summary>
+        public float AngleInStack { get; set; }
+
+        /// <summary>
         /// Gets or sets the stack items this item grinds into.
         /// </summary>
         public OneOrMany<CrucibleIngredientStackItemConfig> GrindsInto { get; set; }
@@ -46,6 +56,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             var item = new CrucibleIngredientStackItem
             {
                 Sprite = this.Sprite,
+                PositionInStack = this.PositionInStack,
+                AngleInStack = this.AngleInStack,
             };
 
             if (this.GrindsInto != null)

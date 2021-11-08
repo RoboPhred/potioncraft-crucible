@@ -18,7 +18,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
 {
     using System;
     using System.Globalization;
-    using RoboPhredDev.PotionCraft.Crucible.Resources;
     using UnityEngine;
     using YamlDotNet.Core;
     using YamlDotNet.Core.Events;
@@ -72,37 +71,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
                 }
             }
 
-            // TODO: object format.
-            throw new FormatException("Unknown color format.  Expected a string");
+            var parseObj = (ColorParseObj)nestedObjectDeserializer(reader, typeof(ColorParseObj));
+
+            value = new Color(parseObj.R, parseObj.G, parseObj.B, parseObj.A);
+            return true;
         }
 
-        private bool TryDeserializeFilename(IParser reader, out object value)
+        private class ColorParseObj
         {
-            if (!reader.TryConsume<Scalar>(out var scalar))
-            {
-                value = null;
-                return false;
-            }
+            public float A { get; set; } = 1;
 
-            var resource = scalar.Value;
+            public float R { get; set; }
 
-            var data = CrucibleResources.ReadAllBytes(resource);
+            public float G { get; set; }
 
-            // Do not create mip levels for this texture, use it as-is.
-            var tex = new Texture2D(0, 0, TextureFormat.ARGB32, false, false)
-            {
-                filterMode = FilterMode.Bilinear,
-            };
-
-            if (!tex.LoadImage(data))
-            {
-                throw new CrucibleResourceException($"Failed to load image from resource at \"{resource}\".");
-            }
-
-            var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
-            sprite.name = resource;
-            value = sprite;
-            return true;
+            public float B { get; set; }
         }
     }
 }

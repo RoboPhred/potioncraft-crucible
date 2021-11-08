@@ -33,6 +33,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public Sprite Sprite { get; set; }
 
         /// <summary>
+        /// Gets or sets the position of this item in the stack.
+        /// </summary>
+        public Vector2 PositionInStack { get; set; }
+
+        /// <summary>
+        /// Gets or sets the rotation of this item in the stack.
+        /// </summary>
+        public float AngleInStack { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of child stack items to create when this ingredient is ground.
         /// </summary>
         public List<CrucibleIngredientStackItem> GrindChildren { get; set; } = new();

@@ -17,6 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
 {
     using System;
+    using System.Linq;
     using RoboPhredDev.PotionCraft.Crucible.Config;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
@@ -221,8 +222,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
 
             if (this.StackItems.Count > 0)
             {
-                // FIXME: Support multiple starting items
-                subject.SetStack(this.StackItems[0].ToStackItem());
+                subject.SetStack(this.StackItems.Select(x => x.ToStackItem()));
             }
         }
     }
