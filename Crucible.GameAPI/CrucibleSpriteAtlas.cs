@@ -245,7 +245,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 var tmpSpriteCharacter = new TMP_SpriteCharacter
                 {
                     glyph = tmpSpriteGlyph,
-                    glyphIndex = (uint)index, // This is the bug fix against UpgradeSpriteAsset.  Original function saets this to 0 at all times.
+                    glyphIndex = (uint)index, // This is the bug fix against UpgradeSpriteAsset.  Original function sets this to 0 at all times.
                     unicode = 65534U,
                     name = spriteInfo.name,
                     scale = spriteInfo.scale,

@@ -21,7 +21,6 @@ namespace RoboPhredDev.PotionCraft.Crucible
     using System.IO;
     using System.Linq;
     using BepInEx;
-    using RoboPhredDev.PotionCraft.Crucible.Config;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using UnityEngine;
 
@@ -31,7 +30,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
     [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible", "Crucible Modding Framework", "1.0.0.0")]
     public class CruciblePlugin : BaseUnityPlugin
     {
-        private ICollection<CrucibleConfigMod> mods;
+        private ICollection<CrucibleMod> mods;
 
         /// <summary>
         /// Called by unity when the plugin loads.
@@ -48,38 +47,49 @@ namespace RoboPhredDev.PotionCraft.Crucible
                 CrucibleLog.Log("Activating Crucible mods.");
                 foreach (var mod in this.mods)
                 {
-                    try
-                    {
-                        mod.ApplyConfiguration();
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.Log(ex.ToExpandedString());
-                    }
+                    ActivateMod(mod);
                 }
             };
         }
 
-        private static ICollection<CrucibleConfigMod> LoadAllConfigMods()
-        {
-            if (!Directory.Exists("crucible/mods"))
-            {
-                return new List<CrucibleConfigMod>();
-            }
-
-            var folders = Directory.GetDirectories("crucible/mods");
-            return folders.Select(folder => TryLoadMod(folder)).Where(x => x != null).ToList();
-        }
-
-        private static CrucibleConfigMod TryLoadMod(string modFolder)
+        private static void ActivateMod(CrucibleMod mod)
         {
             try
             {
-                var mod = CrucibleConfigMod.Load(modFolder);
+                mod.EnsureDependenciesMet();
+                mod.ApplyConfiguration();
+            }
+            catch (CrucibleMissingDependencyException ex)
+            {
+                Debug.Log(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log(ex.ToExpandedString());
+            }
+        }
+
+        private static ICollection<CrucibleMod> LoadAllConfigMods()
+        {
+            var path = Path.Combine("crucible", "mods");
+            if (!Directory.Exists(path))
+            {
+                return new List<CrucibleMod>();
+            }
+
+            var folders = Directory.GetDirectories(path);
+            return folders.Select(folder => TryLoadMod(folder)).Where(x => x != null).ToList();
+        }
+
+        private static CrucibleMod TryLoadMod(string modFolder)
+        {
+            try
+            {
+                var mod = CrucibleMod.LoadFromFolder(modFolder);
                 CrucibleLog.Log($"> Loaded mod \"{mod.Name}\".");
                 return mod;
             }
-            catch (CrucibleConfigModException ex)
+            catch (CrucibleModLoadException ex)
             {
                 Debug.Log(ex.ToExpandedString());
                 return null;

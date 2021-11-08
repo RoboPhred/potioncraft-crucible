@@ -1,4 +1,4 @@
-// <copyright file="CrucibleConfigNode.cs" company="RoboPhredDev">
+// <copyright file="CrucibleBepInExDependencyConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,35 +16,26 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.Config
 {
-    using RoboPhredDev.PotionCraft.Crucible.Yaml;
-    using YamlDotNet.Core;
+    using System.Linq;
 
     /// <summary>
-    /// A configuration node in a CrucibleConfig.
+    /// A confiugration node denotating a dependency on a BepInEx mod.
     /// </summary>
-    public abstract class CrucibleConfigNode : IAfterYamlDeserialization
+    public class CrucibleBepInExDependencyConfig : CrucibleDependencyConfig
     {
         /// <summary>
-        /// Gets the Crucible mod this node is a part of.
+        /// Gets or sets the bepinex mod guid to depend on.
         /// </summary>
-        public CrucibleMod Mod
-        {
-            get; private set;
-        }
+        public string BepInExGUID { get; set; }
 
         /// <inheritdoc/>
-        void IAfterYamlDeserialization.OnDeserializeCompleted(Mark start, Mark end)
+        public override void EnsureDependencyMet()
         {
-            CrucibleMod.OnNodeLoaded(this);
-        }
-
-        /// <summary>
-        /// Sets the crucible config mod that owns this node.
-        /// </summary>
-        /// <param name="crucibleMod">The mod that owns this node.</param>
-        internal void SetParentMod(CrucibleMod crucibleMod)
-        {
-            this.Mod = crucibleMod;
+            var dependencyMet = BepInExPluginUtilities.GetAllPlugins().Any(x => x.GUID == this.BepInExGUID);
+            if (!dependencyMet)
+            {
+                throw CrucibleMissingDependencyException.CreateMissingDependencyException(this.Mod.GUID, this.BepInExGUID, "*");
+            }
         }
     }
 }

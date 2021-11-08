@@ -1,4 +1,4 @@
-// <copyright file="CrucibleConfigNode.cs" company="RoboPhredDev">
+// <copyright file="CrucibleDependencyConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -17,34 +17,17 @@
 namespace RoboPhredDev.PotionCraft.Crucible.Config
 {
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
-    using YamlDotNet.Core;
 
     /// <summary>
-    /// A configuration node in a CrucibleConfig.
+    /// A configuration entry declaring a dependency.
     /// </summary>
-    public abstract class CrucibleConfigNode : IAfterYamlDeserialization
+    [DuckTypeCandidate(typeof(CrucibleBepInExDependencyConfig))]
+    public abstract class CrucibleDependencyConfig : CrucibleConfigNode
     {
         /// <summary>
-        /// Gets the Crucible mod this node is a part of.
+        /// Ensures that the dependency is met.
+        /// If the dependency is not met, this should throw a <see cref="CrucibleMissingDependencyException"/>.
         /// </summary>
-        public CrucibleMod Mod
-        {
-            get; private set;
-        }
-
-        /// <inheritdoc/>
-        void IAfterYamlDeserialization.OnDeserializeCompleted(Mark start, Mark end)
-        {
-            CrucibleMod.OnNodeLoaded(this);
-        }
-
-        /// <summary>
-        /// Sets the crucible config mod that owns this node.
-        /// </summary>
-        /// <param name="crucibleMod">The mod that owns this node.</param>
-        internal void SetParentMod(CrucibleMod crucibleMod)
-        {
-            this.Mod = crucibleMod;
-        }
+        public abstract void EnsureDependencyMet();
     }
 }

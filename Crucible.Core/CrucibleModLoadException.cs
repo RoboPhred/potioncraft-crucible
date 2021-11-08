@@ -1,4 +1,4 @@
-// <copyright file="CrucibleConfigModException.cs" company="RoboPhredDev">
+// <copyright file="CrucibleModLoadException.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,30 +14,30 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Config
+namespace RoboPhredDev.PotionCraft.Crucible
 {
     using System;
 
     /// <summary>
     /// An exception thrown when a failure is encountered while loading a config mod.
     /// </summary>
-    public class CrucibleConfigModException : Exception
+    public class CrucibleModLoadException : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CrucibleConfigModException"/> class.
+        /// Initializes a new instance of the <see cref="CrucibleModLoadException"/> class.
         /// </summary>
         /// <param name="message">The exception message.</param>
-        public CrucibleConfigModException(string message)
+        public CrucibleModLoadException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CrucibleConfigModException"/> class.
+        /// Initializes a new instance of the <see cref="CrucibleModLoadException"/> class.
         /// </summary>
         /// <param name="message">The exception message.</param>
         /// <param name="innerException">The inner exception.</param>
-        public CrucibleConfigModException(string message, Exception innerException)
+        public CrucibleModLoadException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
