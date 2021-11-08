@@ -32,7 +32,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets the <see cref="f"/> this api object is configuring.
+        /// Gets the <see cref="PotionEffect"/> this api object is configuring.
         /// </summary>
         public PotionEffect PotionEffect
         {
