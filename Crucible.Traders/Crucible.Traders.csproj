@@ -15,6 +15,10 @@
     <ProjectReference Include="..\Crucible.Core\Crucible.Core.csproj" />
     <ProjectReference Include="..\Crucible.GameAPI\Crucible.GameAPI.csproj" />
 
+    <Reference Include="BepInEx" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\BepInEx.dll</HintPath>
+    </Reference>
+    
     <Reference Include="UnityEngine" CopyToPublishDirectory="Never">
       <HintPath>..\externals\UnityEngine.dll</HintPath>
     </Reference>

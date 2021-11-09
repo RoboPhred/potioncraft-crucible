@@ -36,7 +36,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
             {
                 foreach (var potionBaseId in UnlockIdsOnStart)
                 {
-                    var potionBase = CruciblePotionBase.GetPotionBase(potionBaseId);
+                    var potionBase = CruciblePotionBase.GetPotionBaseById(potionBaseId);
                     potionBase?.GiveToPlayer();
                 }
             };
@@ -122,7 +122,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         protected override CruciblePotionBase GetSubject()
         {
             var id = this.Mod.Namespace + "." + this.ID;
-            return CruciblePotionBase.GetPotionBase(id) ?? CruciblePotionBase.CreatePotionBase(id);
+            return CruciblePotionBase.GetPotionBaseById(id) ?? CruciblePotionBase.CreatePotionBase(id);
         }
 
         /// <inheritdoc/>

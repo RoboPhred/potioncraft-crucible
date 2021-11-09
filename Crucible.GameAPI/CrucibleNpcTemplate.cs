@@ -28,6 +28,56 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public sealed class CrucibleNpcTemplate
     {
+        private static readonly Dictionary<string, HashSet<string>> NpcTemplateTagsById = new();
+
+        static CrucibleNpcTemplate()
+        {
+            var groundhogDayTags = new[] { WellKnownTags.IsGroundhogDayNpc };
+
+            var herbalistTags = new[] { WellKnownTags.SellsHerbs, WellKnownTags.SellsOrganic, WellKnownTags.SellsIngredients, WellKnownTags.IsHerbalist };
+            NpcTemplateTagsById.Add("HerbalistNpc 1", new HashSet<string>(herbalistTags));
+            NpcTemplateTagsById.Add("HerbalistNpc 2", new HashSet<string>(herbalistTags));
+            NpcTemplateTagsById.Add("HerbalistNpc 3", new HashSet<string>(herbalistTags));
+            NpcTemplateTagsById.Add("HerbalistNpc 4", new HashSet<string>(herbalistTags));
+            NpcTemplateTagsById.Add("HerbalistNpc 5", new HashSet<string>(herbalistTags));
+            NpcTemplateTagsById.Add("HerbalistNpc 6", new HashSet<string>(herbalistTags));
+            NpcTemplateTagsById.Add("HerbalistNpc 7", new HashSet<string>(herbalistTags));
+            NpcTemplateTagsById.Add("HerbalistNpc 8", new HashSet<string>(herbalistTags));
+            NpcTemplateTagsById.Add("Demo2GroundHogDayHerbalistNpc", new HashSet<string>(herbalistTags.Concat(groundhogDayTags)));
+
+            var mushroomerTags = new[] { WellKnownTags.SellsMushrooms, WellKnownTags.SellsOrganic, WellKnownTags.SellsIngredients, WellKnownTags.IsMushroomer };
+            NpcTemplateTagsById.Add("MushroomerNpc 1", new HashSet<string>(mushroomerTags));
+            NpcTemplateTagsById.Add("MushroomerNpc 2", new HashSet<string>(mushroomerTags));
+            NpcTemplateTagsById.Add("MushroomerNpc 3", new HashSet<string>(mushroomerTags));
+            NpcTemplateTagsById.Add("MushroomerNpc 4", new HashSet<string>(mushroomerTags));
+            NpcTemplateTagsById.Add("MushroomerNpc 5", new HashSet<string>(mushroomerTags));
+            NpcTemplateTagsById.Add("MushroomerNpc 6", new HashSet<string>(mushroomerTags));
+            NpcTemplateTagsById.Add("MushroomerNpc 7", new HashSet<string>(mushroomerTags));
+            NpcTemplateTagsById.Add("Demo2GroundHogDayMushroomerNpc", new HashSet<string>(mushroomerTags.Concat(groundhogDayTags)));
+
+            var alchemistTags = new[] { WellKnownTags.SellsAlchemyMachine, WellKnownTags.IsAlchemist };
+            NpcTemplateTagsById.Add("AlchemistNpc 1", new HashSet<string>(alchemistTags));
+            NpcTemplateTagsById.Add("AlchemistNpc 2", new HashSet<string>(alchemistTags));
+            NpcTemplateTagsById.Add("AlchemistNpc 3", new HashSet<string>(alchemistTags));
+            NpcTemplateTagsById.Add("AlchemistNpc 4", new HashSet<string>(alchemistTags));
+            NpcTemplateTagsById.Add("AlchemistNpc 5", new HashSet<string>(alchemistTags));
+            NpcTemplateTagsById.Add("AlchemistNpc 6", new HashSet<string>(alchemistTags));
+            NpcTemplateTagsById.Add("Playtest2GroundHogDayAlchemistNpc", new HashSet<string>(alchemistTags.Concat(groundhogDayTags)));
+
+            var dwarfTags = new[] { WellKnownTags.SellsCrystals, WellKnownTags.SellsInorganic, WellKnownTags.SellsIngredients, WellKnownTags.IsDwarfMiner };
+            NpcTemplateTagsById.Add("DwarfMinerNpc 1", new HashSet<string>(dwarfTags));
+            NpcTemplateTagsById.Add("DwarfMinerNpc 2", new HashSet<string>(dwarfTags));
+            NpcTemplateTagsById.Add("DwarfMinerNpc 3", new HashSet<string>(dwarfTags));
+            NpcTemplateTagsById.Add("DwarfMinerNpc 4", new HashSet<string>(dwarfTags));
+            NpcTemplateTagsById.Add("Playtest2GroundHogDayDwarfMinerNpc", new HashSet<string>(dwarfTags.Concat(groundhogDayTags)));
+
+            var merchantTags = new[] { WellKnownTags.SellsHerbs, WellKnownTags.SellsMushrooms, WellKnownTags.SellsOrganic, WellKnownTags.SellsInorganic, WellKnownTags.SellsIngredients, WellKnownTags.IsTravelingMerchant };
+            NpcTemplateTagsById.Add("WanderingMerchantNpc 1", new HashSet<string>(merchantTags));
+            NpcTemplateTagsById.Add("WanderingMerchantNpc 2", new HashSet<string>(merchantTags));
+            NpcTemplateTagsById.Add("Demo2GroundHogDayWanderingMerchantNpc 1", new HashSet<string>(merchantTags.Concat(groundhogDayTags)));
+            NpcTemplateTagsById.Add("Demo2GroundHogDayWanderingMerchantNpc 2", new HashSet<string>(merchantTags.Concat(groundhogDayTags)));
+        }
+
         private CrucibleNpcTemplate(NpcTemplate template)
         {
             this.NpcTemplate = template;
@@ -64,7 +114,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         /// <param name="name">The name of the npc template to fetch.</param>
         /// <returns>A <see cref="CrucibleNpcTemplate"/> api object for manipulating the template.</returns>
-        public static CrucibleNpcTemplate GetNpcTemplate(string name)
+        public static CrucibleNpcTemplate GetNpcTemplateById(string name)
         {
             var template = NpcTemplate.allNpcTemplates.Find(x => x.name == name);
             if (template == null)
@@ -73,6 +123,85 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             return new CrucibleNpcTemplate(template);
+        }
+
+        /// <summary>
+        /// Gets all npc templates with the given tag.
+        /// </summary>
+        /// <param name="tag">The tag to search for.</param>
+        /// <returns>An enumerable of all npc templates that match the given tag.</returns>
+        public static IEnumerable<CrucibleNpcTemplate> GetNpcTemplatesByTag(string tag)
+        {
+            var templatesByTag = from pair in NpcTemplateTagsById
+                                 where pair.Value.Contains(tag)
+                                 let template = GetNpcTemplateById(pair.Key)
+                                 where template != null
+                                 select template;
+            return templatesByTag;
+        }
+
+        /// <summary>
+        /// Gets all npc templates known to the game.
+        /// </summary>
+        /// <returns>An enumerable of every npc template registered with the game.</returns>
+        public static IEnumerable<CrucibleNpcTemplate> GetAllNpcTemplates()
+        {
+            return NpcTemplate.allNpcTemplates.Select(x => new CrucibleNpcTemplate(x));
+        }
+
+        /// <summary>
+        /// Gets all npc template tags that have been registered with Crucible.
+        /// </summary>
+        /// <returns>An enumerable of every tag applied to any npc template.</returns>
+        public static IEnumerable<string> GetAllNpcTemplateTags()
+        {
+            var allTags = from pair in NpcTemplateTagsById
+                          from tag in pair.Value
+                          select tag;
+            return allTags.Distinct();
+        }
+
+        /// <summary>
+        /// Adds a tag to this npc template.
+        /// </summary>
+        /// <param name="tag">The tag to apply to this template.</param>
+        public void AddTag(string tag)
+        {
+            if (!NpcTemplateTagsById.ContainsKey(this.ID))
+            {
+                NpcTemplateTagsById.Add(this.ID, new HashSet<string>());
+            }
+
+            NpcTemplateTagsById[this.ID].Add(tag);
+        }
+
+        /// <summary>
+        /// Checks to see if this npc template has the given tag.
+        /// </summary>
+        /// <param name="tag">The tag to check for.</param>
+        /// <returns>True if the npc template is tagged with the given tag, or False otherwise.</returns>
+        public bool HasTag(string tag)
+        {
+            if (!NpcTemplateTagsById.TryGetValue(this.ID, out var tags))
+            {
+                return false;
+            }
+
+            return tags.Contains(tag);
+        }
+
+        /// <summary>
+        /// Gets all tags associated with this npc template.
+        /// </summary>
+        /// <returns>The collection of tags associated with this npc template.</returns>
+        public IReadOnlyCollection<string> GetTags()
+        {
+            if (!NpcTemplateTagsById.TryGetValue(this.ID, out var tags))
+            {
+                return new string[0];
+            }
+
+            return tags.ToArray();
         }
 
         /// <summary>
@@ -152,6 +281,83 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     yield return x.part;
                 }
             }
+        }
+
+        /// <summary>
+        /// A collection of common tags for use with npcs.
+        /// </summary>
+        /// <remarks>
+        /// For mod compatibility reasons, it is strongly recommended to apply these tags to your own npc templates when appropriate.
+        /// <para>
+        /// These tags are applied to the base game npc templates by default.
+        /// </para>
+        /// </remarks>
+        public static class WellKnownTags
+        {
+            /// <summary>
+            /// A tag indicating that the npc template sells, or wants to sell, herbs.
+            /// </summary>
+            public const string SellsHerbs = "SellsHerbs";
+
+            /// <summary>
+            /// A tag indicating that the npc template sells, or wants to sell, mushrooms.
+            /// </summary>
+            public const string SellsMushrooms = "SellsMushrooms";
+
+            /// <summary>
+            /// A tag indicating that the npc template sells, or wants to sell, crystals.
+            /// </summary>
+            public const string SellsCrystals = "SellsCrystals";
+
+            /// <summary>
+            /// A tag indicating that the npc template sells, or wants to sell, parts for the alchemy machine.
+            /// </summary>
+            public const string SellsAlchemyMachine = "SellsAlchemyMachine";
+
+            /// <summary>
+            /// A tag indicating that the npc template sells, or wants to sell, organic ingredients.
+            /// </summary>
+            public const string SellsOrganic = "SellsOrganic";
+
+            /// <summary>
+            /// A tag indicating that the npc template sells, or wants to sell, inorganic ingredients.
+            /// </summary>
+            public const string SellsInorganic = "SellsInorganic";
+
+            /// <summary>
+            /// A tag indicating that the npc template sells, or wants to sell, ingredients of any type.
+            /// </summary>
+            public const string SellsIngredients = "SellsIngredients";
+
+            /// <summary>
+            /// A tag indicating that the npc template is for the base game Herbalist NPC.
+            /// </summary>
+            public const string IsHerbalist = "IsHerbalist";
+
+            /// <summary>
+            /// A tag indicating that the npc template is for the base game Mushroomer NPC.
+            /// </summary>
+            public const string IsMushroomer = "IsMushroomer";
+
+            /// <summary>
+            /// A tag indicating that the npc template is for the base game Dwarven Miner NPC.
+            /// </summary>
+            public const string IsDwarfMiner = "IsDwarfMiner";
+
+            /// <summary>
+            /// A tag indicating that the npc template is for the base game Alchemist NPC.
+            /// </summary>
+            public const string IsAlchemist = "IsAlchemist";
+
+            /// <summary>
+            /// A tag indicating that the npc template is for the base game Traveling Merchant NPC.
+            /// </summary>
+            public const string IsTravelingMerchant = "IsTravelingMerchant";
+
+            /// <summary>
+            /// A tag indicating that the npc template appears during the never-ending groundhog day portion of the game.
+            /// </summary>
+            public const string IsGroundhogDayNpc = "IsGroundhogDayNpc";
         }
     }
 }

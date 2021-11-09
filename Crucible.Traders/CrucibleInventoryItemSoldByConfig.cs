@@ -25,6 +25,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Traders
     /// Configuration specifying data on which npc(s) sell a given item.
     /// </summary>
     [DuckTypeCandidate(typeof(CrucibleInventoryItemSoldByNpcTemplateConfig))]
+    [DuckTypeCandidate(typeof(CrucibleInventoryItemSoldByNpcTagConfig))]
     public abstract class CrucibleInventoryItemSoldByConfig : CrucibleConfigNode
     {
         /// <summary>

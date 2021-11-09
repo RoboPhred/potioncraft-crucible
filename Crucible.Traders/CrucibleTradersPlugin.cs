@@ -1,4 +1,4 @@
-// <copyright file="CrucibleIngredientsPlugin.cs" company="RoboPhredDev">
+// <copyright file="CrucibleTradersPlugin.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,16 +14,16 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
+namespace RoboPhredDev.PotionCraft.Crucible.Traders
 {
     using BepInEx;
 
     /// <summary>
     /// BepInEx plugin for Crucible Config mods.
     /// </summary>
-    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.Ingredients", "Ingredient support for the Crucible Modding Framework", "1.0.0.0")]
+    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.Traders", "NPC Trader support for the Crucible Modding Framework", "1.0.0.0")]
     [BepInDependency("net.RoboPhredDev.PotionCraft.Crucible")]
-    public class CrucibleIngredientsPlugin : BaseUnityPlugin
+    public class CrucibleTradersPlugin : BaseUnityPlugin
     {
     }
 }

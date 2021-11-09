@@ -164,7 +164,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         protected override CrucibleIngredient GetSubject()
         {
             var id = this.Mod.Namespace + "." + this.ID;
-            return CrucibleIngredient.GetIngredient(id) ?? CrucibleIngredient.CreateIngredient(id, this.InheritFrom ?? "Waterbloom");
+            return CrucibleIngredient.GetIngredientById(id) ?? CrucibleIngredient.CreateIngredient(id, this.InheritFrom ?? "Waterbloom");
         }
 
         /// <inheritdoc/>

@@ -243,7 +243,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public static CrucibleIngredient CreateIngredient(string id, string copyFromId = "Waterbloom")
         {
             // TODO: names are namespaced among all inventory items.  Should check other types to make sure the id does not collide.
-            if (GetIngredient(id) != null)
+            if (GetIngredientById(id) != null)
             {
                 throw new ArgumentException($"An ingredient with the given id of \"{id}\" already exists.");
             }
@@ -306,7 +306,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         /// <param name="id">The internal name of the ingredient to get.</param>
         /// <returns>The ingredient if found, or null if no ingredient exists by the given id.</returns>
-        public static CrucibleIngredient GetIngredient(string id)
+        public static CrucibleIngredient GetIngredientById(string id)
         {
             var ingredient = Managers.Ingredient.ingredients.Find(x => x.name == id);
             if (ingredient == null)

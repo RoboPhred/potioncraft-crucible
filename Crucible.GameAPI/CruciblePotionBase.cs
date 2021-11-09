@@ -307,7 +307,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>The potion base api object for the created potion base.</returns>
         public static CruciblePotionBase CreatePotionBase(string id)
         {
-            if (GetPotionBase(id) != null)
+            if (GetPotionBaseById(id) != null)
             {
                 throw new ArgumentException($"A base with id \"{id}\" already exists.", nameof(id));
             }
@@ -373,7 +373,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         /// <param name="id">The ID of the potion base to fetch.</param>
         /// <returns>The potion base if found, or null if no potion base exists with the given id.</returns>
-        public static CruciblePotionBase GetPotionBase(string id)
+        public static CruciblePotionBase GetPotionBaseById(string id)
         {
             var mapState = MapLoader.loadedMaps.Find(x => x.potionBase.name == id);
             if (mapState == null)
