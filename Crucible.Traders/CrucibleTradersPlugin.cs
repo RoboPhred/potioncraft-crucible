@@ -21,7 +21,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Traders
     /// <summary>
     /// BepInEx plugin for Crucible Config mods.
     /// </summary>
-    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.Traders", "NPC Trader support for the Crucible Modding Framework", "1.0.0.0")]
+    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.Traders", "NPC Trader support for Crucible Modding Framework", "1.0.0.0")]
     [BepInDependency("net.RoboPhredDev.PotionCraft.Crucible")]
     public class CrucibleTradersPlugin : BaseUnityPlugin
     {

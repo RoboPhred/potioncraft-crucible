@@ -18,6 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Reflection.Emit;
     using Books.RecipeBook;
     using HarmonyLib;
@@ -55,6 +56,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 return;
             }
 
+            patchApplied = true;
+
             var panelUpdateIngredientsMethod = AccessTools.Method(typeof(PotionCraftPanel.PotionCraftPanel), "UpdateIngredientsList");
             if (panelUpdateIngredientsMethod == null)
             {
@@ -77,7 +80,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 HarmonyInstance.Instance.Patch(recipeUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpiler));
             }
 
-            patchApplied = true;
+            var mortarRemoveCurrentStackMethod = AccessTools.Method(typeof(Mortar), "RemoveCurrentStack");
+            if (mortarRemoveCurrentStackMethod == null)
+            {
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate mortar remove current stack function!");
+            }
+            else
+            {
+                var transpiler = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(TranspileMortarRemoveCurrentStack));
+                HarmonyInstance.Instance.Patch(mortarRemoveCurrentStackMethod, transpiler: new HarmonyMethod(transpiler));
+            }
         }
 
         private static string GetAtlasForUsedComponentIndex(int usedComponentIndex)
@@ -88,9 +100,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static string GetAtlasForUsedComponent(Potion.UsedComponent component)
         {
-            var e = new ScriptableObjectAtlasRequestEventArgs(component.componentObject);
+            return GetAtlasForScriptableObject(component.componentObject);
+        }
+
+        private static string GetAtlasForScriptableObject(ScriptableObject scriptableObject)
+        {
+            var e = new ScriptableObjectAtlasRequestEventArgs(scriptableObject);
             onAtlasRequest?.Invoke(null, e);
-            return e.AtlasResult ?? Managers.TmpAtlas.settings.IngredientsAtlasName;
+            var result = e.AtlasResult ?? Managers.TmpAtlas.settings.IngredientsAtlasName;
+            UnityEngine.Debug.Log("Result is " + (result ?? "null"));
+            return result;
         }
 
         private static IEnumerable<CodeInstruction> TranspilePotionCraftPanelUpdateIngredientsList(IEnumerable<CodeInstruction> instructions)
@@ -148,6 +167,38 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             if (!found)
             {
                 Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to inject atlas replacement for RecipeBookLeftPageContent!");
+            }
+        }
+
+        private static IEnumerable<CodeInstruction> TranspileMortarRemoveCurrentStack(IEnumerable<CodeInstruction> instructions)
+        {
+            var getAtlasForScriptableObjectMethod = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(GetAtlasForScriptableObject));
+            var found = false;
+            foreach (var instruction in instructions)
+            {
+                if (!found && instruction.opcode == OpCodes.Ldfld && instruction.operand is FieldInfo fieldInfo && fieldInfo.DeclaringType == typeof(TMPAtlasManagerSettings) && fieldInfo.Name == "IngredientsAtlasName")
+                {
+                    found = true;
+
+                    // pop the previous ldfld's result
+                    // Do not yield return the current ldfld
+                    // Note: This is a bit sloppy.  We should remove the call/ldfld/ldfld instructions and replace it with our own.
+                    yield return new CodeInstruction(OpCodes.Pop);
+
+                    yield return new CodeInstruction(OpCodes.Ldloc_0); // inventoryItem
+                    yield return new CodeInstruction(OpCodes.Call, getAtlasForScriptableObjectMethod);
+
+                    // Next instruction will be a stloc_1, which will store our result.
+                }
+                else
+                {
+                    yield return instruction;
+                }
+            }
+
+            if (!found)
+            {
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to inject atlas replacement for MortarRemoveCurrentStack!");
             }
         }
     }

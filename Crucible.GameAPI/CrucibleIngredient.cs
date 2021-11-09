@@ -280,10 +280,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ingredient.itemStackPrefab = ingredientBase.itemStackPrefab;
             ingredient.grindedSubstance = ingredientBase.grindedSubstance;
             ingredient.grindedSubstanceColor = ingredientBase.grindedSubstanceColor;
-            ingredient.grindStatusByLeafGrindingCurve = ingredientBase.grindStatusByLeafGrindingCurve;
             ingredient.grindedSubstanceMaxAmount = ingredientBase.grindedSubstanceMaxAmount;
             ingredient.physicalParticleType = ingredientBase.physicalParticleType;
-            ingredient.substanceGrindingSettings = ingredientBase.substanceGrindingSettings;
             ingredient.effectMovement = ingredientBase.effectMovement;
             ingredient.effectCollision = ingredientBase.effectCollision;
             ingredient.effectPlantGathering = ingredientBase.effectPlantGathering;
@@ -293,6 +291,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ingredient.spotPlantPrefab = ingredientBase.spotPlantPrefab;
             ingredient.spotPlantSpawnTypes = new List<GrowingSpotType>();
             ingredient.soundPreset = ingredientBase.soundPreset;
+
+            // TODO: These are particularly important, they control the grinding response.
+            // Might be related to ingredients not being fully ground with custom stack items.
+            ingredient.grindStatusByLeafGrindingCurve = ingredientBase.grindStatusByLeafGrindingCurve;
+            ingredient.substanceGrindingSettings = ingredientBase.substanceGrindingSettings;
 
             ingredient.OnAwake();
 
@@ -379,7 +382,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             StackOverriddenIngredients.Add(this.Ingredient);
 
             this.Ingredient.itemStackPrefab = prefab;
-            Traverse.Create(this.Ingredient).Method("CalculateStatesAndPrefabs").GetValue();
+
+            // Perform OnAwake initialization logic
+            this.ReinitializeIngredient();
         }
 
         /// <summary>
@@ -452,6 +457,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     e.Stack.gameObject.SetActive(true);
                 }
             };
+        }
+
+        private void ReinitializeIngredient()
+        {
+            // Perform the work of OnAwait to reinitialize this ingredient's data.
+            var ingredientTraverse = Traverse.Create(this.Ingredient);
+            ingredientTraverse.Method("CalculateStatesAndPrefabs").GetValue();
+            ingredientTraverse.Property<int>("MaxItems").Value = this.Ingredient.itemStackPrefab.transform.childCount;
+            ingredientTraverse.Method("CalculateTotalCurveValue").GetValue();
+            Traverse.Create(this.Ingredient.substanceGrindingSettings).Method("CalculateTotalCurveValue").GetValue();
         }
 
         private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItemItem)
