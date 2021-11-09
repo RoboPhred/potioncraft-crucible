@@ -444,7 +444,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
             {
-                if (AtlasOverriddenIngredients.Contains(e.Object))
+                // Check the type so we can call the efficient HashSet.Contains(Ingredient), rather than the slow
+                // Linq.Contains(object)
+                if (e.Object is not Ingredient ingredient)
+                {
+                    return;
+                }
+
+                if (AtlasOverriddenIngredients.Contains(ingredient))
                 {
                     e.AtlasResult = spriteAtlas.AtlasName;
                 }
@@ -452,7 +459,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
             {
-                if (StackOverriddenIngredients.Contains(e.Stack.inventoryItem))
+                if (e.Stack.inventoryItem is not Ingredient ingredient)
+                {
+                    return;
+                }
+
+                if (StackOverriddenIngredients.Contains(ingredient))
                 {
                     e.Stack.gameObject.SetActive(true);
                 }
