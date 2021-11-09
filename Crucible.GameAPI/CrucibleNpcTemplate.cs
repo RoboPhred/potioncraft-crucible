@@ -32,9 +32,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         static CrucibleNpcTemplate()
         {
-            var groundhogDayTags = new[] { WellKnownTags.IsGroundhogDayNpc };
+            var groundhogDayTags = new[] { CrucibleNpcTemplateTags.IsGroundhogDayNpc };
 
-            var herbalistTags = new[] { WellKnownTags.SellsHerbs, WellKnownTags.SellsOrganic, WellKnownTags.SellsIngredients, WellKnownTags.IsHerbalist };
+            var herbalistTags = new[] { CrucibleNpcTemplateTags.SellsHerbs, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsHerbalist };
             NpcTemplateTagsById.Add("HerbalistNpc 1", new HashSet<string>(herbalistTags));
             NpcTemplateTagsById.Add("HerbalistNpc 2", new HashSet<string>(herbalistTags));
             NpcTemplateTagsById.Add("HerbalistNpc 3", new HashSet<string>(herbalistTags));
@@ -45,7 +45,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             NpcTemplateTagsById.Add("HerbalistNpc 8", new HashSet<string>(herbalistTags));
             NpcTemplateTagsById.Add("Demo2GroundHogDayHerbalistNpc", new HashSet<string>(herbalistTags.Concat(groundhogDayTags)));
 
-            var mushroomerTags = new[] { WellKnownTags.SellsMushrooms, WellKnownTags.SellsOrganic, WellKnownTags.SellsIngredients, WellKnownTags.IsMushroomer };
+            var mushroomerTags = new[] { CrucibleNpcTemplateTags.SellsMushrooms, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsMushroomer };
             NpcTemplateTagsById.Add("MushroomerNpc 1", new HashSet<string>(mushroomerTags));
             NpcTemplateTagsById.Add("MushroomerNpc 2", new HashSet<string>(mushroomerTags));
             NpcTemplateTagsById.Add("MushroomerNpc 3", new HashSet<string>(mushroomerTags));
@@ -55,7 +55,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             NpcTemplateTagsById.Add("MushroomerNpc 7", new HashSet<string>(mushroomerTags));
             NpcTemplateTagsById.Add("Demo2GroundHogDayMushroomerNpc", new HashSet<string>(mushroomerTags.Concat(groundhogDayTags)));
 
-            var alchemistTags = new[] { WellKnownTags.SellsAlchemyMachine, WellKnownTags.IsAlchemist };
+            var alchemistTags = new[] { CrucibleNpcTemplateTags.SellsAlchemyMachine, CrucibleNpcTemplateTags.IsAlchemist };
             NpcTemplateTagsById.Add("AlchemistNpc 1", new HashSet<string>(alchemistTags));
             NpcTemplateTagsById.Add("AlchemistNpc 2", new HashSet<string>(alchemistTags));
             NpcTemplateTagsById.Add("AlchemistNpc 3", new HashSet<string>(alchemistTags));
@@ -64,14 +64,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             NpcTemplateTagsById.Add("AlchemistNpc 6", new HashSet<string>(alchemistTags));
             NpcTemplateTagsById.Add("Playtest2GroundHogDayAlchemistNpc", new HashSet<string>(alchemistTags.Concat(groundhogDayTags)));
 
-            var dwarfTags = new[] { WellKnownTags.SellsCrystals, WellKnownTags.SellsInorganic, WellKnownTags.SellsIngredients, WellKnownTags.IsDwarfMiner };
+            var dwarfTags = new[] { CrucibleNpcTemplateTags.SellsCrystals, CrucibleNpcTemplateTags.SellsInorganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsDwarfMiner };
             NpcTemplateTagsById.Add("DwarfMinerNpc 1", new HashSet<string>(dwarfTags));
             NpcTemplateTagsById.Add("DwarfMinerNpc 2", new HashSet<string>(dwarfTags));
             NpcTemplateTagsById.Add("DwarfMinerNpc 3", new HashSet<string>(dwarfTags));
             NpcTemplateTagsById.Add("DwarfMinerNpc 4", new HashSet<string>(dwarfTags));
             NpcTemplateTagsById.Add("Playtest2GroundHogDayDwarfMinerNpc", new HashSet<string>(dwarfTags.Concat(groundhogDayTags)));
 
-            var merchantTags = new[] { WellKnownTags.SellsHerbs, WellKnownTags.SellsMushrooms, WellKnownTags.SellsOrganic, WellKnownTags.SellsInorganic, WellKnownTags.SellsIngredients, WellKnownTags.IsTravelingMerchant };
+            var merchantTags = new[] { CrucibleNpcTemplateTags.SellsHerbs, CrucibleNpcTemplateTags.SellsMushrooms, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsInorganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsTravelingMerchant };
             NpcTemplateTagsById.Add("WanderingMerchantNpc 1", new HashSet<string>(merchantTags));
             NpcTemplateTagsById.Add("WanderingMerchantNpc 2", new HashSet<string>(merchantTags));
             NpcTemplateTagsById.Add("Demo2GroundHogDayWanderingMerchantNpc 1", new HashSet<string>(merchantTags.Concat(groundhogDayTags)));
@@ -281,83 +281,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     yield return x.part;
                 }
             }
-        }
-
-        /// <summary>
-        /// A collection of common tags for use with npcs.
-        /// </summary>
-        /// <remarks>
-        /// For mod compatibility reasons, it is strongly recommended to apply these tags to your own npc templates when appropriate.
-        /// <para>
-        /// These tags are applied to the base game npc templates by default.
-        /// </para>
-        /// </remarks>
-        public static class WellKnownTags
-        {
-            /// <summary>
-            /// A tag indicating that the npc template sells, or wants to sell, herbs.
-            /// </summary>
-            public const string SellsHerbs = "SellsHerbs";
-
-            /// <summary>
-            /// A tag indicating that the npc template sells, or wants to sell, mushrooms.
-            /// </summary>
-            public const string SellsMushrooms = "SellsMushrooms";
-
-            /// <summary>
-            /// A tag indicating that the npc template sells, or wants to sell, crystals.
-            /// </summary>
-            public const string SellsCrystals = "SellsCrystals";
-
-            /// <summary>
-            /// A tag indicating that the npc template sells, or wants to sell, parts for the alchemy machine.
-            /// </summary>
-            public const string SellsAlchemyMachine = "SellsAlchemyMachine";
-
-            /// <summary>
-            /// A tag indicating that the npc template sells, or wants to sell, organic ingredients.
-            /// </summary>
-            public const string SellsOrganic = "SellsOrganic";
-
-            /// <summary>
-            /// A tag indicating that the npc template sells, or wants to sell, inorganic ingredients.
-            /// </summary>
-            public const string SellsInorganic = "SellsInorganic";
-
-            /// <summary>
-            /// A tag indicating that the npc template sells, or wants to sell, ingredients of any type.
-            /// </summary>
-            public const string SellsIngredients = "SellsIngredients";
-
-            /// <summary>
-            /// A tag indicating that the npc template is for the base game Herbalist NPC.
-            /// </summary>
-            public const string IsHerbalist = "IsHerbalist";
-
-            /// <summary>
-            /// A tag indicating that the npc template is for the base game Mushroomer NPC.
-            /// </summary>
-            public const string IsMushroomer = "IsMushroomer";
-
-            /// <summary>
-            /// A tag indicating that the npc template is for the base game Dwarven Miner NPC.
-            /// </summary>
-            public const string IsDwarfMiner = "IsDwarfMiner";
-
-            /// <summary>
-            /// A tag indicating that the npc template is for the base game Alchemist NPC.
-            /// </summary>
-            public const string IsAlchemist = "IsAlchemist";
-
-            /// <summary>
-            /// A tag indicating that the npc template is for the base game Traveling Merchant NPC.
-            /// </summary>
-            public const string IsTravelingMerchant = "IsTravelingMerchant";
-
-            /// <summary>
-            /// A tag indicating that the npc template appears during the never-ending groundhog day portion of the game.
-            /// </summary>
-            public const string IsGroundhogDayNpc = "IsGroundhogDayNpc";
         }
     }
 }

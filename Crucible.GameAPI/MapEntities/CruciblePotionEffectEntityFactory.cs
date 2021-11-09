@@ -49,7 +49,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         /// Gets or sets the angle of this potion effect.
         /// </summary>
         /// <remarks>
-        /// If an angle is specified, brewing this effect may require using salts to rotate the potion bottle.
+        /// If an angle is specified, brewing this effect may require using sun and moon salts to rotate the potion bottle.
         /// </remarks>
         public float Angle { get; set; }
 
@@ -61,7 +61,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         /// <inheritdoc/>
         public GameObject SpawnEntity(GameObject recipeMap)
         {
-            throw new System.NotImplementedException("Prefab capture not yet implemented.");
+            throw new System.NotImplementedException("Potion effect prefab capture not yet implemented.");
             var go = Object.Instantiate(potionEffectPrefab, new Vector3(0, 0, 0), Quaternion.identity, recipeMap.transform);
             var mapItem = go.GetComponent<PotionEffectMapItem>();
             mapItem.effect = this.PotionEffect.PotionEffect;
