@@ -36,6 +36,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         void IAfterYamlDeserialization.OnDeserializeCompleted(Mark start, Mark end)
         {
             CrucibleMod.OnNodeLoaded(this);
+            this.OnDeserializeCompleted(start, end);
+        }
+
+        /// <summary>
+        /// Runs when the deserialization of this node is complete.
+        /// </summary>
+        /// <param name="start">The start of this node in the yaml document.</param>
+        /// <param name="end">The end of this node in the yaml document.</param>
+        /// <remarks>
+        /// This can be used to perform validation on the loaded data.
+        /// </remarks>
+        protected virtual void OnDeserializeCompleted(Mark start, Mark end)
+        {
         }
 
         /// <summary>

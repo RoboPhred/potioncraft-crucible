@@ -22,29 +22,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
     using UnityEngine;
+    using YamlDotNet.Core;
 
     /// <summary>
     /// Configuration subject for a PotionCraft ingredient.
     /// </summary>
     public class CrucibleIngredientConfig : CrucibleConfigSubjectObject<CrucibleIngredient>
     {
-        private string id;
-
         /// <summary>
         /// Gets or sets the ID of this ingredient.
         /// </summary>
-        public string ID
-        {
-            get
-            {
-                return this.id ?? ((string)this.Name).Replace(" ", string.Empty);
-            }
-
-            set
-            {
-                this.id = value;
-            }
-        }
+        public string ID { get; set; }
 
         /// <summary>
         /// Gets or sets the name of this ingredient.
@@ -105,6 +93,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// Gets or sets the stack items for this ingredient.
         /// </summary>
         public OneOrMany<CrucibleIngredientStackItemConfig> StackItems { get; set; }
+
+        /// <inheritdoc/>
+        protected override void OnDeserializeCompleted(Mark start, Mark end)
+        {
+            if (string.IsNullOrWhiteSpace(this.ID))
+            {
+                throw new Exception($"Ingredient at {start} must have an id.");
+            }
+        }
 
         /// <inheritdoc/>
         protected override CrucibleIngredient GetSubject()

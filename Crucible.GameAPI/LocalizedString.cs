@@ -38,7 +38,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalizedString"/> class.
         /// </summary>
-        public LocalizedString() { }
+        public LocalizedString()
+        {
+        }
 
         /// <summary>
         /// Gets or sets the default value to use if no localized string is found for the current language.
