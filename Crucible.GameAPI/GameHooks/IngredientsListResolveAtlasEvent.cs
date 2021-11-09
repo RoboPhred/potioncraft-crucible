@@ -225,7 +225,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             var found = false;
             foreach (var instruction in instructions)
             {
-                // FIXME: Potentially dangerous injection.  Relying on local 0 to be the atlas name. 
+                // FIXME: Potentially dangerous injection.  Relying on local 0 to be the atlas name.
                 if (!found && instruction.opcode == OpCodes.Ldloc_0)
                 {
                     found = true;

@@ -330,6 +330,24 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Sets the localized name of this ingredient.
+        /// </summary>
+        /// <param name="name">The localized name to use for this ingredient.</param>
+        public void SetLocalizedName(LocalizedString name)
+        {
+            CrucibleLocalization.SetLocalizationKey(this.LocalizationKey, name);
+        }
+
+        /// <summary>
+        /// Sets the localized description of this ingredient.
+        /// </summary>
+        /// <param name="description">The localized description to use for this ingredient.</param>
+        public void SetLocalizedDescription(LocalizedString description)
+        {
+            CrucibleLocalization.SetLocalizationKey($"{this.LocalizationKey}_description", description);
+        }
+
+        /// <summary>
         /// Sets the stack for this ingredient.
         /// </summary>
         /// <remarks>
@@ -481,15 +499,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             Traverse.Create(this.Ingredient.substanceGrindingSettings).Method("CalculateTotalCurveValue").GetValue();
         }
 
-        private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItemItem)
+        private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItem)
         {
             var stackItem = new GameObject
             {
                 name = $"{this.ID} Stack Item",
             };
             stackItem.transform.parent = GameObjectUtilities.DisabledRoot.transform;
-            stackItem.transform.localPosition = crucibleStackItemItem.PositionInStack;
-            stackItem.transform.localRotation = Quaternion.Euler(0, 0, crucibleStackItemItem.AngleInStack);
+            stackItem.transform.localPosition = crucibleStackItem.PositionInStack;
+            stackItem.transform.localRotation = Quaternion.Euler(0, 0, crucibleStackItem.AngleInStack);
 
             var goOuter = new GameObject
             {
@@ -507,28 +525,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             goInner.transform.parent = stackItem.transform;
             var colliderInner = goInner.AddComponent<PolygonCollider2D>();
 
-            colliderInner.points = new Vector2[]
-            {
-                new Vector2(0.2f, 0.2f),
-                new Vector2(0.2f, -0.2f),
-                new Vector2(-0.2f, -0.2f),
-            };
-
-            colliderOuter.points = new Vector2[]
-            {
-                new Vector2(0.3f, 0.3f),
-                new Vector2(0.3f, -0.3f),
-                new Vector2(-0.3f, -0.3f),
-            };
+            // TODO: Get collision information from CrucibleIngredientStackItem
+            colliderInner.CreatePrimitive(32, new Vector2(0.3f, 0.3f), crucibleStackItem.PositionInStack);
+            colliderOuter.CreatePrimitive(32, new Vector2(0.3f, 0.3f), crucibleStackItem.PositionInStack);
 
             var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();
-            spriteRenderer.sprite = crucibleStackItemItem.Sprite;
+            spriteRenderer.sprite = crucibleStackItem.Sprite;
 
             var ifs = stackItem.AddComponent<IngredientFromStack>();
             ifs.spriteRenderers = new[] { spriteRenderer };
             ifs.colliderOuter = colliderOuter;
             ifs.colliderInner = colliderInner;
-            ifs.NextStagePrefabs = crucibleStackItemItem.GrindChildren.Select(x => this.CreateStackItem(x)).ToArray();
+            ifs.NextStagePrefabs = crucibleStackItem.GrindChildren.Select(x => this.CreateStackItem(x)).ToArray();
 
             return stackItem;
         }

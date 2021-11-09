@@ -24,7 +24,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public static class CrucibleLocalization
     {
-        private static readonly Dictionary<string, string> Localization = new();
+        private static readonly Dictionary<string, LocalizedString> Localization = new();
         private static bool initialized = false;
 
         /// <summary>
@@ -39,6 +39,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             Localization[key] = value;
         }
 
+        /// <summary>
+        /// Sets the value of a localization key.
+        /// If the key is already registered by the game or another mod, it will be replaced.
+        /// </summary>
+        /// <param name="key">The key to set.</param>
+        /// <param name="value">The localized value to use.</param>
+        public static void SetLocalizationKey(string key, LocalizedString value)
+        {
+            TryInitialize();
+            Localization[key] = value;
+        }
+
         private static void TryInitialize()
         {
             if (initialized)
@@ -47,6 +59,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             initialized = true;
+
+            // FIXME: Override value at LocalizationSystem.GetText(), not Key.GetText()
             KeyGetTextEvent.OnGetText += (_, e) =>
             {
                 if (Localization.TryGetValue(e.Key, out var value))
