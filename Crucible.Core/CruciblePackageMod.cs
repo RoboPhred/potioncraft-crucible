@@ -1,4 +1,4 @@
-// <copyright file="CrucibleMod.cs" company="RoboPhredDev">
+// <copyright file="CruciblePackageMod.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -26,16 +26,13 @@ namespace RoboPhredDev.PotionCraft.Crucible
     /// <summary>
     /// Represents a Crucible configuration-derived mod.
     /// </summary>
-    public sealed class CrucibleMod : DirectoryResourceProvider
+    public sealed class CruciblePackageMod : DirectoryResourceProvider
     {
-        private static List<CrucibleConfigNode> loadingNodes;
+        private static List<CruciblePackageConfigNode> loadingNodes;
 
-        private CrucibleModConfig root;
+        private CruciblePackageModConfig root;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CrucibleMod"/> class.
-        /// </summary>
-        private CrucibleMod(string directory)
+        private CruciblePackageMod(string directory)
             : base(directory)
         {
             this.ID = new DirectoryInfo(directory).Name;
@@ -59,7 +56,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
         /// <summary>
         /// Gets or the dependencies of this mod.
         /// </summary>
-        public List<CrucibleDependencyConfig> Dependencies => this.root.Dependencies;
+        public List<CruciblePackageDependencyConfig> Dependencies => this.root.Dependencies;
 
         /// <summary>
         /// Gets the ID of this mod.
@@ -96,25 +93,25 @@ namespace RoboPhredDev.PotionCraft.Crucible
         }
 
         /// <summary>
-        /// Loads the config mod from the specified folder.
+        /// Loads the crucible package from the specified directory.
         /// </summary>
-        /// <param name="modFolder">The folder of the mod to load.</param>
-        /// <returns>The crucible mod loaded from the folder.</returns>
-        public static CrucibleMod LoadFromFolder(string modFolder)
+        /// <param name="directory">The package directory to load.</param>
+        /// <returns>A <see cref="CruciblePackageMod"/> loaded from the directory.</returns>
+        public static CruciblePackageMod LoadFromFolder(string directory)
         {
-            loadingNodes = new List<CrucibleConfigNode>();
+            loadingNodes = new List<CruciblePackageConfigNode>();
             try
             {
-                var mod = new CrucibleMod(modFolder);
-                var packagePath = Path.Combine(modFolder, "package.yml");
-                mod.root = CrucibleResources.WithResourceProvider(mod, () => Deserializer.Deserialize<CrucibleModConfig>(packagePath));
+                var mod = new CruciblePackageMod(directory);
+                var packagePath = Path.Combine(directory, "package.yml");
+                mod.root = CrucibleResources.WithResourceProvider(mod, () => Deserializer.Deserialize<CruciblePackageModConfig>(packagePath));
                 loadingNodes.ForEach(x => x.SetParentMod(mod));
                 return mod;
             }
             catch (Exception ex)
             {
                 // TODO: Collect exceptions for display to the user, return mod anyway.
-                throw new CrucibleModLoadException($"Failed to load crucible mod \"{modFolder}\": " + ex.Message, ex);
+                throw new CruciblePackageModLoadException($"Failed to load crucible package from \"{directory}\": " + ex.Message, ex);
             }
             finally
             {
@@ -149,11 +146,11 @@ namespace RoboPhredDev.PotionCraft.Crucible
         /// Inform the mod that a config node belonging to it has loaded.
         /// </summary>
         /// <param name="node">The node belonging to this mod that has loaded.</param>
-        internal static void OnNodeLoaded(CrucibleConfigNode node)
+        internal static void OnNodeLoaded(CruciblePackageConfigNode node)
         {
             if (loadingNodes == null)
             {
-                throw new Exception("Cannot instantiate a CrucibleConfigNode when no CrucibleMod is being loaded.");
+                throw new Exception("Cannot instantiate a " + nameof(CruciblePackageConfigNode) + " when no " + nameof(CruciblePackageMod) + " is being loaded.");
             }
 
             loadingNodes.Add(node);

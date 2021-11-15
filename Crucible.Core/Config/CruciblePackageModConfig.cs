@@ -1,4 +1,4 @@
-// <copyright file="CrucibleModConfig.cs" company="RoboPhredDev">
+// <copyright file="CruciblePackageModConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -20,18 +20,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
-    /// The root config node for a crucible mod.
+    /// Defines the initial properties and root-parsing logic for the package file in a <see cref="CruciblePackageMod"/>.
     /// </summary>
     /// <remarks>
-    /// This class should not be deserialized directly.  Instead, <see cref="CrucibleMod"/> should be used.
+    /// This class should not be deserialized directly.  Instead, <see cref="CruciblePackageMod"/> should be used.
     /// </remarks>
-    /// <seealso cref="CrucibleMod"/>
-    public class CrucibleModConfig : IDeserializeExtraData
+    /// <seealso cref="CruciblePackageMod"/>
+    public class CruciblePackageModConfig : IDeserializeExtraData
     {
         /// <summary>
         /// Gets the list of config roots parsed from this mod config.
         /// </summary>
-        public List<CrucibleConfigRoot> ParsedRoots { get; } = new();
+        public List<CruciblePackageConfigRoot> ParsedRoots { get; } = new();
 
         /// <summary>
         /// Gets or sets the name of this mod.
@@ -51,17 +51,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// <summary>
         /// Gets or sets the dependencies of this mod.
         /// </summary>
-        public List<CrucibleDependencyConfig> Dependencies { get; set; } = new();
+        public List<CruciblePackageDependencyConfig> Dependencies { get; set; } = new();
 
         /// <inheritdoc/>
         void IDeserializeExtraData.OnDeserializeExtraData(ReplayParser parser)
         {
             this.ParsedRoots.Clear();
 
-            foreach (var rootType in CrucibleConfigElementRegistry.GetConfigRoots())
+            foreach (var rootType in CruciblePackageConfigElementRegistry.GetConfigRoots())
             {
                 parser.Reset();
-                this.ParsedRoots.Add((CrucibleConfigRoot)Deserializer.DeserializeFromParser(rootType, parser));
+                this.ParsedRoots.Add((CruciblePackageConfigRoot)Deserializer.DeserializeFromParser(rootType, parser));
             }
         }
     }

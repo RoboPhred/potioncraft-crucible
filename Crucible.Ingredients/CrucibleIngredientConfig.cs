@@ -27,7 +27,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     /// <summary>
     /// Configuration subject for a PotionCraft ingredient.
     /// </summary>
-    public class CrucibleIngredientConfig : CrucibleConfigSubjectObject<CrucibleIngredient>
+    public class CrucibleIngredientConfig : CruciblePackageConfigSubjectNode<CrucibleIngredient>
     {
         /// <summary>
         /// Gets or sets the ID of this ingredient.
@@ -106,7 +106,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <inheritdoc/>
         protected override CrucibleIngredient GetSubject()
         {
-            var id = this.Mod.Namespace + "." + this.ID;
+            var id = this.PackageMod.Namespace + "." + this.ID;
             return CrucibleIngredient.GetIngredientById(id) ?? CrucibleIngredient.CreateIngredient(id, this.InheritFrom ?? "Waterbloom");
         }
 

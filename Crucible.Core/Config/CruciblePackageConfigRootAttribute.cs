@@ -1,4 +1,4 @@
-// <copyright file="CrucibleConfigRootAttribute.cs" company="RoboPhredDev">
+// <copyright file="CruciblePackageConfigRootAttribute.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -19,12 +19,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     using System;
 
     /// <summary>
-    /// An attribute marking a class as being a root configuration object.
-    /// Such classes will be deserialized from the root of each mod configuration.
+    /// An attribute marking a class as being a root object in a <see cref="CruciblePackageMod"/> package configuration.
+    /// Such classes will be deserialized from the root of each package.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     [CrucibleRegistryAttribute]
-    public class CrucibleConfigRootAttribute : Attribute
+    public class CruciblePackageConfigRootAttribute : Attribute
     {
     }
 }

@@ -24,7 +24,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
     /// <summary>
     /// Configuration subject for a PotionCraft ingredient.
     /// </summary>
-    public class CruciblePotionBaseConfig : CrucibleConfigSubjectObject<CruciblePotionBase>
+    public class CruciblePotionBaseConfig : CruciblePackageConfigSubjectNode<CruciblePotionBase>
     {
         private static readonly HashSet<string> UnlockIdsOnStart = new();
 
@@ -121,7 +121,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         /// <inheritdoc/>
         protected override CruciblePotionBase GetSubject()
         {
-            var id = this.Mod.Namespace + "." + this.ID;
+            var id = this.PackageMod.Namespace + "." + this.ID;
             return CruciblePotionBase.GetPotionBaseById(id) ?? CruciblePotionBase.CreatePotionBase(id);
         }
 

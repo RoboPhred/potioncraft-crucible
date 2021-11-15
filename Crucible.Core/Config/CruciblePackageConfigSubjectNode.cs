@@ -1,4 +1,4 @@
-// <copyright file="CrucibleConfigSubjectObject.cs" company="RoboPhredDev">
+// <copyright file="CruciblePackageConfigSubjectNode.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -20,14 +20,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
-    /// Defines an object element configuration section in a Crucible config file.
-    /// This configration element will produce a subject after parsing, and allow
-    /// extension config entries to apply their configuration to the subject.
+    /// Defines a configration node in a <see cref="CruciblePackageMod"/> package config which creates or otherwise targets
+    /// a specific class instance.
     /// </summary>
+    /// <remarks>
+    /// Subject nodes typically operate on game api classes, and contain enough configuration to instantiate or target existing classes.
+    /// Subject nodes can be additionally extended using <see cref="CruciblePackageConfigExtensionAttribute"/>, which provide further
+    /// configuration and modification of the subject config's subject.
+    /// </remarks>
     /// <typeparam name="TSubject">The subject object created as a result of this configuration entry.</typeparam>
-    public abstract class CrucibleConfigSubjectObject<TSubject> : CrucibleConfigNode, IDeserializeExtraData
+    public abstract class CruciblePackageConfigSubjectNode<TSubject> : CruciblePackageConfigNode, IDeserializeExtraData
     {
-        private readonly List<ICrucibleConfigExtension<TSubject>> extensions = new();
+        private readonly List<ICruciblePackageConfigExtension<TSubject>> extensions = new();
 
         /// <summary>
         /// Applies the configuration node.
@@ -50,10 +54,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         {
             this.extensions.Clear();
 
-            foreach (var extensionType in CrucibleConfigElementRegistry.GetSubjectExtensionTypes<TSubject>())
+            foreach (var extensionType in CruciblePackageConfigElementRegistry.GetSubjectExtensionTypes<TSubject>())
             {
                 parser.Reset();
-                var extension = (ICrucibleConfigExtension<TSubject>)Deserializer.DeserializeFromParser(extensionType, parser);
+                var extension = (ICruciblePackageConfigExtension<TSubject>)Deserializer.DeserializeFromParser(extensionType, parser);
                 this.extensions.Add(extension);
             }
         }

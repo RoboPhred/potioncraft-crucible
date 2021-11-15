@@ -1,4 +1,4 @@
-// <copyright file="CrucibleConfigRoot.cs" company="RoboPhredDev">
+// <copyright file="CruciblePackageDependencyConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,14 +16,18 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.Config
 {
+    using RoboPhredDev.PotionCraft.Crucible.Yaml;
+
     /// <summary>
-    /// Defines a configuration object root.
+    /// A configuration entry declaring a dependency.
     /// </summary>
-    public abstract class CrucibleConfigRoot : CrucibleConfigNode
+    [DuckTypeCandidate(typeof(CruciblePackageBepInExDependencyConfig))]
+    public abstract class CruciblePackageDependencyConfig : CruciblePackageConfigNode
     {
         /// <summary>
-        /// Apply this configuration node.
+        /// Ensures that the dependency is met.
+        /// If the dependency is not met, this should throw a <see cref="CrucibleMissingDependencyException"/>.
         /// </summary>
-        public abstract void ApplyConfiguration();
+        public abstract void EnsureDependencyMet();
     }
 }

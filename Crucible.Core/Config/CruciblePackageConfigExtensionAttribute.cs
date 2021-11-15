@@ -1,4 +1,4 @@
-// <copyright file="CrucibleBepInExDependencyConfig.cs" company="RoboPhredDev">
+// <copyright file="CruciblePackageConfigExtensionAttribute.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,26 +16,29 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.Config
 {
-    using System.Linq;
+    using System;
 
     /// <summary>
-    /// A confiugration node denotating a dependency on a BepInEx mod.
+    /// An attribute marking a class as being a configuration extension.
+    /// Configuration extension classes will be parsed alongside the root configuration nodes that create instances
+    /// of the given subject.
     /// </summary>
-    public class CrucibleBepInExDependencyConfig : CrucibleDependencyConfig
+    [AttributeUsage(AttributeTargets.Class)]
+    [CrucibleRegistryAttribute]
+    public class CruciblePackageConfigExtensionAttribute : Attribute
     {
         /// <summary>
-        /// Gets or sets the bepinex mod guid to depend on.
+        /// Initializes a new instance of the <see cref="CruciblePackageConfigExtensionAttribute"/> class.
         /// </summary>
-        public string BepInExGUID { get; set; }
-
-        /// <inheritdoc/>
-        public override void EnsureDependencyMet()
+        /// <param name="subject">The subject this configuration class will apply to.</param>
+        public CruciblePackageConfigExtensionAttribute(Type subject)
         {
-            var dependencyMet = BepInExPluginUtilities.GetAllPlugins().Any(x => x.GUID == this.BepInExGUID);
-            if (!dependencyMet)
-            {
-                throw CrucibleMissingDependencyException.CreateMissingDependencyException(this.Mod.GUID, this.BepInExGUID, "*");
-            }
+            this.SubjectType = subject;
         }
+
+        /// <summary>
+        /// Gets the subject this configuration extension applies to.
+        /// </summary>
+        public Type SubjectType { get; }
     }
 }

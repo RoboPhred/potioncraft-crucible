@@ -30,7 +30,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
     [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible", "Crucible Modding Framework", "1.0.0.0")]
     public class CruciblePlugin : BaseUnityPlugin
     {
-        private ICollection<CrucibleMod> mods;
+        private ICollection<CruciblePackageMod> mods;
 
         /// <summary>
         /// Called by unity when the plugin loads.
@@ -52,7 +52,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
             };
         }
 
-        private static void ActivateMod(CrucibleMod mod)
+        private static void ActivateMod(CruciblePackageMod mod)
         {
             try
             {
@@ -69,27 +69,27 @@ namespace RoboPhredDev.PotionCraft.Crucible
             }
         }
 
-        private static ICollection<CrucibleMod> LoadAllConfigMods()
+        private static ICollection<CruciblePackageMod> LoadAllConfigMods()
         {
             var path = Path.Combine("crucible", "mods");
             if (!Directory.Exists(path))
             {
-                return new List<CrucibleMod>();
+                return new List<CruciblePackageMod>();
             }
 
             var folders = Directory.GetDirectories(path);
             return folders.Select(folder => TryLoadMod(folder)).Where(x => x != null).ToList();
         }
 
-        private static CrucibleMod TryLoadMod(string modFolder)
+        private static CruciblePackageMod TryLoadMod(string modFolder)
         {
             try
             {
-                var mod = CrucibleMod.LoadFromFolder(modFolder);
+                var mod = CruciblePackageMod.LoadFromFolder(modFolder);
                 CrucibleLog.Log($"> Loaded mod \"{mod.Name}\".");
                 return mod;
             }
-            catch (CrucibleModLoadException ex)
+            catch (CruciblePackageModLoadException ex)
             {
                 Debug.Log(ex.ToExpandedString());
                 return null;

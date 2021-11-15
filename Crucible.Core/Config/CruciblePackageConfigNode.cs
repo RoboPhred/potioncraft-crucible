@@ -1,4 +1,4 @@
-// <copyright file="CrucibleConfigNode.cs" company="RoboPhredDev">
+// <copyright file="CruciblePackageConfigNode.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -20,14 +20,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
     using YamlDotNet.Core;
 
     /// <summary>
-    /// A configuration node in a CrucibleConfig.
+    /// Provides the base class to define configuration nodes in a <see cref="CruciblePackageMod"/>.
     /// </summary>
-    public abstract class CrucibleConfigNode : IAfterYamlDeserialization
+    public abstract class CruciblePackageConfigNode : IAfterYamlDeserialization
     {
         /// <summary>
         /// Gets the Crucible mod this node is a part of.
         /// </summary>
-        public CrucibleMod Mod
+        public CruciblePackageMod PackageMod
         {
             get; private set;
         }
@@ -35,8 +35,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// <inheritdoc/>
         void IAfterYamlDeserialization.OnDeserializeCompleted(Mark start, Mark end)
         {
-            CrucibleMod.OnNodeLoaded(this);
+            CruciblePackageMod.OnNodeLoaded(this);
             this.OnDeserializeCompleted(start, end);
+        }
+
+        /// <summary>
+        /// Sets the crucible config mod that owns this node.
+        /// </summary>
+        /// <param name="packageMod">The <see cref="CruciblePackageMod"/> that owns this node.</param>
+        internal void SetParentMod(CruciblePackageMod packageMod)
+        {
+            this.PackageMod = packageMod;
         }
 
         /// <summary>
@@ -49,15 +58,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         /// </remarks>
         protected virtual void OnDeserializeCompleted(Mark start, Mark end)
         {
-        }
-
-        /// <summary>
-        /// Sets the crucible config mod that owns this node.
-        /// </summary>
-        /// <param name="crucibleMod">The mod that owns this node.</param>
-        internal void SetParentMod(CrucibleMod crucibleMod)
-        {
-            this.Mod = crucibleMod;
         }
     }
 }

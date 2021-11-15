@@ -22,8 +22,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     /// <summary>
     /// The configuration root for ingredients.
     /// </summary>
-    [CrucibleConfigRoot]
-    public class CrucibleIngredientsConfigRoot : CrucibleConfigRoot
+    [CruciblePackageConfigRoot]
+    public class CrucibleIngredientsConfigRoot : CruciblePackageConfigRoot
     {
         /// <summary>
         /// Gets or sets the list of ingredients.

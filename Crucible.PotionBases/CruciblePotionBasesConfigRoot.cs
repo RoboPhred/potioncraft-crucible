@@ -22,8 +22,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
     /// <summary>
     /// The configuration root for potion bases.
     /// </summary>
-    [CrucibleConfigRoot]
-    public class CruciblePotionBasesConfigRoot : CrucibleConfigRoot
+    [CruciblePackageConfigRoot]
+    public class CruciblePotionBasesConfigRoot : CruciblePackageConfigRoot
     {
         /// <summary>
         /// Gets or sets the list of potion bases.

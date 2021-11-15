@@ -1,4 +1,4 @@
-// <copyright file="CrucibleConfigExtensionAttribute.cs" company="RoboPhredDev">
+// <copyright file="ICruciblePackageConfigExtension.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,29 +16,20 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.Config
 {
-    using System;
-
     /// <summary>
-    /// An attribute marking a class as being a configuration extension.
-    /// Configuration extension classes will be parsed alongside the root configuration nodes that create instances
-    /// of the given subject.
+    /// Defines an extension configuration targeting a <see cref="CrucibleConfigSubjectObject"/>.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    [CrucibleRegistryAttribute]
-    public class CrucibleConfigExtensionAttribute : Attribute
+    /// <typeparam name="TSubject">The type produced by the targeted <see cref="CrucibleConfigSubjectObject"/>.</typeparam>
+    /// <remarks>
+    /// This interface should be used with <see cref="CruciblePackageConfigExtensionAttribute"/> to produce a class that loads extended
+    /// configuration data from an existing <see cref="CrucibleConfigSubjectObject"/>.
+    /// </remarks>
+    public interface ICruciblePackageConfigExtension<in TSubject>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CrucibleConfigExtensionAttribute"/> class.
+        /// Apply this configuration node to the subject.
         /// </summary>
-        /// <param name="subject">The subject this configuration class will apply to.</param>
-        public CrucibleConfigExtensionAttribute(Type subject)
-        {
-            this.SubjectType = subject;
-        }
-
-        /// <summary>
-        /// Gets the subject this configuration extension applies to.
-        /// </summary>
-        public Type SubjectType { get; }
+        /// <param name="subject">The subject created by the root configuration node.</param>
+        void OnApplyConfiguration(TSubject subject);
     }
 }

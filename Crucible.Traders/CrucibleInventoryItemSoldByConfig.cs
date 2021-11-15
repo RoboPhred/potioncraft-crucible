@@ -26,7 +26,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Traders
     /// </summary>
     [DuckTypeCandidate(typeof(CrucibleInventoryItemSoldByNpcTemplateConfig))]
     [DuckTypeCandidate(typeof(CrucibleInventoryItemSoldByNpcTagConfig))]
-    public abstract class CrucibleInventoryItemSoldByConfig : CrucibleConfigNode
+    public abstract class CrucibleInventoryItemSoldByConfig : CruciblePackageConfigNode
     {
         /// <summary>
         /// Gets or sets the chance of this item being sold.

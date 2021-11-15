@@ -25,7 +25,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     /// <summary>
     /// Represents configuration for creating a stack item.
     /// </summary>
-    public class CrucibleIngredientStackItemConfig : CrucibleConfigNode
+    public class CrucibleIngredientStackItemConfig : CruciblePackageConfigNode
     {
         /// <summary>
         /// Gets or sets the sprite to use for this stack item.
