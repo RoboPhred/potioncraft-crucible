@@ -65,21 +65,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public IEnumerable<CrucibleIngredientPathSegment> ToPathSegments()
         {
             var path = this.Data;
+
+            // This is the scale to apply to each path command.
+            // Flip the y axis, as standard SVG paths are top-down, while game paths are bottom-up.
             var scale = new Vector2(this.ScaleX, this.ScaleY * -1);
+
             var lastEnd = Vector2.zero;
             CrucibleIngredientPathSegment curve;
             while ((curve = PartToCurve(ref path, lastEnd)) != null)
             {
-                // Filter out any M 0,0 that might have gotten in from path editors.
-                if (curve.P1 == curve.P2 && curve.P1 == curve.End)
-                {
-                    continue;
-                }
-
+                // Apply the scale
                 curve.P1 *= scale;
                 curve.P2 *= scale;
                 curve.End *= scale;
 
+                // Keep track of where we ended, so PartToCurve can calculate relative commands.
                 if (curve.IsRelative)
                 {
                     lastEnd += curve.End;
@@ -162,7 +162,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 "v" => RelativeVertical(ref svgPath),
                 "h" => RelativeHorizontal(ref svgPath),
                 "c" => RelativeCubicCurve(ref svgPath),
-                _ => throw new Exception($"Unknown SVG path command \"{token}\"."),
+                _ => throw new Exception($"Unsupported SVG path command \"{token}\"."),
             };
         }
 
