@@ -94,6 +94,24 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// </summary>
         public OneOrMany<CrucibleIngredientStackItemConfig> StackItems { get; set; }
 
+        /// <summary>
+        /// Gets or sets the ID property.
+        /// This is a shim for the yaml camel case property name resolver.
+        /// </summary>
+        [Obsolete("Shim for yaml camel case property resolver.  Do not use")]
+        public string Id
+        {
+            get
+            {
+                return this.ID;
+            }
+
+            set
+            {
+                this.ID = value;
+            }
+        }
+
         /// <inheritdoc/>
         protected override void OnDeserializeCompleted(Mark start, Mark end)
         {

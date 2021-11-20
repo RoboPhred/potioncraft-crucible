@@ -46,20 +46,24 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
             }
 
             var parseObj = (Dictionary<string, string>)nestedObjectDeserializer(reader, typeof(Dictionary<string, string>));
-            string defaultValue = null;
+
+            LocalizedString localizedString;
             if (parseObj.TryGetValue("default", out var defaultValueString))
             {
-                defaultValue = defaultValueString;
+                localizedString = new LocalizedString(defaultValueString);
                 parseObj.Remove("default");
             }
-
-            var localized = new LocalizedString(defaultValue);
-            foreach (var pair in parseObj)
+            else
             {
-                localized.SetLocalization(pair.Key, pair.Value);
+                localizedString = new LocalizedString();
             }
 
-            value = localized;
+            foreach (var pair in parseObj)
+            {
+                localizedString.SetLocalization(pair.Key, pair.Value);
+            }
+
+            value = localizedString;
             return true;
         }
     }

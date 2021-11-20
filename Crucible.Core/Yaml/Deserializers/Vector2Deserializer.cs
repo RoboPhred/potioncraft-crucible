@@ -44,6 +44,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
                 float[] parts;
                 try
                 {
+                    // Make sure to use invariant culture, as some languages flip commas and dots for decimal markers.
                     parts = scalar.Value.Split(',').Select(x => x.Trim()).Select(x => float.Parse(x, CultureInfo.InvariantCulture)).ToArray();
                 }
                 catch

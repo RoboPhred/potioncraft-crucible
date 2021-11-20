@@ -525,9 +525,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             goInner.transform.parent = stackItem.transform;
             var colliderInner = goInner.AddComponent<PolygonCollider2D>();
 
-            // TODO: Get collision information from CrucibleIngredientStackItem
-            colliderInner.CreatePrimitive(32, new Vector2(0.3f, 0.3f), crucibleStackItem.PositionInStack);
-            colliderOuter.CreatePrimitive(32, new Vector2(0.3f, 0.3f), crucibleStackItem.PositionInStack);
+            if (crucibleStackItem.ColliderPolygon?.Count > 0)
+            {
+                colliderInner.pathCount = 1;
+                colliderOuter.pathCount = 1;
+                colliderInner.SetPath(0, crucibleStackItem.ColliderPolygon);
+                colliderOuter.SetPath(0, crucibleStackItem.ColliderPolygon);
+            }
+            else
+            {
+                colliderInner.CreatePrimitive(4, new Vector2(0.3f, 0.3f), crucibleStackItem.PositionInStack);
+                colliderOuter.CreatePrimitive(4, new Vector2(0.3f, 0.3f), crucibleStackItem.PositionInStack);
+            }
 
             var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();
             spriteRenderer.sprite = crucibleStackItem.Sprite;
