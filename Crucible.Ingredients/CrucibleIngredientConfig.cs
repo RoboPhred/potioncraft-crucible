@@ -40,14 +40,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public LocalizedString Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the id of the ingredient to inherit from.
-        /// </summary>
-        public string InheritFrom { get; set; }
-
-        /// <summary>
         /// Gets or sets the description of this ingredient shown in the tooltip.
         /// </summary>
         public LocalizedString Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the id of the ingredient to inherit from.
+        /// </summary>
+        public string InheritFrom { get; set; }
 
         /// <summary>
         /// Gets or sets the sprite to use for the inventory image of this ingredient.
@@ -65,11 +65,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public Sprite IngredientListIcon { get; set; }
 
         /// <summary>
-        /// Gets or sets the color to use for the ground substance.
-        /// </summary>
-        public Color? GroundColor { get; set; }
-
-        /// <summary>
         /// Gets or sets the bace price for this ingredient.
         /// </summary>
         public float? Price { get; set; }
@@ -83,6 +78,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// Gets or sets a value specifying what percentage of the ingredient is pre-ground.
         /// </summary>
         public float? GrindStartPercent { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color to use for the ground substance.
+        /// </summary>
+        public Color? GroundColor { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this ingredient teleports during movement.

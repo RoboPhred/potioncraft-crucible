@@ -126,21 +126,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets all npc templates with the given tag.
-        /// </summary>
-        /// <param name="tag">The tag to search for.</param>
-        /// <returns>An enumerable of all npc templates that match the given tag.</returns>
-        public static IEnumerable<CrucibleNpcTemplate> GetNpcTemplatesByTag(string tag)
-        {
-            var templatesByTag = from pair in NpcTemplateTagsById
-                                 where pair.Value.Contains(tag)
-                                 let template = GetNpcTemplateById(pair.Key)
-                                 where template != null
-                                 select template;
-            return templatesByTag;
-        }
-
-        /// <summary>
         /// Gets all npc templates known to the game.
         /// </summary>
         /// <returns>An enumerable of every npc template registered with the game.</returns>

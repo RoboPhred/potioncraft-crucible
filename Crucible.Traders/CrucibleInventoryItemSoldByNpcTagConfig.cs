@@ -39,9 +39,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Traders
                 return new CrucibleNpcTemplate[0];
             }
 
-            var traders = from tag in this.NpcTag
-                          from template in CrucibleNpcTemplate.GetNpcTemplatesByTag(tag)
+            var traders = from template in CrucibleNpcTemplate.GetAllNpcTemplates()
                           where template.IsTrader
+                          where this.NpcTag.All(x => template.HasTag(x))
                           select template;
             return traders.Distinct();
         }

@@ -94,7 +94,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
                 while (depth > 0);
             }
 
-            // reader.Accept will have obtained a mapping end, queue it up.
+            // reader.TryConsume will have obtained a mapping end, queue it up.
             replayParser.Enqueue(mappingEnd);
 
             // Pick the type based on the keys we have found.
