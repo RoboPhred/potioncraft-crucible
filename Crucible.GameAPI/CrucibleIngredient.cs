@@ -499,8 +499,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             Traverse.Create(this.Ingredient.substanceGrindingSettings).Method("CalculateTotalCurveValue").GetValue();
         }
 
-        private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItem, int depth = 0)
+        private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItem, Matrix4x4? parent = null, int depth = 0)
         {
+            var parentM = parent ?? Matrix4x4.identity;
+            var selfM = parentM * Matrix4x4.TRS(crucibleStackItem.PositionInStack, Quaternion.Euler(0, 0, crucibleStackItem.AngleInStack), Vector2.one);
             var stackItem = new GameObject
             {
                 name = $"{this.ID} Stack Item {depth}",
@@ -530,7 +532,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 colliderInner.pathCount = 1;
                 colliderOuter.pathCount = 1;
 
-                var positionCorrectedCollider = crucibleStackItem.ColliderPolygon.ConvertAll(v => (Vector2)(Quaternion.Euler(0, 0, crucibleStackItem.AngleInStack) * v) + crucibleStackItem.PositionInStack);
+                var positionCorrectedCollider = crucibleStackItem.ColliderPolygon.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
                 colliderInner.SetPath(0, positionCorrectedCollider);
                 colliderOuter.SetPath(0, positionCorrectedCollider);
             }
@@ -547,7 +549,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ifs.spriteRenderers = new[] { spriteRenderer };
             ifs.colliderOuter = colliderOuter;
             ifs.colliderInner = colliderInner;
-            ifs.NextStagePrefabs = crucibleStackItem.GrindChildren.Select(x => this.CreateStackItem(x, depth + 1)).ToArray();
+            ifs.spawnAtTheVisualCenterOfTheParent = true;
+            ifs.NextStagePrefabs = crucibleStackItem.GrindChildren.Select(x => this.CreateStackItem(x, selfM, depth + 1)).ToArray();
 
             return stackItem;
         }

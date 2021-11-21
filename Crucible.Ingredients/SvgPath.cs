@@ -124,7 +124,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 result.AddRange(partPoints);
             }
 
-
             // This is the scale to apply to each path command.
             // Flip the y axis, as standard SVG paths are top-down, while game paths are bottom-up.
             var scale = new Vector2(this.ScaleX, this.ScaleY * -1);
