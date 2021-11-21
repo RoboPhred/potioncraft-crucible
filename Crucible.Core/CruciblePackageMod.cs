@@ -103,8 +103,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
             try
             {
                 var mod = new CruciblePackageMod(directory);
-                var packagePath = Path.Combine(directory, "package.yml");
-                mod.root = CrucibleResources.WithResourceProvider(mod, () => Deserializer.Deserialize<CruciblePackageModConfig>(packagePath));
+                mod.root = CrucibleResources.WithResourceProvider(mod, () => Deserializer.DeserializeFromResource<CruciblePackageModConfig>("package.yml"));
                 loadingNodes.ForEach(x => x.SetParentMod(mod));
                 return mod;
             }

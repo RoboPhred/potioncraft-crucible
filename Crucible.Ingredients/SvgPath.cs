@@ -102,10 +102,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         {
             var path = this.Data;
 
-            // This is the scale to apply to each path command.
-            // Flip the y axis, as standard SVG paths are top-down, while game paths are bottom-up.
-            var scale = new Vector2(this.ScaleX, this.ScaleY * -1);
-
             var partStart = Vector2.zero;
             var figureStart = Vector2.zero;
             Vector2[] partPoints;
@@ -113,9 +109,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             var isClosed = true;
             while ((partPoints = PartToPoints(ref path, ref partStart, ref figureStart)) != null)
             {
-                // Apply the scale
-                partPoints = Array.ConvertAll(partPoints, p => p * scale);
-
                 if (partPoints.Length == 0)
                 {
                     // Detect when we close the figure.
@@ -131,7 +124,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 result.AddRange(partPoints);
             }
 
-            return result;
+
+            // This is the scale to apply to each path command.
+            // Flip the y axis, as standard SVG paths are top-down, while game paths are bottom-up.
+            var scale = new Vector2(this.ScaleX, this.ScaleY * -1);
+
+            return result.ConvertAll(x => x * scale);
         }
 
         private static string GetToken(ref string svgPath)

@@ -57,12 +57,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
         /// <summary>
         /// Deserializes the given file into the given type.
         /// </summary>
-        /// <param name="filePath">The path to the file to deserialize.</param>
+        /// <param name="resourcePath">The path to the file in the resource to deserialize.</param>
         /// <typeparam name="T">The type to deserialize.</typeparam>
         /// <returns>The deserialized object.</returns>
-        public static T Deserialize<T>(string filePath)
+        public static T DeserializeFromResource<T>(string resourcePath)
         {
-            return WithResourceFileParser(filePath, parser =>
+            return WithResourceFileParser(resourcePath, parser =>
             {
                 var deserializer = BuildDeserializer();
                 return deserializer.Deserialize<T>(parser);
