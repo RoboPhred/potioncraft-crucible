@@ -23,6 +23,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
     using UnityEngine;
     using YamlDotNet.Core;
+    using YamlDotNet.Serialization;
 
     /// <summary>
     /// Configuration subject for a PotionCraft ingredient.
@@ -32,6 +33,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <summary>
         /// Gets or sets the ID of this ingredient.
         /// </summary>
+        [YamlMemberAttribute(Alias = "id")]
         public string ID { get; set; }
 
         /// <summary>
@@ -93,24 +95,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// Gets or sets the stack items for this ingredient.
         /// </summary>
         public OneOrMany<CrucibleIngredientStackItemConfig> StackItems { get; set; }
-
-        /// <summary>
-        /// Gets or sets the ID property.
-        /// This is a shim for the yaml camel case property name resolver.
-        /// </summary>
-        [Obsolete("Shim for yaml camel case property resolver.  Do not use")]
-        public string Id
-        {
-            get
-            {
-                return this.ID;
-            }
-
-            set
-            {
-                this.ID = value;
-            }
-        }
 
         /// <inheritdoc/>
         protected override void OnDeserializeCompleted(Mark start, Mark end)
