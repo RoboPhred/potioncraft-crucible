@@ -18,6 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using UnityEngine;
@@ -93,6 +94,46 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             }
         }
 
+        /// <summary>
+        /// Returns a list of points describing the path.
+        /// </summary>
+        /// <returns>A list of points describing the path.</returns>
+        public List<Vector2> ToPoints()
+        {
+            var path = this.Data;
+
+            // This is the scale to apply to each path command.
+            // Flip the y axis, as standard SVG paths are top-down, while game paths are bottom-up.
+            var scale = new Vector2(this.ScaleX, this.ScaleY * -1);
+
+            var partStart = Vector2.zero;
+            var figureStart = Vector2.zero;
+            Vector2[] partPoints;
+            var result = new List<Vector2>();
+            var isClosed = true;
+            while ((partPoints = PartToPoints(ref path, ref partStart, ref figureStart)) != null)
+            {
+                // Apply the scale
+                partPoints = Array.ConvertAll(partPoints, p => p * scale);
+
+                if (partPoints.Length == 0)
+                {
+                    // Detect when we close the figure.
+                    isClosed = true;
+                }
+                else if (isClosed)
+                {
+                    // If we are starting a new figure, add the figure start position.
+                    isClosed = false;
+                    result.Add(figureStart);
+                }
+
+                result.AddRange(partPoints);
+            }
+
+            return result;
+        }
+
         private static string GetToken(ref string svgPath)
         {
             var token = new StringBuilder();
@@ -144,6 +185,39 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             return result;
         }
 
+        private static Vector2[] PartToPoints(ref string svgPath, ref Vector2 partStart, ref Vector2 figureStart)
+        {
+            var token = GetToken(ref svgPath);
+            if (token == null)
+            {
+                return null;
+            }
+
+            return token switch
+            {
+                "M" => AbsoluteMoveToPoints(ref svgPath, ref partStart, ref figureStart),
+                "L" => UpdatePartStart(AbsoluteLineToPoints(ref svgPath), ref partStart),
+                "H" => UpdatePartStart(RelativeLineToPoints(ref svgPath, partStart), ref partStart),
+                "V" => UpdatePartStart(AbsoluteVerticalToPoints(ref svgPath, partStart), ref partStart),
+                "C" => UpdatePartStart(AbsoluteCubicCurveToPoints(ref svgPath), ref partStart),
+                "m" => RelativeMoveToPoints(ref svgPath, ref partStart, ref figureStart),
+                "l" => UpdatePartStart(RelativeLineToPoints(ref svgPath, partStart), ref partStart),
+                "v" => UpdatePartStart(RelativeVerticalToPoints(ref svgPath, partStart), ref partStart),
+                "h" => UpdatePartStart(RelativeHorizontalToPoints(ref svgPath, partStart), ref partStart),
+                "c" => UpdatePartStart(RelativeCubicCurveToPoints(ref svgPath, partStart), ref partStart),
+
+                // FIXME: Go to start of last figure.
+                "Z" or "z" => ClosePoints(ref svgPath, ref partStart, ref figureStart),
+                _ => throw new Exception($"Unsupported SVG path command \"{token}\"."),
+            };
+        }
+
+        private static Vector2[] UpdatePartStart(Vector2[] result, ref Vector2 partStart)
+        {
+            partStart = result.Last();
+            return result;
+        }
+
         private static CrucibleIngredientPathSegment PartToCurve(ref string svgPath, Vector2 start)
         {
             var token = GetToken(ref svgPath);
@@ -154,55 +228,101 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
 
             return token switch
             {
-                "M" or "L" => AbsoluteLine(ref svgPath),
-                "H" => AbsoluteHorizontal(ref svgPath, start),
-                "V" => AbsoluteVertical(ref svgPath, start),
-                "C" => AbsoluteCubicCurve(ref svgPath),
-                "m" or "l" => RelativeLine(ref svgPath),
-                "v" => RelativeVertical(ref svgPath),
-                "h" => RelativeHorizontal(ref svgPath),
-                "c" => RelativeCubicCurve(ref svgPath),
+                "M" or "L" => AbsoluteLineToCurve(ref svgPath),
+                "H" => AbsoluteHorizontalToCurve(ref svgPath, start),
+                "V" => AbsoluteVerticalToCurve(ref svgPath, start),
+                "C" => AbsoluteCubicCurveToCurve(ref svgPath),
+                "m" or "l" => RelativeLineToCurve(ref svgPath),
+                "v" => RelativeVerticalToCurve(ref svgPath),
+                "h" => RelativeHorizontalToCurve(ref svgPath),
+                "c" => RelativeCubicCurveToCurve(ref svgPath),
                 _ => throw new Exception($"Unsupported SVG path command \"{token}\"."),
             };
         }
 
-        private static CrucibleIngredientPathSegment AbsoluteLine(ref string svgPath)
+        private static Vector2[] AbsoluteMoveToPoints(ref string svgPath, ref Vector2 partStart, ref Vector2 figureStart)
+        {
+            var p1 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
+            partStart = p1;
+            figureStart = p1;
+            return new Vector2[0];
+        }
+
+        private static Vector2[] RelativeMoveToPoints(ref string svgPath, ref Vector2 partStart, ref Vector2 figureStart)
+        {
+            var p1 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
+            partStart += p1;
+            figureStart = partStart;
+            return new Vector2[0];
+        }
+
+        private static CrucibleIngredientPathSegment AbsoluteLineToCurve(ref string svgPath)
         {
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             return CrucibleIngredientPathSegment.LineTo(end);
         }
 
-        private static CrucibleIngredientPathSegment RelativeLine(ref string svgPath)
+        private static Vector2[] AbsoluteLineToPoints(ref string svgPath)
+        {
+            var end = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
+            return new[] { end };
+        }
+
+        private static CrucibleIngredientPathSegment RelativeLineToCurve(ref string svgPath)
         {
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             return CrucibleIngredientPathSegment.RelativeLineTo(end);
         }
 
-        private static CrucibleIngredientPathSegment AbsoluteHorizontal(ref string svgPath, Vector2 start)
+        private static Vector2[] RelativeLineToPoints(ref string svgPath, Vector2 start)
+        {
+            var end = new Vector2(GetFloatTokenOrFail(ref svgPath) + start.x, GetFloatTokenOrFail(ref svgPath) + start.y);
+            return new[] { end };
+        }
+
+        private static CrucibleIngredientPathSegment AbsoluteHorizontalToCurve(ref string svgPath, Vector2 start)
         {
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), start.y);
             return CrucibleIngredientPathSegment.LineTo(end);
         }
 
-        private static CrucibleIngredientPathSegment RelativeHorizontal(ref string svgPath)
+        private static CrucibleIngredientPathSegment RelativeHorizontalToCurve(ref string svgPath)
         {
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), 0);
             return CrucibleIngredientPathSegment.RelativeLineTo(end);
         }
 
-        private static CrucibleIngredientPathSegment AbsoluteVertical(ref string svgPath, Vector2 start)
+        private static Vector2[] RelativeHorizontalToPoints(ref string svgPath, Vector2 start)
+        {
+            var end = new Vector2(GetFloatTokenOrFail(ref svgPath) + start.x, start.y);
+            return new[] { end };
+        }
+
+        private static CrucibleIngredientPathSegment AbsoluteVerticalToCurve(ref string svgPath, Vector2 start)
         {
             var end = new Vector2(start.x, GetFloatTokenOrFail(ref svgPath));
             return CrucibleIngredientPathSegment.LineTo(end);
         }
 
-        private static CrucibleIngredientPathSegment RelativeVertical(ref string svgPath)
+        private static Vector2[] AbsoluteVerticalToPoints(ref string svgPath, Vector2 start)
+        {
+            var end = new Vector2(start.x, GetFloatTokenOrFail(ref svgPath));
+            return new[] { end };
+        }
+
+        private static CrucibleIngredientPathSegment RelativeVerticalToCurve(ref string svgPath)
         {
             var end = new Vector2(0, GetFloatTokenOrFail(ref svgPath));
             return CrucibleIngredientPathSegment.RelativeLineTo(end);
         }
 
-        private static CrucibleIngredientPathSegment AbsoluteCubicCurve(ref string svgPath)
+        private static Vector2[] RelativeVerticalToPoints(ref string svgPath, Vector2 start)
+        {
+            var end = new Vector2(start.x, GetFloatTokenOrFail(ref svgPath) + start.y);
+            return new[] { end };
+        }
+
+        private static CrucibleIngredientPathSegment AbsoluteCubicCurveToCurve(ref string svgPath)
         {
             var p1 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             var p2 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
@@ -210,12 +330,36 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             return CrucibleIngredientPathSegment.CurveTo(p1, p2, end);
         }
 
-        private static CrucibleIngredientPathSegment RelativeCubicCurve(ref string svgPath)
+        private static Vector2[] AbsoluteCubicCurveToPoints(ref string svgPath)
+        {
+            var p1 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
+            var p2 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
+            var end = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
+            // FIXME: Break the cubic curve into line segments.
+            return new[] { p1, p2, end };
+        }
+
+        private static CrucibleIngredientPathSegment RelativeCubicCurveToCurve(ref string svgPath)
         {
             var p1 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             var p2 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             return CrucibleIngredientPathSegment.RelativeCurveTo(p1, p2, end);
+        }
+
+        private static Vector2[] RelativeCubicCurveToPoints(ref string svgPath, Vector2 start)
+        {
+            var p1 = new Vector2(GetFloatTokenOrFail(ref svgPath) + start.x, GetFloatTokenOrFail(ref svgPath) + start.y);
+            var p2 = new Vector2(GetFloatTokenOrFail(ref svgPath) + start.x, GetFloatTokenOrFail(ref svgPath) + start.y);
+            var end = new Vector2(GetFloatTokenOrFail(ref svgPath) + start.x, GetFloatTokenOrFail(ref svgPath) + start.y);
+            // FIXME: Break the cubic curve into line segments.
+            return new[] { p1, p2, end };
+        }
+
+        private static Vector2[] ClosePoints(ref string svgPath, ref Vector2 partStart, ref Vector2 figureStart)
+        {
+            partStart = figureStart;
+            return new[] { figureStart };
         }
     }
 }

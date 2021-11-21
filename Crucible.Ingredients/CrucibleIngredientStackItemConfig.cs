@@ -16,7 +16,6 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
 {
-    using System.Collections.Generic;
     using System.Linq;
     using RoboPhredDev.PotionCraft.Crucible.Config;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
@@ -46,7 +45,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <summary>
         /// Gets or sets the list of points making up the collision polygon.
         /// </summary>
-        public List<Vector2> Collision { get; set; }
+        public SvgPath Collision { get; set; }
 
         /// <summary>
         /// Gets or sets the stack items this item grinds into.
@@ -64,7 +63,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 Sprite = this.Sprite,
                 PositionInStack = this.PositionInStack,
                 AngleInStack = this.AngleInStack,
-                ColliderPolygon = this.Collision,
+                ColliderPolygon = this.Collision.ToPoints(),
             };
 
             if (this.GrindsInto != null)

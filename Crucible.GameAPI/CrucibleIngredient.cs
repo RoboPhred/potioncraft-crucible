@@ -529,8 +529,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 colliderInner.pathCount = 1;
                 colliderOuter.pathCount = 1;
-                colliderInner.SetPath(0, crucibleStackItem.ColliderPolygon);
-                colliderOuter.SetPath(0, crucibleStackItem.ColliderPolygon);
+
+                var positionCorrectedCollider = crucibleStackItem.ColliderPolygon.ConvertAll(v => (Vector2)(Quaternion.Euler(0, 0, crucibleStackItem.AngleInStack) * v) + crucibleStackItem.PositionInStack);
+                colliderInner.SetPath(0, positionCorrectedCollider);
+                colliderOuter.SetPath(0, positionCorrectedCollider);
             }
             else
             {
