@@ -41,9 +41,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
             }
 
             // Things get gnarly here, as we might be parsing an !import tag.
-            if (ImportDeserializer.TryConsumeImport(reader, out var filePath))
+            if (ImportDeserializer.TryConsumeImport(reader, out var resourcePath))
             {
-                value = Deserializer.WithFileParser(filePath, importParser =>
+                value = Deserializer.WithResourceFileParser(resourcePath, importParser =>
                 {
                     // Expecting a basic, non fragment single document file.
                     importParser.Consume<StreamStart>();

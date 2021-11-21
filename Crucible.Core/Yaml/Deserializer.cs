@@ -19,6 +19,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using RoboPhredDev.PotionCraft.Crucible.Resources;
     using YamlDotNet.Core;
     using YamlDotNet.Serialization;
     using YamlDotNet.Serialization.NamingConventions;
@@ -61,7 +62,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
         /// <returns>The deserialized object.</returns>
         public static T Deserialize<T>(string filePath)
         {
-            return WithFileParser(filePath, parser =>
+            return WithResourceFileParser(filePath, parser =>
             {
                 var deserializer = BuildDeserializer();
                 return deserializer.Deserialize<T>(parser);
@@ -71,12 +72,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
         /// <summary>
         /// Deserialize the given file into the given type.
         /// </summary>
-        /// <param name="filePath">The path to the file to deserialize.</param>
+        /// <param name="resourcePath">The path to the resource to deserialize.</param>
         /// <param name="type">The type to deserialize.</param>
         /// <returns>The deserialized object.</returns>
-        public static object Deserialize(string filePath, Type type)
+        public static object Deserialize(string resourcePath, Type type)
         {
-            return WithFileParser(filePath, parser =>
+            return WithResourceFileParser(resourcePath, parser =>
             {
                 var deserializer = BuildDeserializer();
                 return deserializer.Deserialize(parser, type);
@@ -123,16 +124,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
         /// <summary>
         /// Obtains a <see cref="IParser"/> from a given yaml file path.
         /// </summary>
-        /// <param name="filePath">The path of the file to obtain a parser for.</param>
+        /// <param name="resourcePath">The path of the resource file to obtain a parser for.</param>
         /// <param name="func">The function to parse the object from the parser.</param>
         /// <typeparam name="T">The type to deserialize.</typeparam>
         /// <returns>The parser for the given file.</returns>
-        public static T WithFileParser<T>(string filePath, Func<IParser, T> func)
+        public static T WithResourceFileParser<T>(string resourcePath, Func<IParser, T> func)
         {
-            ParsingFiles.Push(filePath);
+            ParsingFiles.Push(resourcePath);
             try
             {
-                var fileContents = File.ReadAllText(filePath);
+                var fileContents = CrucibleResources.ReadAllText(resourcePath);
                 var parser = new MergingParser(new Parser(new StringReader(fileContents)));
                 return func(parser);
             }

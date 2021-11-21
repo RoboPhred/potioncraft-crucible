@@ -22,6 +22,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.Resources
     public interface ICrucibleResourceProvider
     {
         /// <summary>
+        /// Checks to see if a given resource exists.
+        /// </summary>
+        /// <param name="resourceName">The name of the resource.</param>
+        /// <returns><c>true</c> if the resource exists, or <c>falsse</c>.</returns>
+        bool Exists(string resourceName);
+
+        /// <summary>
         /// Reads all text from a text resource.
         /// </summary>
         /// /// <param name="resourceName">The name of the resource to read.</param>

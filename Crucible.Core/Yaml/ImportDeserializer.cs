@@ -18,6 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
 {
     using System;
     using System.IO;
+    using RoboPhredDev.PotionCraft.Crucible.Resources;
     using YamlDotNet.Core;
     using YamlDotNet.Core.Events;
     using YamlDotNet.Serialization;
@@ -51,9 +52,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
                 }
 
                 filePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(Deserializer.CurrentFilePath), filePath));
-                if (!File.Exists(filePath))
+                if (!CrucibleResources.Exists(filePath))
                 {
-                    throw new YamlException(nodeEvent.Start, nodeEvent.End, $"Cannot import file \"{filePath}\" as the file does not exist.");
+                    throw new YamlException(nodeEvent.Start, nodeEvent.End, $"Cannot import file \"{filePath}\" as the file does not exist in the current package.");
                 }
 
                 return true;

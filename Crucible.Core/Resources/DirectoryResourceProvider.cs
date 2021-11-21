@@ -35,6 +35,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Resources
         }
 
         /// <inheritdoc/>
+        public bool Exists(string resourcePath)
+        {
+            return File.Exists(Path.Combine(this.rootPath, resourcePath));
+        }
+
+        /// <inheritdoc/>
         public byte[] ReadAllBytes(string resource)
         {
             var resourcePath = this.GetResourcePath(resource);

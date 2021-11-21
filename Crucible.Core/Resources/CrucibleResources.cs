@@ -43,6 +43,24 @@ namespace RoboPhredDev.PotionCraft.Crucible.Resources
         }
 
         /// <summary>
+        /// Checks to see if a given resource exists.
+        /// </summary>
+        /// <param name="resourceName">The name of the resource.</param>
+        /// <returns><c>true</c> if the resource exists, or <c>falsse</c>.</returns>
+        public static bool Exists(string resourceName)
+        {
+            if (CurrentResourceProvider == null)
+            {
+                throw new CrucibleResourceException($"No resource provider is active.")
+                {
+                    ResourceName = resourceName,
+                };
+            }
+
+            return CurrentResourceProvider.Exists(resourceName);
+        }
+
+        /// <summary>
         /// Reads all text from a text resource.
         /// </summary>
         /// /// <param name="resourceName">The name of the resource to read.</param>
