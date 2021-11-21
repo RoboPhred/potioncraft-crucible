@@ -33,7 +33,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <summary>
         /// Gets or sets the ID of this ingredient.
         /// </summary>
-        [YamlMemberAttribute(Alias = "id")]
+        [YamlMember(Alias = "id")]
         public string ID { get; set; }
 
         /// <summary>
