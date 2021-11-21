@@ -538,8 +538,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
             else
             {
-                colliderInner.CreatePrimitive(4, new Vector2(0.3f, 0.3f), crucibleStackItem.PositionInStack);
-                colliderOuter.CreatePrimitive(4, new Vector2(0.3f, 0.3f), crucibleStackItem.PositionInStack);
+                var positionCorrectedCollider = new List<Vector2>
+                {
+                    new Vector2(-.3f, -.3f),
+                    new Vector2(.3f, -.3f),
+                    new Vector2(.3f, .3f),
+                    new Vector2(-.3f, .3f),
+                }.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
+                colliderInner.SetPath(0, positionCorrectedCollider);
+                colliderOuter.SetPath(0, positionCorrectedCollider);
             }
 
             var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();
