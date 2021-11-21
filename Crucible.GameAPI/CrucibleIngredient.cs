@@ -499,11 +499,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             Traverse.Create(this.Ingredient.substanceGrindingSettings).Method("CalculateTotalCurveValue").GetValue();
         }
 
-        private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItem)
+        private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItem, int depth = 0)
         {
             var stackItem = new GameObject
             {
-                name = $"{this.ID} Stack Item",
+                name = $"{this.ID} Stack Item {depth}",
             };
             stackItem.transform.parent = GameObjectUtilities.DisabledRoot.transform;
             stackItem.transform.localPosition = crucibleStackItem.PositionInStack;
@@ -547,7 +547,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ifs.spriteRenderers = new[] { spriteRenderer };
             ifs.colliderOuter = colliderOuter;
             ifs.colliderInner = colliderInner;
-            ifs.NextStagePrefabs = crucibleStackItem.GrindChildren.Select(x => this.CreateStackItem(x)).ToArray();
+            ifs.NextStagePrefabs = crucibleStackItem.GrindChildren.Select(x => this.CreateStackItem(x, depth + 1)).ToArray();
 
             return stackItem;
         }

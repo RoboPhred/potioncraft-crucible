@@ -335,6 +335,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             var p1 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             var p2 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
+
             // FIXME: Break the cubic curve into line segments.
             return new[] { p1, p2, end };
         }
@@ -352,6 +353,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             var p1 = new Vector2(GetFloatTokenOrFail(ref svgPath) + start.x, GetFloatTokenOrFail(ref svgPath) + start.y);
             var p2 = new Vector2(GetFloatTokenOrFail(ref svgPath) + start.x, GetFloatTokenOrFail(ref svgPath) + start.y);
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath) + start.x, GetFloatTokenOrFail(ref svgPath) + start.y);
+
             // FIXME: Break the cubic curve into line segments.
             return new[] { p1, p2, end };
         }

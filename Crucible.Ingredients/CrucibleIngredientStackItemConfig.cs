@@ -63,7 +63,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 Sprite = this.Sprite,
                 PositionInStack = this.PositionInStack,
                 AngleInStack = this.AngleInStack,
-                ColliderPolygon = this.Collision.ToPoints(),
+                ColliderPolygon = this.Collision?.ToPoints(),
             };
 
             if (this.GrindsInto != null)
