@@ -14,6 +14,8 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
+#if ENABLE_POTION_BASE
+
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
 {
     using UnityEngine;
@@ -36,3 +38,5 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         }
     }
 }
+
+#endif
