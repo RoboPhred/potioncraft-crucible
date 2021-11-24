@@ -63,6 +63,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <returns>The stack item.</returns>
         public CrucibleIngredientStackItem ToStackItem()
         {
+            if (this.SelfCollision != null && string.IsNullOrEmpty(this.SelfCollision.Data))
+            {
+                this.SelfCollision.Data = this.Collision?.Data;
+            }
+
             var item = new CrucibleIngredientStackItem
             {
                 Sprite = this.Sprite,

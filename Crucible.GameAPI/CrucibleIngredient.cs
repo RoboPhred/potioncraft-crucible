@@ -221,6 +221,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the stack items spawned act solid in the mortar.
+        /// </summary>
+        public bool IsStackItemSolid
+        {
+            get
+            {
+                return this.Ingredient.isSolid;
+            }
+
+            set
+            {
+                this.Ingredient.isSolid = value;
+            }
+        }
+
         private string LocalizationKey
         {
             get
@@ -276,11 +292,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 grindedPathStartsFrom = ingredientBase.path.grindedPathStartsFrom,
             };
 
-            // TODO: Get access to these from the crucible api.
             ingredient.itemStackPrefab = ingredientBase.itemStackPrefab;
-            ingredient.grindedSubstance = ingredientBase.grindedSubstance;
+
             ingredient.grindedSubstanceColor = ingredientBase.grindedSubstanceColor;
-            ingredient.grindedSubstanceMaxAmount = ingredientBase.grindedSubstanceMaxAmount;
+
+            // TODO: Get access to these from the crucible api.
+            ingredient.grindedSubstance = ingredientBase.grindedSubstance;
             ingredient.physicalParticleType = ingredientBase.physicalParticleType;
             ingredient.effectMovement = ingredientBase.effectMovement;
             ingredient.effectCollision = ingredientBase.effectCollision;
@@ -292,10 +309,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ingredient.spotPlantSpawnTypes = new List<GrowingSpotType>();
             ingredient.soundPreset = ingredientBase.soundPreset;
 
-            // TODO: These are particularly important, they control the grinding response.
-            // Might be related to ingredients not being fully ground with custom stack items.
+            // These are calculated on awake, or with our ReinitializeIngredient function.
             ingredient.grindStatusByLeafGrindingCurve = ingredientBase.grindStatusByLeafGrindingCurve;
             ingredient.substanceGrindingSettings = ingredientBase.substanceGrindingSettings;
+            ingredient.grindedSubstanceMaxAmount = ingredientBase.grindedSubstanceMaxAmount;
 
             ingredient.OnAwake();
 
@@ -499,10 +516,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             Traverse.Create(this.Ingredient.substanceGrindingSettings).Method("CalculateTotalCurveValue").GetValue();
         }
 
-        private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItem, Matrix4x4? parent = null, int depth = 0)
+        private GameObject CreateStackItem(CrucibleIngredientStackItem crucibleStackItem, int depth = 0)
         {
-            var parentM = parent ?? Matrix4x4.identity;
-            var selfM = parentM * Matrix4x4.TRS(crucibleStackItem.PositionInStack, Quaternion.Euler(0, 0, crucibleStackItem.AngleInStack), Vector2.one);
             var stackItem = new GameObject
             {
                 name = $"{this.ID} Stack Item {depth}",
@@ -517,6 +532,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 layer = LayerMask.NameToLayer("IngredientsOuter"),
             };
             goOuter.transform.parent = stackItem.transform;
+            goOuter.transform.localPosition = Vector3.zero;
+            goOuter.transform.eulerAngles = Vector3.zero;
             var colliderOuter = goOuter.AddComponent<PolygonCollider2D>();
 
             var goInner = new GameObject
@@ -525,10 +542,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 layer = LayerMask.NameToLayer("IngredientsInner"),
             };
             goInner.transform.parent = stackItem.transform;
+            goInner.transform.localPosition = Vector3.zero;
+            goInner.transform.eulerAngles = Vector3.zero;
             var colliderInner = goInner.AddComponent<PolygonCollider2D>();
 
-            var positionCorrectedCollider = crucibleStackItem.ColliderPolygon?.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
-            var positionCorrectedInnerCollider = (crucibleStackItem.InnerColliderPolygon ?? crucibleStackItem.ColliderPolygon)?.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
+            // Why do we have to apply selfM as an offset?
+            // Our parent is already offset... so is the rigidbody on the parent...
+            var positionCorrectedCollider = crucibleStackItem.ColliderPolygon;
+            var positionCorrectedInnerCollider = crucibleStackItem.InnerColliderPolygon ?? crucibleStackItem.ColliderPolygon;
 
             if (positionCorrectedCollider?.Count > 0)
             {
@@ -544,7 +565,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     new Vector2(.3f, -.3f),
                     new Vector2(.3f, .3f),
                     new Vector2(-.3f, .3f),
-                }.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
+                };
                 colliderOuter.SetPath(0, dummyCollider);
             }
 
@@ -562,7 +583,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     new Vector2(.3f, -.3f),
                     new Vector2(.3f, .3f),
                     new Vector2(-.3f, .3f),
-                }.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
+                };
                 colliderInner.SetPath(0, dummyCollider);
             }
 
@@ -573,8 +594,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ifs.spriteRenderers = new[] { spriteRenderer };
             ifs.colliderOuter = colliderOuter;
             ifs.colliderInner = colliderInner;
-            ifs.spawnAtTheVisualCenterOfTheParent = true;
-            ifs.NextStagePrefabs = crucibleStackItem.GrindChildren.Select(x => this.CreateStackItem(x, selfM, depth + 1)).ToArray();
+            ifs.NextStagePrefabs = crucibleStackItem.GrindChildren.Select(x => this.CreateStackItem(x, depth + 1)).ToArray();
 
             return stackItem;
         }

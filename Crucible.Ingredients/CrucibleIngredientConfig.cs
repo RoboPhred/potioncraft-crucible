@@ -69,7 +69,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <summary>
         /// Gets or sets the bace price for this ingredient.
         /// </summary>
-        public float? Price { get; set; }
+        public float? BasePrice { get; set; }
 
         /// <summary>
         /// Gets or sets the ingredient path for this ingredient.
@@ -95,6 +95,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// Gets or sets the stack items for this ingredient.
         /// </summary>
         public OneOrMany<CrucibleIngredientStackItemConfig> StackItems { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the stack items behave as solid items in the morter.
+        /// </summary>
+        public bool? IsStackItemsSolid { get; set; }
 
         /// <inheritdoc/>
         protected override void OnDeserializeCompleted(Mark start, Mark end)
@@ -140,9 +145,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 subject.IngredientListIcon = this.IngredientListIcon;
             }
 
-            if (this.Price.HasValue)
+            if (this.BasePrice.HasValue)
             {
-                subject.Price = this.Price.Value;
+                subject.Price = this.BasePrice.Value;
             }
 
             if (this.IsTeleportationIngredient.HasValue)
@@ -168,6 +173,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             if (this.StackItems.Count > 0)
             {
                 subject.SetStack(this.StackItems.Select(x => x.ToStackItem()));
+            }
+
+            if (this.IsStackItemsSolid.HasValue)
+            {
+                subject.IsStackItemSolid = this.IsStackItemsSolid.Value;
             }
         }
     }

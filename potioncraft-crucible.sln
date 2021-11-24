@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible.Ingredients", "Cru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible.PotionBases", "Crucible.PotionBases\Crucible.PotionBases.csproj", "{3B1DD2DF-7D39-4EC7-A6AF-73884DFDA74B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible.Traders", "Crucible.Traders\Crucible.Traders.csproj", "{E6BCE39D-D78F-4B87-9EA0-CBC52CC0BCC3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crucible.NPCs", "Crucible.NPCs\Crucible.NPCs.csproj", "{E6BCE39D-D78F-4B87-9EA0-CBC52CC0BCC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
