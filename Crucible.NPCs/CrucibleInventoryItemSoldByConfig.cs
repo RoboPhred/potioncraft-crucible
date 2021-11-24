@@ -14,7 +14,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Traders
+namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.Config;

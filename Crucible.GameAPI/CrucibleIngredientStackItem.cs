@@ -48,6 +48,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public List<Vector2> ColliderPolygon { get; set; }
 
         /// <summary>
+        /// Gets or sets the list of points that make up the collision polygon of this item.
+        /// </summary>
+        public List<Vector2> InnerColliderPolygon { get; set; }
+
+        /// <summary>
         /// Gets or sets the list of child stack items to create when this ingredient is ground.
         /// </summary>
         public List<CrucibleIngredientStackItem> GrindChildren { get; set; } = new();

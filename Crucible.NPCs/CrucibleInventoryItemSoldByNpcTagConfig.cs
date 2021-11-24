@@ -1,4 +1,4 @@
-﻿// <copyright file="CrucibleInventoryItemTraderExtensionConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleInventoryItemSoldByNpcTagConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,33 +14,36 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Traders
+namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using RoboPhredDev.PotionCraft.Crucible.Config;
+    using System.Collections.Generic;
+    using System.Linq;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
-    /// A configuration extention allowing the specification of trader npcs selling the extended inventory item.
+    /// A config entry for specifying a specific npc template to sell an item.
     /// </summary>
-    [CruciblePackageConfigExtension(typeof(CrucibleInventoryItem))]
-    public class CrucibleInventoryItemTraderExtensionConfig : CruciblePackageConfigNode, ICruciblePackageConfigExtension<CrucibleInventoryItem>
+    public class CrucibleInventoryItemSoldByNpcTagConfig : CrucibleInventoryItemSoldByConfig
     {
         /// <summary>
-        /// Gets or sets the collection of configs denotating who sells this inventory item.
+        /// Gets or sets the collection of npc template names that will stock this item.
         /// </summary>
-        public OneOrMany<CrucibleInventoryItemSoldByConfig> SoldBy { get; set; }
+        public OneOrMany<string> NpcTag { get; set; }
 
         /// <inheritdoc/>
-        public void OnApplyConfiguration(CrucibleInventoryItem subject)
+        protected override IEnumerable<CrucibleNpcTemplate> GetTraders()
         {
-            if (this.SoldBy != null)
+            if (this.NpcTag == null)
             {
-                foreach (var soldBy in this.SoldBy)
-                {
-                    soldBy.OnApplyConfiguration(subject);
-                }
+                return new CrucibleNpcTemplate[0];
             }
+
+            var traders = from template in CrucibleNpcTemplate.GetAllNpcTemplates()
+                          where template.IsTrader
+                          where this.NpcTag.All(x => template.HasTag(x))
+                          select template;
+            return traders.Distinct();
         }
     }
 }

@@ -1,4 +1,4 @@
-// <copyright file="CrucibleInventoryItemSoldByNpcTemplateConfig.cs" company="RoboPhredDev">
+﻿// <copyright file="CrucibleInventoryItemTraderExtensionConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,39 +14,32 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Traders
+namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System.Collections.Generic;
+    using RoboPhredDev.PotionCraft.Crucible.Config;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
-    /// A config entry for specifying a specific npc template to sell an item.
+    /// A configuration extention allowing the specification of trader npcs selling the extended inventory item.
     /// </summary>
-    public class CrucibleInventoryItemSoldByNpcTemplateConfig : CrucibleInventoryItemSoldByConfig
+    [CruciblePackageConfigExtension(typeof(CrucibleInventoryItem))]
+    public class CrucibleInventoryItemTraderExtensionConfig : CruciblePackageConfigNode, ICruciblePackageConfigExtension<CrucibleInventoryItem>
     {
         /// <summary>
-        /// Gets or sets the collection of npc template names that will stock this item.
+        /// Gets or sets the collection of configs denotating who sells this inventory item.
         /// </summary>
-        public OneOrMany<string> NpcTemplateName { get; set; }
+        public OneOrMany<CrucibleInventoryItemSoldByConfig> SoldBy { get; set; }
 
         /// <inheritdoc/>
-        protected override IEnumerable<CrucibleNpcTemplate> GetTraders()
+        public void OnApplyConfiguration(CrucibleInventoryItem subject)
         {
-            foreach (string templateName in this.NpcTemplateName)
+            if (this.SoldBy != null)
             {
-                var trader = CrucibleNpcTemplate.GetNpcTemplateById(templateName);
-                if (trader == null)
+                foreach (var soldBy in this.SoldBy)
                 {
-                    throw new System.Exception($"NPC template {templateName} not found.");
+                    soldBy.OnApplyConfiguration(subject);
                 }
-
-                if (!trader.IsTrader)
-                {
-                    throw new System.Exception($"NPC template {templateName} is not a trader.");
-                }
-
-                yield return trader;
             }
         }
     }

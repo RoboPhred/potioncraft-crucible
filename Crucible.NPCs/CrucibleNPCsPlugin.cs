@@ -14,14 +14,14 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Traders
+namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
     using BepInEx;
 
     /// <summary>
     /// BepInEx plugin for Crucible Config mods.
     /// </summary>
-    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.Traders", "NPC Trader support for Crucible Modding Framework", "1.0.0.0")]
+    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.NPCs", "NPC support for Crucible Modding Framework", "1.0.0.0")]
     [BepInDependency("net.RoboPhredDev.PotionCraft.Crucible")]
     public class CrucibleTradersPlugin : BaseUnityPlugin
     {

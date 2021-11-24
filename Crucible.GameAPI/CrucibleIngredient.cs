@@ -527,26 +527,43 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             goInner.transform.parent = stackItem.transform;
             var colliderInner = goInner.AddComponent<PolygonCollider2D>();
 
-            if (crucibleStackItem.ColliderPolygon?.Count > 0)
+            var positionCorrectedCollider = crucibleStackItem.ColliderPolygon?.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
+            var positionCorrectedInnerCollider = (crucibleStackItem.InnerColliderPolygon ?? crucibleStackItem.ColliderPolygon)?.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
+
+            if (positionCorrectedCollider?.Count > 0)
             {
-                colliderInner.pathCount = 1;
                 colliderOuter.pathCount = 1;
 
-                var positionCorrectedCollider = crucibleStackItem.ColliderPolygon.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
-                colliderInner.SetPath(0, positionCorrectedCollider);
                 colliderOuter.SetPath(0, positionCorrectedCollider);
             }
             else
             {
-                var positionCorrectedCollider = new List<Vector2>
+                var dummyCollider = new List<Vector2>
                 {
                     new Vector2(-.3f, -.3f),
                     new Vector2(.3f, -.3f),
                     new Vector2(.3f, .3f),
                     new Vector2(-.3f, .3f),
                 }.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
-                colliderInner.SetPath(0, positionCorrectedCollider);
-                colliderOuter.SetPath(0, positionCorrectedCollider);
+                colliderOuter.SetPath(0, dummyCollider);
+            }
+
+            if (positionCorrectedInnerCollider?.Count > 0)
+            {
+                colliderInner.pathCount = 1;
+
+                colliderInner.SetPath(0, positionCorrectedInnerCollider);
+            }
+            else
+            {
+                var dummyCollider = new List<Vector2>
+                {
+                    new Vector2(-.3f, -.3f),
+                    new Vector2(.3f, -.3f),
+                    new Vector2(.3f, .3f),
+                    new Vector2(-.3f, .3f),
+                }.ConvertAll(v => (Vector2)selfM.MultiplyPoint3x4(v));
+                colliderInner.SetPath(0, dummyCollider);
             }
 
             var spriteRenderer = stackItem.AddComponent<SpriteRenderer>();

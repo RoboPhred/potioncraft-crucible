@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <RootNamespace>RoboPhredDev.PotionCraft.Crucible.Traders</RootNamespace>
+    <RootNamespace>RoboPhredDev.PotionCraft.Crucible.NPCs</RootNamespace>
     <LangVersion>preview</LangVersion>
     <CodeAnalysisRuleSet>../StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRuleSet>../StyleCop.ruleset</CodeAnalysisRuleSet>

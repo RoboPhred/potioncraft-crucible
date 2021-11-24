@@ -43,9 +43,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public float AngleInStack { get; set; }
 
         /// <summary>
-        /// Gets or sets the list of points making up the collision polygon.
+        /// Gets or sets the collision shape for collision with the world.
         /// </summary>
         public SvgPath Collision { get; set; }
+
+        /// <summary>
+        /// Gets or sets the collision shape for collision with itself.
+        /// </summary>
+        public SvgPath SelfCollision { get; set; }
 
         /// <summary>
         /// Gets or sets the stack items this item grinds into.
@@ -64,6 +69,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 PositionInStack = this.PositionInStack,
                 AngleInStack = this.AngleInStack,
                 ColliderPolygon = this.Collision?.ToPoints(),
+                InnerColliderPolygon = this.SelfCollision?.ToPoints(),
             };
 
             if (this.GrindsInto != null)
