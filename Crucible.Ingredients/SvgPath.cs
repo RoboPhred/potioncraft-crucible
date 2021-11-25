@@ -50,14 +50,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public string Data { get; set; }
 
         /// <summary>
-        /// Gets or sets the x axis scaling.
+        /// Gets or sets the scale to apply to the path.
         /// </summary>
-        public float ScaleX { get; set; } = 1;
-
-        /// <summary>
-        /// Gets or sets the y axis scaling.
-        /// </summary>
-        public float ScaleY { get; set; } = 1;
+        public Vector2 Scale { get; set; } = Vector2.one;
 
         /// <summary>
         /// Parses an SVG Path into a list of <see cref="CrucibleIngredientPathSegment"/>s.
@@ -69,7 +64,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
 
             // This is the scale to apply to each path command.
             // Flip the y axis, as standard SVG paths are top-down, while game paths are bottom-up.
-            var scale = new Vector2(this.ScaleX, this.ScaleY * -1);
+            var scale = new Vector2(this.Scale.x, this.Scale.y * -1);
 
             var lastEnd = Vector2.zero;
             CrucibleIngredientPathSegment curve;
@@ -125,10 +120,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             }
 
             // This is the scale to apply to each path command.
-            // Flip the y axis, as standard SVG paths are top-down, while game paths are bottom-up.
-            var scale = new Vector2(this.ScaleX, this.ScaleY * -1);
-
-            return result.ConvertAll(x => x * scale);
+            // Flip the y axis, as standard SVG paths are top-down, while game copords are bottom-up.
+            var negY = new Vector2(1, -1);
+            return result.ConvertAll(x => x * this.Scale * negY);
         }
 
         private static string GetToken(ref string svgPath)
