@@ -463,7 +463,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 CrucibleSpriteAtlasManager.AddAtlas(spriteAtlas);
             }
 
-            spriteAtlas.SetIcon($"{ingredient.name.Replace(" ", string.Empty)} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
+            spriteAtlas.SetIcon($"{ingredient.name.Replace(" ", string.Empty)} SmallIcon", texture, 0, texture.height * 0.66f, 1f);
 
             AtlasOverriddenIngredients.Add(ingredient);
         }
@@ -492,6 +492,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 }
             };
 
+            // Stack items expect activated perfabs.  Prefabs made by the unity editor can be 'active' while not actually existing as true game objects.
+            // Since we cannot pull this off at runtime, we instead need to set our template game objects as inactive.  This stops them running
+            // their initialization code before they are actually spawned and hooked up to real items.
+            // However, we need to activate them on spawn to let their logic wake up and work properly.
             StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
             {
                 if (e.Stack.inventoryItem is not Ingredient ingredient)
@@ -533,7 +537,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             };
             goOuter.transform.parent = stackItem.transform;
             goOuter.transform.localPosition = Vector3.zero;
-            goOuter.transform.eulerAngles = Vector3.zero;
+            goOuter.transform.localRotation = Quaternion.identity;
             var colliderOuter = goOuter.AddComponent<PolygonCollider2D>();
 
             var goInner = new GameObject
@@ -543,11 +547,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             };
             goInner.transform.parent = stackItem.transform;
             goInner.transform.localPosition = Vector3.zero;
-            goInner.transform.eulerAngles = Vector3.zero;
+            goOuter.transform.localRotation = Quaternion.identity;
             var colliderInner = goInner.AddComponent<PolygonCollider2D>();
 
-            // Why do we have to apply selfM as an offset?
-            // Our parent is already offset... so is the rigidbody on the parent...
             var positionCorrectedCollider = crucibleStackItem.ColliderPolygon;
             var positionCorrectedInnerCollider = crucibleStackItem.InnerColliderPolygon ?? crucibleStackItem.ColliderPolygon;
 

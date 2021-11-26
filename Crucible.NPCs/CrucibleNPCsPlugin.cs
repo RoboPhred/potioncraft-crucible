@@ -1,4 +1,4 @@
-// <copyright file="CrucibleTradersPlugin.cs" company="RoboPhredDev">
+// <copyright file="CrucibleNPCsPlugin.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     /// </summary>
     [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.NPCs", "NPC support for Crucible Modding Framework", "1.0.0.0")]
     [BepInDependency("net.RoboPhredDev.PotionCraft.Crucible")]
-    public class CrucibleTradersPlugin : BaseUnityPlugin
+    public class CrucibleNPCsPlugin : BaseUnityPlugin
     {
     }
 }

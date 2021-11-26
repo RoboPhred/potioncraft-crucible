@@ -125,7 +125,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="xOffset">The x offset of the icon.</param>
         /// <param name="yOffset">The y offset of the icon.</param>
         /// <param name="scale">The scale of the icon.</param>
-        public void SetIcon(string iconName, Texture2D icon, float xOffset, float yOffset, float scale)
+        public void SetIcon(string iconName, Texture2D icon, float xOffset = 0, float yOffset = 0, float scale = 1f)
         {
             this.items[iconName] = new SpriteAtlasItem
             {
