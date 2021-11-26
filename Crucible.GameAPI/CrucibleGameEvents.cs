@@ -26,7 +26,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     {
         private static bool isInitialized;
 
-        private static EventHandler onSaveLoaded;
+        private static EventHandler<CrucibleSaveEventArgs> onSaveLoaded;
+        private static EventHandler<CrucibleSaveEventArgs> onSaveSaved;
 
         /// <summary>
         /// Raised when the game has finished loading its initial data.
@@ -53,8 +54,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Raised when a save file is loaded.
         /// </summary>
-        // TODO: Present the save file and support loading custom data from it.
-        public static event EventHandler OnSaveLoaded
+        /// <remarks>
+        /// This provides an opportunity for other mods to load data previously saved.
+        /// The <see cref="CrucibleSaveEventArgs"/> arguments provides access to saving data to the save file, which may be saved
+        /// using <see cref="OnSaveSaved"/>.
+        /// </remarks>
+        public static event EventHandler<CrucibleSaveEventArgs> OnSaveLoaded
         {
             add
             {
@@ -68,6 +73,28 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        /// <summary>
+        /// Raised when a save file is saved.
+        /// </summary>
+        /// <remarks>
+        /// This provides an opportunity for other mods to store data into the save file.
+        /// The <see cref="CrucibleSaveEventArgs"/> arguments provides access to saving data to the save file, which may be loaded
+        /// using <see cref="OnSaveLoaded"/>.
+        /// </remarks>
+        public static event EventHandler<CrucibleSaveEventArgs> OnSaveSaved
+        {
+            add
+            {
+                EnsureInitialized();
+                onSaveSaved += value;
+            }
+
+            remove
+            {
+                onSaveSaved -= value;
+            }
+        }
+
         private static void EnsureInitialized()
         {
             if (isInitialized)
@@ -77,7 +104,30 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             isInitialized = true;
 
-            SaveLoadEvent.OnGameLoaded += (_, __) => onSaveLoaded?.Invoke(null, EventArgs.Empty);
+            SaveLoadEvent.OnGameLoaded += HandleSaveLoaded;
+            SaveLoadEvent.OnGameSaved += HandleSaveSaved;
+        }
+
+        private static void HandleSaveLoaded(object sender, SaveLoadEventArgs e)
+        {
+            if (onSaveLoaded == null)
+            {
+                return;
+            }
+
+            using var saveFile = new CrucibleSaveFile(e.File);
+            onSaveLoaded.Invoke(null, new CrucibleSaveEventArgs(saveFile));
+        }
+
+        private static void HandleSaveSaved(object sender, SaveLoadEventArgs e)
+        {
+            if (onSaveSaved == null)
+            {
+                return;
+            }
+
+            using var saveFile = new CrucibleSaveFile(e.File);
+            onSaveSaved.Invoke(null, new CrucibleSaveEventArgs(saveFile));
         }
     }
 }

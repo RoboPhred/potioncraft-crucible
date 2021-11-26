@@ -14,7 +14,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible
+namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Collections.Generic;
@@ -52,26 +52,51 @@ namespace RoboPhredDev.PotionCraft.Crucible
         }
 
         /// <summary>
-        /// Gets the BepInEx mod GUID for the mod implemented in the given assembly.
+        /// Gets the BepInEx plugin GUID for the mod implemented in the given assembly.
         /// </summary>
         /// <remarks>
-        /// If more than one mod is located in the assembly, the returned GUID may be unpredictable.
+        /// If more than one plugin is located in the assembly, the method will return null.
         /// </remarks>
         /// <param name="assembly">The assembly to identify the mod GUID from.</param>
-        /// <returns>The mod GUID of the BepInExPlugin contained in the assembly, or <c>null</c> if none was found.</returns>
-        public static string GetModGuidFromAssembly(Assembly assembly)
+        /// <returns>The plugin GUID of the BepInExPlugin contained in the assembly, or <c>null</c> if none was found.</returns>
+        public static string GetPluginGuidFromAssembly(Assembly assembly)
         {
             var pluginAttributes = from type in assembly.GetTypes()
                                    let attribute = (BepInPlugin)Attribute.GetCustomAttribute(type, typeof(BepInPlugin))
                                    where attribute != null
                                    select attribute;
-            var bepAttr = pluginAttributes.FirstOrDefault();
-            if (bepAttr != null)
+            var found = pluginAttributes.ToArray();
+            if (found.Length != 1)
             {
-                return bepAttr.GUID;
+                return null;
             }
 
-            return null;
+            return found[0].GUID;
+        }
+
+        /// <summary>
+        /// Gets the BepInPlugin GUID for the assembly, or throw a <see cref="BepInPluginRequiredException"/> if none is found.
+        /// </summary>
+        /// <param name="assembly">The assembly to fetch the plugin GUID from.</param>
+        /// <returns>The plugin GUID of the plugin the given assembly implements.</returns>
+        public static string RequirePluginGuidFromAssembly(Assembly assembly)
+        {
+            var pluginAttributes = from type in assembly.GetTypes()
+                                   let attribute = (BepInPlugin)Attribute.GetCustomAttribute(type, typeof(BepInPlugin))
+                                   where attribute != null
+                                   select attribute;
+            var found = pluginAttributes.ToArray();
+            if (found.Length == 0)
+            {
+                throw new BepInPluginRequiredException("No class in the assembly contains the BepInPlugin attribute.");
+            }
+
+            if (found.Length > 1)
+            {
+                throw new BepInPluginRequiredException("The assembly contains more than one class with the BepInPlugin attribute.");
+            }
+
+            return found[0].GUID;
         }
 
         private static void EnsureInitialized()

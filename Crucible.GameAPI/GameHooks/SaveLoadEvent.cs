@@ -29,17 +29,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     /// </summary>
     public static class SaveLoadEvent
     {
-        // TODO: An event for saving the game.
-        // Decide whether this should be before or after File is saved
-        // to disk.  If before, we need a way to attach data to the File that will
-        // save.  After might be simpler, as then we can append to the existing file.
-        /*
         private static EventHandler<SaveLoadEventArgs> onGameSaved;
-        */
 
         private static EventHandler<SaveLoadEventArgs> onGameLoaded;
 
-        /*
         /// <summary>
         /// Raised after the game saves.
         /// </summary>
@@ -56,7 +49,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 onGameSaved -= value;
             }
         }
-        */
 
         /// <summary>
         /// Raised after the game loads.
@@ -77,7 +69,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static void EnsurePatches()
         {
-            var loadLastProgressFromPool = AccessTools.Method(typeof(SaveLoadManager), "LoadLastProgressFromPool");
+            var loadLastProgressFromPool = AccessTools.Method(typeof(SaveLoadManager), nameof(SaveLoadManager.LoadLastProgressFromPool));
             if (loadLastProgressFromPool == null)
             {
                 Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate game load function!");
@@ -87,6 +79,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 var transpiler = AccessTools.Method(typeof(SaveLoadEvent), nameof(TranspileLoadLastProgressFromPool));
                 HarmonyInstance.Instance.Patch(loadLastProgressFromPool, transpiler: new HarmonyMethod(transpiler));
             }
+
+            var saveProgressToPool = AccessTools.Method(typeof(SaveLoadManager), nameof(SaveLoadManager.SaveProgressToPool));
+            if (saveProgressToPool == null)
+            {
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate game save function!");
+            }
+            else
+            {
+                var transpiler = AccessTools.Method(typeof(SaveLoadEvent), nameof(TranspileSaveProgressToPool));
+                HarmonyInstance.Instance.Patch(saveProgressToPool, transpiler: new HarmonyMethod(transpiler));
+            }
         }
 
         private static void RaiseGameLoaded(File file)
@@ -95,11 +98,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             onGameLoaded?.Invoke(null, e);
         }
 
+        private static void RaiseGameSaved(SavePool pool)
+        {
+            // We dont get a direct reference to the file, but we can safely assume it was the
+            // most recent file in the given pool.
+            var file = FileStorage.GetNewestFromPool(pool);
+            var e = new SaveLoadEventArgs(file);
+            onGameSaved?.Invoke(null, e);
+        }
+
         private static IEnumerable<CodeInstruction> TranspileLoadLastProgressFromPool(IEnumerable<CodeInstruction> instructions)
         {
             var raiseGameLoadedMethodInfo = AccessTools.Method(typeof(SaveLoadEvent), nameof(RaiseGameLoaded));
 
-            var managersGetMenuMethodInfo = AccessTools.PropertyGetter(typeof(Managers), "Menu");
+            var managersGetMenuMethodInfo = AccessTools.PropertyGetter(typeof(Managers), nameof(Managers.Menu));
 
             var found = false;
             foreach (var instruction in instructions)
@@ -117,6 +129,37 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             if (!found)
             {
                 Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to inject game loaded interceptor!");
+            }
+        }
+
+        private static IEnumerable<CodeInstruction> TranspileSaveProgressToPool(IEnumerable<CodeInstruction> instructions)
+        {
+            var createNewFromStateMethodInfo = AccessTools.Method(typeof(File), nameof(File.CreateNewFromState));
+            var raiseGameSavedMethodInfo = AccessTools.Method(typeof(SaveLoadEvent), nameof(RaiseGameSaved));
+            var found = false;
+            foreach (var instruction in instructions)
+            {
+                if (!found && instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo methodInfo && methodInfo == createNewFromStateMethodInfo)
+                {
+                    found = true;
+
+                    // yield the instruction to call the function that saves the game.
+                    yield return instruction;
+
+                    // After saving the file, call our handler.
+                    // We dont have a direct reference to the file, so we will infer it from the pool.
+                    yield return new CodeInstruction(OpCodes.Ldloc_0); // pool
+                    yield return new CodeInstruction(OpCodes.Call, raiseGameSavedMethodInfo);
+                }
+                else
+                {
+                    yield return instruction;
+                }
+            }
+
+            if (!found)
+            {
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to inject game save interceptor!");
             }
         }
     }

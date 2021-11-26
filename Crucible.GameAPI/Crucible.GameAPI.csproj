@@ -12,6 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="BepInEx" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\BepInEx.dll</HintPath>
+    </Reference>
     <Reference Include="BepInEx.Harmony" CopyToPublishDirectory="Never">
       <HintPath>..\externals\BepInEx.Harmony.dll</HintPath>
     </Reference>
@@ -38,7 +41,9 @@
     <Reference Include="UnityEngine.Physics2DModule" CopyToPublishDirectory="Never">
       <HintPath>..\externals\UnityEngine.Physics2DModule.dll</HintPath>
     </Reference>
-    
+    <Reference Include="UnityEngine.JSONSerializeModule" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
 
     <Reference Include="Assembly-CSharp" CopyToPublishDirectory="Never">
       <HintPath>..\externals\Assembly-CSharp.dll</HintPath>

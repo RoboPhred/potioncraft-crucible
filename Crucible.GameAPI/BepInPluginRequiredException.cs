@@ -1,4 +1,4 @@
-// <copyright file="CruciblePackageBepInExDependencyConfig.cs" company="RoboPhredDev">
+// <copyright file="BepInPluginRequiredException.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,29 +14,22 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Config
+namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
-    using System.Linq;
-    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using System;
 
     /// <summary>
-    /// A confiugration node denotating a dependency on a BepInEx mod.
+    /// Thrown when a required BepInPlugin is not found.
     /// </summary>
-    public class CruciblePackageBepInExDependencyConfig : CruciblePackageDependencyConfig
+    public class BepInPluginRequiredException : Exception
     {
         /// <summary>
-        /// Gets or sets the bepinex mod guid to depend on.
+        /// Initializes a new instance of the <see cref="BepInPluginRequiredException"/> class.
         /// </summary>
-        public string BepInExGUID { get; set; }
-
-        /// <inheritdoc/>
-        public override void EnsureDependencyMet()
+        /// <param name="message">The exception message.</param>
+        public BepInPluginRequiredException(string message)
+            : base(message)
         {
-            var dependencyMet = BepInExPluginUtilities.GetAllPlugins().Any(x => x.GUID == this.BepInExGUID);
-            if (!dependencyMet)
-            {
-                throw CrucibleMissingDependencyException.CreateMissingDependencyException(this.PackageMod.GUID, this.BepInExGUID, "*");
-            }
         }
     }
 }

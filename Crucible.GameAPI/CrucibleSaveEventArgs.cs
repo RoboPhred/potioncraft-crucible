@@ -1,4 +1,4 @@
-// <copyright file="CruciblePackageBepInExDependencyConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleSaveEventArgs.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,29 +14,27 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Config
+namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
-    using System.Linq;
-    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using System;
 
     /// <summary>
-    /// A confiugration node denotating a dependency on a BepInEx mod.
+    /// Event arguments for handling save and load events.
     /// </summary>
-    public class CruciblePackageBepInExDependencyConfig : CruciblePackageDependencyConfig
+    public class CrucibleSaveEventArgs : EventArgs
     {
         /// <summary>
-        /// Gets or sets the bepinex mod guid to depend on.
+        /// Initializes a new instance of the <see cref="CrucibleSaveEventArgs"/> class.
         /// </summary>
-        public string BepInExGUID { get; set; }
-
-        /// <inheritdoc/>
-        public override void EnsureDependencyMet()
+        /// <param name="saveFile">The crucible save file to handle loading and saving data.</param>
+        public CrucibleSaveEventArgs(CrucibleSaveFile saveFile)
         {
-            var dependencyMet = BepInExPluginUtilities.GetAllPlugins().Any(x => x.GUID == this.BepInExGUID);
-            if (!dependencyMet)
-            {
-                throw CrucibleMissingDependencyException.CreateMissingDependencyException(this.PackageMod.GUID, this.BepInExGUID, "*");
-            }
+            this.SaveFile = saveFile;
         }
+
+        /// <summary>
+        /// Gets the save file to load and store mod data on.
+        /// </summary>
+        public CrucibleSaveFile SaveFile { get; }
     }
 }
