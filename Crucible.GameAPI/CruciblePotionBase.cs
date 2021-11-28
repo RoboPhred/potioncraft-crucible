@@ -499,7 +499,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 CrucibleSpriteAtlasManager.AddAtlas(spriteAtlas);
             }
 
-            spriteAtlas.SetIcon($"PotionBase {potionBase.name} SmallIcon", texture, 0, texture.height * 0.66f, 1.5f);
+            spriteAtlas.SetIcon($"PotionBase {potionBase.name} SmallIcon", texture, yOffset: texture.height * 0.66f);
 
             AtlasOverriddenPotionBases.Add(potionBase);
         }

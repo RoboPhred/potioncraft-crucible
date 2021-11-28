@@ -41,13 +41,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             get;
         }
 
-        /// <summary>
-        /// Gets the potion effect settings for this potion effect.
-        /// </summary>
-        /// <remarks>
-        /// This is used by the base game to control the appearance of the potion effect on the recipe map.
-        /// </remarks>
-        public PotionEffectSettings PotionEffectSettings
+        // TODO: Wrap individual settings, do not expose the base game class.
+        internal PotionEffectSettings PotionEffectSettings
         {
             get
             {
