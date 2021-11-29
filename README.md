@@ -5,6 +5,52 @@ Crucible is a modding framework for PotionCraft, with the following features
 - Abstracted game api, to allow for future-proof access to the game from BepInEx mods.
 - YAML config based mod loader, to allow for configuration based mods without code.
 
+Out of the box, Crucible provides support for creating code-free PotionCraft mods for:
+
+- Custom Ingredients
+
+Additionally, Crucible provides an API for other mods to use that provides:
+
+- Shared access to sprite atlases, allowing mods to add new icons without conflicting.
+- Shared access to save data, allowing mods to add data to the save files in a way that will not conflict.
+- Access to create and customize ingredients, wrapped behind and API that will remain stable across game updates.
+- Support for mods that can add new features to Crucible Packages, both through new configuration sections and extending existing sections.
+
+## Crucible Package Mods
+
+Crucible Package mods are collections of assets and config files that allow mods to be created for PotionCraft without resorting to reverse engineering or compiling custom code.
+Anyone who can put together art assets can use Crucible Packages to create mods for the game.
+
+Some benefits of using Crucible Packages:
+
+- Low barrier of entry: No programming experience is required.
+- Much less chance of future game updates breaking compatibility. Only Crucible needs to be updated.
+
+### Making Crucible Package Mods
+
+See [Creating Crucible Packages](https://github.com/RoboPhred/potioncraft-crucible/wiki/Getting-Started:-Crucible-Package-Mods)
+
+### Using the Crucible Modding API
+
+Modders wishing to take advantage of Crucible's GameAPI should take a BepInEx dependency on Crucible and reference the Crucible.GameAPI dll.
+
+**Note**: While it is possible to include the Crucible.GameAPI dll with your mod download, doing so puts you at great risk for causing conflicts with other mods, including Crucible itself. While Crucible.GameAPI takes great care
+to remain maximally compatible with other mods, certain features may not function properly if duplicated across multiple mods. Storing custom data on save files and injecting custom sprite atlases are particularly fragile, and distributing
+your own copy of Crucible.GameAPI may break this functionality in the presense of Crucible Core or other mods that also redistribute Crucible.GameAPI.
+
+## Future Plans
+
+The following features are in active development:
+
+- Custom potion bases
+- Custom maps
+
+The following features are planned:
+
+- Custom potion effects
+- Custom Customers
+- Custom Merchants
+
 ### License
 
 Copyright (c) RoboPhredDev, 2021
