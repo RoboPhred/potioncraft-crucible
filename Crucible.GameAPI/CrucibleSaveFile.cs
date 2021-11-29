@@ -74,6 +74,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         /// <remarks>
         /// If the caller does not provide a class with the <see cref="BepInPlugin"/> attribute, this function will throw a <see cref="BepInPluginRequiredException"/> exception.
+        /// <p>
+        /// This uses Unity's built in json handling, which is very limited.  For complex data, a third party serialization library shoud be used, and the data
+        /// should be stored and retrieved as a string.
+        /// </p>
         /// </remarks>
         /// <typeparam name="T">The data type to deserialize.</typeparam>
         /// <returns>The deserialized data, or <c>default(T)</c> if no data was saved for the given plugin GUID.</returns>
@@ -99,6 +103,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Deserializes the save data associated with the given plugin GUID.
         /// </summary>
+        /// <remarks>
+        /// This uses Unity's built in json handling, which is very limited.  For complex data, a third party serialization library shoud be used, and the data
+        /// should be stored and retrieved as a string.
+        /// </remarks>
         /// <param name="pluginGuid">The GUID of the plugin to fetch save data for.  This should be a BepInEx Plugin GUID.</param>
         /// <typeparam name="T">The data type to deserialize.</typeparam>
         /// <returns>The deserialized data, or <c>default(T)</c> if no data was saved for the given plugin GUID.</returns>
@@ -135,6 +143,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         /// <remarks>
         /// If the caller does not provide a class with the <see cref="BepInPlugin"/> attribute, this function will throw a <see cref="BepInPluginRequiredException"/> exception.
+        /// <p>
+        /// This uses Unity's built in json handling, which is very limited.  For complex data, a third party serialization library shoud be used, and the data
+        /// should be stored and retrieved as a string.
+        /// </p>
         /// </remarks>
         /// <param name="value">The value to store in the save file for this plugin.</param>
         /// <typeparam name="T">The data type to store.</typeparam>
@@ -162,6 +174,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Stores the serialized object to the save file.
         /// </summary>
+        /// <remarks>
+        /// This uses Unity's built in json handling, which is very limited.  For complex data, a third party serialization library shoud be used, and the data
+        /// should be stored and retrieved as a string.
+        /// </remarks>
         /// <param name="pluginGuid">The GUID of the plugin to fetch save data for.  This should be a BepInEx Plugin GUID.</param>
         /// <param name="value">The object to store in the save file.</param>
         /// <typeparam name="T">The data type to store.</typeparam>
@@ -172,8 +188,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // Mod data must be loaded so dataByPluginGuid is available for writing.
             this.TryLoadModData();
 
-            var json = JsonUtility.ToJson(value);
-            this.dataByPluginGuid[pluginGuid] = json;
+            this.dataByPluginGuid[pluginGuid] = JsonUtility.ToJson(value);
         }
 
         /// <inheritdoc/>
