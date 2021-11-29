@@ -23,7 +23,7 @@ Additionally, Crucible provides an API for other mods to use that provides:
 - Download and install [BepInEx 5.x 64 bit](https://github.com/BepInEx/BepInEx/releases)
   - The contents of the BepInEx zip should be extracted to your PotionCraft steam directory.
   - If properly installed, you should see a `winhttp.dll` file and `BepInEx` folder alongside your `Potion Craft.exe`
-- Download and install [Crucible](/releases)
+- Download and install [Crucible](https://github.com/RoboPhred/potioncraft-crucible/releases)
   - The contents of the Crucible zip should be extracted to your PotionCraft steam directory.
   - If properly installed, you should have a `Crucible.dll` file (among others) at `Potion Craft/BepInEx/plugins/Crucible`
 
