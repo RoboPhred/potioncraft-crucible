@@ -16,6 +16,23 @@ Additionally, Crucible provides an API for other mods to use that provides:
 - Access to create and customize ingredients, wrapped behind and API that will remain stable across game updates.
 - Support for mods that can add new features to Crucible Packages, both through new configuration sections and extending existing sections.
 
+## Installation
+
+### Installing Crucible
+
+- Download and install [BepInEx 5.x 64 bit](https://github.com/BepInEx/BepInEx/releases)
+  - The contents of the BepInEx zip should be extracted to your PotionCraft steam directory.
+  - If properly installed, you should see a `winhttp.dll` file and `BepInEx` folder alongside your `Potion Craft.exe`
+- Download and install [Crucible](/releases)
+  - The contents of the Crucible zip should be extracted to your PotionCraft steam directory.
+  - If properly installed, you should have a `Crucible.dll` file (among others) at `Potion Craft/BepInEx/plugins/Crucible`
+
+### Installing Crucible Package Mods
+
+In general, each mod should include its own instructions for how to install it.
+
+A successful mod installation should result in the mod placing a folder in `Potion Craft/crucible/mods`.
+
 ## Crucible Package Mods
 
 Crucible Package mods are collections of assets and config files that allow mods to be created for PotionCraft without resorting to reverse engineering or compiling custom code.
@@ -30,7 +47,7 @@ Some benefits of using Crucible Packages:
 
 See [Creating Crucible Packages](https://github.com/RoboPhred/potioncraft-crucible/wiki/Getting-Started:-Crucible-Package-Mods)
 
-### Using the Crucible Modding API
+## Using the Crucible Modding API
 
 Modders wishing to take advantage of Crucible's GameAPI should take a BepInEx dependency on Crucible and reference the Crucible.GameAPI dll.
 
