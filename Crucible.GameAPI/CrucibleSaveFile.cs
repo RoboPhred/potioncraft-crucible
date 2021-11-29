@@ -18,10 +18,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using SaveFileSystem;
     using UnityEngine;
     using Utils;
+    using YamlDotNet.Serialization;
+    using YamlDotNet.Serialization.NamingConventions;
 
     /// <summary>
     /// Provides access to custom data stored in PotionCraft save files.
@@ -53,30 +56,30 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         /// <summary>
         /// Gets the save data associated with the caller's BepInEx plugin.
-        /// The caller must be an assembly that implements a plugin with the <see cref="BepInPluginAttribute"/> attribute.
+        /// The caller must be an assembly that implements a plugin with the <see cref="BepInPlugin"/> attribute.
         /// </summary>
         /// <remarks>
-        /// If the caller does not provide a class with the <see cref="BepInPluginAttribute"/> attribute, this function will throw a <see cref="BepInPluginRequiredException"/> exception.
+        /// If the caller does not provide a class with the <see cref="BepInPlugin"/> attribute, this function will throw a <see cref="BepInPluginRequiredException"/> exception.
         /// </remarks>
         /// <returns>The save data associated with the GUID, or <c>null</c> if none was saved.</returns>
         public string GetSaveData()
         {
-            var currentPluginGuid = BepInExPluginUtilities.RequirePluginGuidFromAssembly(Assembly.GetExecutingAssembly());
+            var currentPluginGuid = BepInExPluginUtilities.RequirePluginGuidFromAssembly(Assembly.GetCallingAssembly());
             return this.GetSaveData(currentPluginGuid);
         }
 
         /// <summary>
         /// Gets the save data associated with the caller's BepInEx plugin.
-        /// The caller must be an assembly that implements a plugin with the <see cref="BepInPluginAttribute"/> attribute.
+        /// The caller must be an assembly that implements a plugin with the <see cref="BepInPlugin"/> attribute.
         /// </summary>
         /// <remarks>
-        /// If the caller does not provide a class with the <see cref="BepInPluginAttribute"/> attribute, this function will throw a <see cref="BepInPluginRequiredException"/> exception.
+        /// If the caller does not provide a class with the <see cref="BepInPlugin"/> attribute, this function will throw a <see cref="BepInPluginRequiredException"/> exception.
         /// </remarks>
         /// <typeparam name="T">The data type to deserialize.</typeparam>
         /// <returns>The deserialized data, or <c>default(T)</c> if no data was saved for the given plugin GUID.</returns>
         public T GetSaveData<T>()
         {
-            var currentPluginGuid = BepInExPluginUtilities.RequirePluginGuidFromAssembly(Assembly.GetExecutingAssembly());
+            var currentPluginGuid = BepInExPluginUtilities.RequirePluginGuidFromAssembly(Assembly.GetCallingAssembly());
             return this.GetSaveData<T>(currentPluginGuid);
         }
 
@@ -114,30 +117,30 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         /// <summary>
         /// Sets the save data for the caller's BepInEx plugin.
-        /// The caller must be an assembly that implements a plugin with the <see cref="BepInPluginAttribute"/> attribute.
+        /// The caller must be an assembly that implements a plugin with the <see cref="BepInPlugin"/> attribute.
         /// </summary>
         /// <remarks>
-        /// If the caller does not provide a class with the <see cref="BepInPluginAttribute"/> attribute, this function will throw a <see cref="BepInPluginRequiredException"/> exception.
+        /// If the caller does not provide a class with the <see cref="BepInPlugin"/> attribute, this function will throw a <see cref="BepInPluginRequiredException"/> exception.
         /// </remarks>
         /// <param name="value">The string to store in the save file for this plugin.</param>
         public void SetSaveData(string value)
         {
-            var currentPluginGuid = BepInExPluginUtilities.RequirePluginGuidFromAssembly(Assembly.GetExecutingAssembly());
+            var currentPluginGuid = BepInExPluginUtilities.RequirePluginGuidFromAssembly(Assembly.GetCallingAssembly());
             this.SetSaveData(currentPluginGuid, value);
         }
 
         /// <summary>
         /// Sets the save data for the caller's BepInEx plugin.
-        /// The caller must be an assembly that implements a plugin with the <see cref="BepInPluginAttribute"/> attribute.
+        /// The caller must be an assembly that implements a plugin with the <see cref="BepInPlugin"/> attribute.
         /// </summary>
         /// <remarks>
-        /// If the caller does not provide a class with the <see cref="BepInPluginAttribute"/> attribute, this function will throw a <see cref="BepInPluginRequiredException"/> exception.
+        /// If the caller does not provide a class with the <see cref="BepInPlugin"/> attribute, this function will throw a <see cref="BepInPluginRequiredException"/> exception.
         /// </remarks>
         /// <param name="value">The value to store in the save file for this plugin.</param>
         /// <typeparam name="T">The data type to store.</typeparam>
         public void SetSaveData<T>(T value)
         {
-            var currentPluginGuid = BepInExPluginUtilities.RequirePluginGuidFromAssembly(Assembly.GetExecutingAssembly());
+            var currentPluginGuid = BepInExPluginUtilities.RequirePluginGuidFromAssembly(Assembly.GetCallingAssembly());
             this.SetSaveData(currentPluginGuid, value);
         }
 
@@ -169,7 +172,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // Mod data must be loaded so dataByPluginGuid is available for writing.
             this.TryLoadModData();
 
-            this.dataByPluginGuid[pluginGuid] = JsonUtility.ToJson(value);
+            var json = JsonUtility.ToJson(value);
+            this.dataByPluginGuid[pluginGuid] = json;
         }
 
         /// <inheritdoc/>
@@ -202,7 +206,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             this.isDataLoaded = true;
 
             var lines = System.IO.File.ReadAllLines(this.file.url);
-            if (lines.Length >= CrucibleFileLine)
+            if (lines.Length <= CrucibleFileLine)
             {
                 this.dataByPluginGuid = new Dictionary<string, string>();
                 return;
@@ -212,9 +216,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             if (!string.IsNullOrEmpty(data))
             {
                 var decryptedData = Base64.Decode(data);
-                this.dataByPluginGuid = JsonUtility.FromJson<Dictionary<string, string>>(decryptedData);
+
+                // Tried hard to get unity's JsonUtility to serialize the data, but it abhores any sort of collection of elements.
+                var deserializer = new DeserializerBuilder().IgnoreUnmatchedProperties().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
+                var saveData = deserializer.Deserialize<CrucibleSaveData>(decryptedData);
+
+                this.dataByPluginGuid = saveData.PluginData;
             }
-            else
+
+            if (this.dataByPluginGuid == null)
             {
                 this.dataByPluginGuid = new Dictionary<string, string>();
             }
@@ -234,12 +244,26 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var saveLines = new string[Math.Max(lines.Length, CrucibleFileLine + 1)];
             Array.Copy(lines, saveLines, lines.Length);
 
-            // Serialize, encode, and store our data.
-            var modJsonData = JsonUtility.ToJson(this.dataByPluginGuid);
+            // Tried hard to get unity's JsonUtility to serialize the data, but it abhores any sort of collection of elements.
+            var serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).JsonCompatible().Build();
+            var modJsonData = serializer.Serialize(new CrucibleSaveData
+            {
+                Version = 1,
+                PluginData = this.dataByPluginGuid,
+            });
+
             saveLines[CrucibleFileLine] = Base64.Encode(modJsonData);
 
             // Save the file
             System.IO.File.WriteAllLines(this.file.url, saveLines);
+        }
+
+        [Serializable]
+        private struct CrucibleSaveData
+        {
+            public int Version;
+
+            public Dictionary<string, string> PluginData;
         }
     }
 }

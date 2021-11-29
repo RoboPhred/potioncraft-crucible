@@ -88,12 +88,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var found = pluginAttributes.ToArray();
             if (found.Length == 0)
             {
-                throw new BepInPluginRequiredException("No class in the assembly contains the BepInPlugin attribute.");
+                throw new BepInPluginRequiredException($"No class in the assembly \"{assembly.FullName}\" contains the BepInPlugin attribute.");
             }
 
             if (found.Length > 1)
             {
-                throw new BepInPluginRequiredException("The assembly contains more than one class with the BepInPlugin attribute.");
+                throw new BepInPluginRequiredException($"The assembly \"{assembly.FullName}\" contains more than one class with the BepInPlugin attribute.");
             }
 
             return found[0].GUID;

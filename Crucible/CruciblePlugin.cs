@@ -50,6 +50,43 @@ namespace RoboPhredDev.PotionCraft.Crucible
                     ActivateMod(mod);
                 }
             };
+
+            CrucibleGameEvents.OnSaveLoaded += (_, e) =>
+            {
+                var saveData = e.SaveFile.GetSaveData<CruciblePluginSaveData>();
+
+                if (saveData.InstalledCruciblePackageIDs != null)
+                {
+                    var missingMods = new List<string>();
+                    foreach (var package in saveData.InstalledCruciblePackageIDs)
+                    {
+                        if (!this.mods.Any(m => m.ID == package))
+                        {
+                            missingMods.Add(package);
+                        }
+                    }
+
+                    var newModCount = this.mods.Count(x => !saveData.InstalledCruciblePackageIDs.Contains(x.ID));
+
+                    if (missingMods.Count > 0)
+                    {
+                        Notification.ShowText("Missing Crucible Packages", $"Some mods that this save relies on were not found: {string.Join(", ", missingMods)}.", Notification.TextType.EventText);
+                    }
+                    else if (newModCount > 0)
+                    {
+                        Notification.ShowText("New Crucible Packages", $"{newModCount} new {(newModCount != 1 ? "mods were" : "mod was")} installed.", Notification.TextType.EventText);
+                    }
+                }
+            };
+
+            CrucibleGameEvents.OnSaveSaved += (_, e) =>
+            {
+                e.SaveFile.SetSaveData(new CruciblePluginSaveData()
+                {
+                    CrucibleCoreVersion = "1.0.0.0",
+                    InstalledCruciblePackageIDs = this.mods.Select(m => m.ID).ToList(),
+                });
+            };
         }
 
         private static void ActivateMod(CruciblePackageMod mod)

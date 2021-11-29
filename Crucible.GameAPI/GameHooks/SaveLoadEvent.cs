@@ -81,16 +81,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             }
 
             // FIXME: IL error
-            // var saveProgressToPool = AccessTools.Method(typeof(SaveLoadManager), nameof(SaveLoadManager.SaveProgressToPool));
-            // if (saveProgressToPool == null)
-            // {
-            //     Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate game save function!");
-            // }
-            // else
-            // {
-            //     var transpiler = AccessTools.Method(typeof(SaveLoadEvent), nameof(TranspileSaveProgressToPool));
-            //     HarmonyInstance.Instance.Patch(saveProgressToPool, transpiler: new HarmonyMethod(transpiler));
-            // }
+            var saveProgressToPool = AccessTools.Method(typeof(SaveLoadManager), nameof(SaveLoadManager.SaveProgressToPool));
+            if (saveProgressToPool == null)
+            {
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate game save function!");
+            }
+            else
+            {
+                var transpiler = AccessTools.Method(typeof(SaveLoadEvent), nameof(TranspileSaveProgressToPool));
+                HarmonyInstance.Instance.Patch(saveProgressToPool, transpiler: new HarmonyMethod(transpiler));
+            }
         }
 
         private static void RaiseGameLoaded(File file)
@@ -149,7 +149,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
                     // After saving the file, call our handler.
                     // We dont have a direct reference to the file, so we will infer it from the pool.
-                    yield return new CodeInstruction(OpCodes.Ldloc_0); // pool
+                    yield return new CodeInstruction(OpCodes.Ldarg_0); // pool
                     yield return new CodeInstruction(OpCodes.Call, raiseGameSavedMethodInfo);
                 }
                 else
