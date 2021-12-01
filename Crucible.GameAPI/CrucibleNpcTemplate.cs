@@ -22,6 +22,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using Npc.Parts.Settings;
     using ObjectBased.Deliveries;
     using QuestSystem;
+    using UnityEngine;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="NpcTemplate"/>s.
@@ -78,7 +79,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             NpcTemplateTagsById.Add("Demo2GroundHogDayWanderingMerchantNpc 2", new HashSet<string>(merchantTags.Concat(groundhogDayTags)));
         }
 
-        private CrucibleNpcTemplate(NpcTemplate template)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CrucibleNpcTemplate"/> class.
+        /// </summary>
+        /// <param name="template">The game NpcTemplate to represent.</param>
+        internal CrucibleNpcTemplate(NpcTemplate template)
         {
             this.NpcTemplate = template;
         }
@@ -108,6 +113,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Gets a value indicating whether this template is a customer.
         /// </summary>
         public bool IsCustomer => this.GetAllParts().Any(x => x is Quest);
+
+        /// <summary>
+        /// Gets the collection of child templates for this npc template.
+        /// </summary>
+        public CrucibleNpcTemplateChildren Children
+        {
+            get => new(this.NpcTemplate);
+        }
 
         /// <summary>
         /// Gets the NPC Template by the given name.
@@ -144,6 +157,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                           from tag in pair.Value
                           select tag;
             return allTags.Distinct();
+        }
+
+        /// <summary>
+        /// Creates a new blank NPC template.
+        /// </summary>
+        /// <param name="name">The name of the template.</param>
+        /// <returns>A new blank NPC template.</returns>
+        public static CrucibleNpcTemplate CreateNpcTemplate(string name)
+        {
+            var template = ScriptableObject.CreateInstance<NpcTemplate>();
+            template.name = name;
+
+            NpcTemplate.allNpcTemplates.Add(template);
+
+            return new CrucibleNpcTemplate(template);
         }
 
         /// <summary>
@@ -187,6 +215,51 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             return tags.ToArray();
+        }
+
+        /// <summary>
+        /// Copies the apperance from an npc template to this one.
+        /// </summary>
+        /// <remarks>
+        /// Appearance data is made up of multiple parts that themselves contain random chances.  This copy command
+        /// copies all data, including the randomized data.  As such, the npc appearance might change whenever the NPC shows up.
+        /// </remarks>
+        /// <param name="template">The template to copy the appearance from.</param>
+        public void CopyAppearance(CrucibleNpcTemplate template)
+        {
+            this.NpcTemplate.appearance = new AppearanceContainer
+            {
+                skinColor = template.NpcTemplate.appearance.skinColor,
+                behindBodyFeature2 = template.NpcTemplate.appearance.behindBodyFeature2,
+                behindBodyFeature1 = template.NpcTemplate.appearance.behindBodyFeature1,
+                handBackFeature2 = template.NpcTemplate.appearance.handBackFeature2,
+                handBackFeature1 = template.NpcTemplate.appearance.handBackFeature1,
+                bodyFeature2 = template.NpcTemplate.appearance.bodyFeature2,
+                bodyFeature1 = template.NpcTemplate.appearance.bodyFeature1,
+                handFrontFeature2 = template.NpcTemplate.appearance.handFrontFeature2,
+                handFrontFeature1 = template.NpcTemplate.appearance.handFrontFeature1,
+                skullShapeFeature3 = template.NpcTemplate.appearance.skullShapeFeature3,
+                skullShapeFeature2 = template.NpcTemplate.appearance.skullShapeFeature2,
+                skullShapeFeature1 = template.NpcTemplate.appearance.skullShapeFeature1,
+                faceFeature2 = template.NpcTemplate.appearance.faceFeature2,
+                shortHairFeature2 = template.NpcTemplate.appearance.shortHairFeature2,
+                shortHairFeature1 = template.NpcTemplate.appearance.shortHairFeature1,
+                faceFeature1 = template.NpcTemplate.appearance.faceFeature1,
+                aboveHairFeature1 = template.NpcTemplate.appearance.aboveHairFeature1,
+                hairColor = template.NpcTemplate.appearance.hairColor,
+                clothesColor1 = template.NpcTemplate.appearance.clothesColor1,
+                clothesColor2 = template.NpcTemplate.appearance.clothesColor2,
+                clothesColor3 = template.NpcTemplate.appearance.clothesColor3,
+                aboveHairFeature2 = template.NpcTemplate.appearance.aboveHairFeature2,
+                body = template.NpcTemplate.appearance.body,
+                clothesColor4 = template.NpcTemplate.appearance.clothesColor4,
+                skullShape = template.NpcTemplate.appearance.skullShape,
+                face = template.NpcTemplate.appearance.face,
+                hat = template.NpcTemplate.appearance.hat,
+                hairstyle = template.NpcTemplate.appearance.hairstyle,
+                eyes = template.NpcTemplate.appearance.eyes,
+                breastSize = template.NpcTemplate.appearance.breastSize,
+            };
         }
 
         /// <summary>
