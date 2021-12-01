@@ -19,7 +19,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using RoboPhredDev.PotionCraft.Crucible.Config;
+    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.Resources;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
@@ -139,6 +139,12 @@ namespace RoboPhredDev.PotionCraft.Crucible
         {
             // TODO: Collect exceptions for display to the user.
             CrucibleResources.WithResourceProvider(this, () => CrucibleLog.RunInLogScope(this.Namespace, () => this.root.ParsedRoots.ForEach(x => x.ApplyConfiguration())));
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return this.ID;
         }
 
         /// <summary>

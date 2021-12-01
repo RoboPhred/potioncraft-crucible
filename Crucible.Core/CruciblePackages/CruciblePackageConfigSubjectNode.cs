@@ -14,7 +14,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Config
+namespace RoboPhredDev.PotionCraft.Crucible.CruciblePackages
 {
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
@@ -34,15 +34,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.Config
         private readonly List<ICruciblePackageConfigExtension<TSubject>> extensions = new();
 
         /// <summary>
+        /// Gets the subject this config node created.
+        /// </summary>
+        public TSubject Subject { get; private set; }
+
+        /// <summary>
         /// Applies the configuration node.
         /// </summary>
         public void ApplyConfiguration()
         {
-            var subject = this.GetSubject();
-            this.OnApplyConfiguration(subject);
+            this.Subject = this.GetSubject();
+            this.OnApplyConfiguration(this.Subject);
             foreach (var extension in this.extensions)
             {
-                extension.OnApplyConfiguration(subject);
+                extension.OnApplyConfiguration(this.Subject);
             }
         }
 

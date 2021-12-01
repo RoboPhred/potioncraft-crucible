@@ -16,6 +16,7 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Npc.Parts;
@@ -27,7 +28,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="NpcTemplate"/>s.
     /// </summary>
-    public sealed class CrucibleNpcTemplate
+    public class CrucibleNpcTemplate
     {
         private static readonly Dictionary<string, HashSet<string>> NpcTemplateTagsById = new();
 
@@ -160,21 +161,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Creates a new blank NPC template.
-        /// </summary>
-        /// <param name="name">The name of the template.</param>
-        /// <returns>A new blank NPC template.</returns>
-        public static CrucibleNpcTemplate CreateNpcTemplate(string name)
-        {
-            var template = ScriptableObject.CreateInstance<NpcTemplate>();
-            template.name = name;
-
-            NpcTemplate.allNpcTemplates.Add(template);
-
-            return new CrucibleNpcTemplate(template);
-        }
-
-        /// <summary>
         /// Adds a tag to this npc template.
         /// </summary>
         /// <param name="tag">The tag to apply to this template.</param>
@@ -225,7 +211,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// copies all data, including the randomized data.  As such, the npc appearance might change whenever the NPC shows up.
         /// </remarks>
         /// <param name="template">The template to copy the appearance from.</param>
-        public void CopyAppearance(CrucibleNpcTemplate template)
+        public void CopyAppearanceFrom(CrucibleNpcTemplate template)
         {
             this.NpcTemplate.appearance = new AppearanceContainer
             {
@@ -260,6 +246,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 eyes = template.NpcTemplate.appearance.eyes,
                 breastSize = template.NpcTemplate.appearance.breastSize,
             };
+        }
+
+        /// <summary>
+        /// If this NPC Template is a customer, gets the API object for manipulating its customer data.
+        /// </summary>
+        /// <returns>The customer npc template, if this NPC template represents a customer.</returns>
+        public CrucibleCustomerNpcTemplate AsCustomer()
+        {
+            if (!this.IsCustomer)
+            {
+                throw new InvalidOperationException("This NPC template is not a customer.");
+            }
+
+            return new CrucibleCustomerNpcTemplate(this.NpcTemplate);
         }
 
         /// <summary>

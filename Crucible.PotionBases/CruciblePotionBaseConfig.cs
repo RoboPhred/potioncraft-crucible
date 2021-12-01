@@ -17,7 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
 {
     using System.Collections.Generic;
-    using RoboPhredDev.PotionCraft.Crucible.Config;
+    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using UnityEngine;
 

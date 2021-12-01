@@ -132,7 +132,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 return false;
             }
 
-            this.template.baseParts = this.template.baseParts.Take(index).Concat(this.template.baseParts.Skip(index + 1)).ToArray();
+            this.template.baseParts = this.template.baseParts.Where((_, i) => i != index).ToArray();
             return true;
         }
 

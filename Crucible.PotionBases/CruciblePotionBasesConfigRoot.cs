@@ -17,7 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
 {
     using System.Collections.Generic;
-    using RoboPhredDev.PotionCraft.Crucible.Config;
+    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
 
     /// <summary>
     /// The configuration root for potion bases.

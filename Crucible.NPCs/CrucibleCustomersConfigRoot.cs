@@ -1,4 +1,4 @@
-// <copyright file="CruciblePackageConfigRootAttribute.cs" company="RoboPhredDev">
+// <copyright file="CrucibleCustomersConfigRoot.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,17 +14,26 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Config
+namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System;
+    using System.Collections.Generic;
+    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
 
     /// <summary>
-    /// An attribute marking a class as being a root object in a <see cref="CruciblePackageMod"/> package configuration.
-    /// Such classes will be deserialized from the root of each package.
+    /// The configuration root for ingredients.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
-    [CrucibleRegistryAttribute]
-    public class CruciblePackageConfigRootAttribute : Attribute
+    [CruciblePackageConfigRoot]
+    public class CrucibleCustomersConfigRoot : CruciblePackageConfigRoot
     {
+        /// <summary>
+        /// Gets or sets the list of ingredients.
+        /// </summary>
+        public List<CrucibleCustomerConfig> Customers { get; set; } = new();
+
+        /// <inheritdoc/>
+        public override void ApplyConfiguration()
+        {
+            this.Customers.ForEach(x => x.ApplyConfiguration());
+        }
     }
 }

@@ -14,23 +14,36 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-#if ENABLE_POTION_BASE
-
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
-    using System;
-
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="PotionEffect"/>s.
     /// </summary>
     public sealed class CruciblePotionEffect
     {
+#if ENABLE_POTION_BASE
         // TODO: Load PotionEffectSettings for all the base potion effects.
         private static readonly SerializableDictionary<string, PotionEffectSettings> RegisteredEffects = new();
+#endif
 
-        private CruciblePotionEffect(PotionEffect potionEffect)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CruciblePotionEffect"/> class.
+        /// </summary>
+        /// <param name="potionEffect">The potion effect to wrap.</param>
+        internal CruciblePotionEffect(PotionEffect potionEffect)
         {
             this.PotionEffect = potionEffect;
+        }
+
+        /// <summary>
+        /// Gets the effect ID of this effect.
+        /// </summary>
+        public string ID
+        {
+            get
+            {
+                return this.PotionEffect.name;
+            }
         }
 
         /// <summary>
@@ -41,6 +54,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             get;
         }
 
+#if ENABLE_POTION_BASE
         // TODO: Wrap individual settings, do not expose the base game class.
         internal PotionEffectSettings PotionEffectSettings
         {
@@ -55,13 +69,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 throw new Exception($"No settings object was found for potion base \"{this.PotionEffect.name}\".");
             }
         }
+#endif
 
         /// <summary>
         /// Gets a potion effect by id.
         /// </summary>
         /// <param name="id">The id of the potion effect to get.</param>
         /// <returns>A <see cref="CruciblePotionEffect"/> object for manipulating the potion effect, or null if no potion effect exists with the given id.</returns>
-        public static CruciblePotionEffect GetPotionEffect(string id)
+        public static CruciblePotionEffect GetPotionEffectByID(string id)
         {
             var effect = PotionEffect.allPotionEffects.Find(x => x.name == id);
             if (effect == null)
@@ -73,5 +88,3 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
     }
 }
-
-#endif
