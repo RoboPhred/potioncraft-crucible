@@ -41,7 +41,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <summary>
         /// Gets or sets the collection of effect names that this npc wants to buy.
         /// </summary>
-        public List<string> RequestedEffects { get; set; }
+        public List<string> AcceptedEffects { get; set; }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return this.ID;
+        }
 
         /// <inheritdoc/>
         protected override CrucibleCustomerNpcTemplate GetSubject()
@@ -66,9 +72,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
             }
 
-            if (this.RequestedEffects != null)
+            if (this.AcceptedEffects != null)
             {
-                foreach (var effectId in this.RequestedEffects)
+                foreach (var effectId in this.AcceptedEffects)
                 {
                     var effect = CruciblePotionEffect.GetPotionEffectByID(effectId);
                     if (effect == null)

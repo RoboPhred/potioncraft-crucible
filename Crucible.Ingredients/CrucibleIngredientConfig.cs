@@ -102,6 +102,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public bool? IsStackItemsSolid { get; set; }
 
         /// <inheritdoc/>
+        public override string ToString()
+        {
+            return this.ID;
+        }
+
+        /// <inheritdoc/>
         protected override void OnDeserializeCompleted(Mark start, Mark end)
         {
             if (string.IsNullOrWhiteSpace(this.ID))

@@ -17,9 +17,13 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using DialogueSystem.Dialogue;
+    using DialogueSystem.Dialogue.Data;
     using LocalizationSystem;
     using Npc.Parts;
+    using Npc.Parts.Settings;
     using QuestSystem;
     using UnityEngine;
 
@@ -102,23 +106,153 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>A new blank NPC template.</returns>
         public static CrucibleCustomerNpcTemplate CreateCustomerNpcTemplate(string name, string copyAppearanceFrom = null)
         {
-            var copyFromTemplate = CrucibleNpcTemplate.GetNpcTemplateById(copyAppearanceFrom);
-            if (copyFromTemplate == null)
+            CrucibleNpcTemplate copyFromTemplate = null;
+            if (!string.IsNullOrEmpty(copyAppearanceFrom))
             {
-                throw new ArgumentException($"Could not find NPC template with id \"{copyAppearanceFrom}\" to copy appearance from.", nameof(copyAppearanceFrom));
+                copyFromTemplate = copyAppearanceFrom != null ? CrucibleNpcTemplate.GetNpcTemplateById(copyAppearanceFrom) : null;
+                if (copyFromTemplate == null)
+                {
+                    throw new ArgumentException($"Could not find NPC template with id \"{copyAppearanceFrom}\" to copy appearance from.", nameof(copyAppearanceFrom));
+                }
             }
 
             var template = ScriptableObject.CreateInstance<NpcTemplate>();
 
             template.spawnChance = 1f;
-            template.baseParts = new[]
+
+            var quest = ScriptableObject.CreateInstance<Quest>();
+            quest.name = name;
+            quest.karmaReward = 0;
+            quest.desiredEffects = new PotionEffect[0];
+
+            var copyFrom = NpcTemplate.allNpcTemplates.Find(x => x.name == "HerbalistNpc 1");
+            if (copyFrom == null)
             {
-                new Quest
+                throw new Exception("Could not load dummy template to copy from.");
+            }
+
+            // TODO: How do prefabs differ?
+            var prefab = ScriptableObject.CreateInstance<Prefab>();
+            var parentPrefab = copyFrom.baseParts.OfType<Prefab>().FirstOrDefault();
+            if (parentPrefab == null)
+            {
+                throw new Exception("Copy target had no prefab!");
+            }
+
+            prefab.prefab = parentPrefab.prefab;
+            prefab.clothesColorPalette1 = parentPrefab.clothesColorPalette1;
+            prefab.clothesColorPalette2 = parentPrefab.clothesColorPalette2;
+            prefab.clothesColorPalette3 = parentPrefab.clothesColorPalette3;
+            prefab.clothesColorPalette4 = parentPrefab.clothesColorPalette4;
+
+            // Path NonAppearancePart seems to be unused.  It is not present on the herbalist NPC
+
+            // Used in getting potion reactions
+            var gender = ScriptableObject.CreateInstance<Gender>();
+            gender.gender = Gender.GenderSet.Female;
+
+            var dialogData = ScriptableObject.CreateInstance<DialogueData>();
+            /*
+             > > >  Dialogue Data
+ > > > > StartDialogueNodeData guid=f5cfb36e-ed3a-4bcf-a7b5-81e6e0f99cf8
+ > > > > > Child PotionRequestNodeData guid=144caf16-b1fc-4d02-8529-7eb9e48ebcf2
+ > > > > PotionRequestNodeData guid=144caf16-b1fc-4d02-8529-7eb9e48ebcf2
+ > > > > > More info request guid=87db4581-73e9-4c21-998b-f0f9f9af12fa key=Guard_1_StoneSkin_Dialogue_pr0_m text=How did you get by without potions before?
+ > > > > > Child EndOfDialogueNodeData guid=8edb71f0-e5fb-45da-8e32-076a27586658
+ > > > > > Child DialogueNodeData guid=b6478a76-0430-4f9d-ac84-6a056746347a
+ > > > > EndOfDialogueNodeData guid=8edb71f0-e5fb-45da-8e32-076a27586658
+ > > > > DialogueNodeData guid=b6478a76-0430-4f9d-ac84-6a056746347a key=Guard_1_StoneSkin_Dialogue_n0_p text=Well, we used to have a healer. He often helped me clean and bandage my wounds. Then he disappeared and no one has seen him since.
+ > > > > > Answer guid=870efe2a-fd46-4347-912b-0b57bb044bc4 key=Guard_1_StoneSkin_Dialogue_n0_a1 text=[1]
+ > > > > > Child PotionRequestNodeData guid=144caf16-b1fc-4d02-8529-7eb9e48ebcf2
+            */
+
+            var startDialogueNodeData = new StartDialogueNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+            };
+            dialogData.startDialogue = startDialogueNodeData;
+
+            var potionRequestNodeData = new PotionRequestNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+                morePort = new AnswerData
                 {
-                    karmaReward = 0,
-                    desiredEffects = PotionEffect.allPotionEffects.ToArray(),
+                    guid = Guid.NewGuid().ToString(),
+                    key = "__morePort__data",
+                    text = "Hell World!  This is a potion request question.",
                 },
             };
+            CrucibleLocalization.SetLocalizationKey($"__morePort__data", "This is a discussion option!");
+            dialogData.potionRequests.Add(potionRequestNodeData);
+
+            var requestAnswerData = new DialogueNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+                key = "__requestanswerdata",
+                text = "Hello world!  This is the potion request answer.",
+                answers = new List<AnswerData> {
+                    new AnswerData {
+                        guid = Guid.NewGuid().ToString(),
+                        key = "__requestanswerdata_answer1",
+                        text = "Hello world!  This is answer data for requestAnswerData and I don't know what its here for.",
+                    },
+                },
+            };
+            CrucibleLocalization.SetLocalizationKey($"__requestanswerdata", "This is an answer!");
+            CrucibleLocalization.SetLocalizationKey($"__requestanswerdata_answer1", "This is... im not sure what this is!");
+            dialogData.dialogues.Add(requestAnswerData);
+
+            var endNodeData = new EndOfDialogueNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+            };
+            dialogData.endsOfDialogue.Add(endNodeData);
+
+            // start => PostionRequestNodeData
+            dialogData.edges.Add(new EdgeData
+            {
+                output = startDialogueNodeData.guid,
+                input = potionRequestNodeData.guid,
+            });
+
+            // PotionRequestNodeData => End
+            dialogData.edges.Add(new EdgeData
+            {
+                output = potionRequestNodeData.guid,
+                input = endNodeData.guid,
+            });
+
+            // PotionRequestNodeData => dialog
+            dialogData.edges.Add(new EdgeData
+            {
+                output = potionRequestNodeData.guid,
+                input = requestAnswerData.guid,
+            });
+
+            // dialog => PotionRequestNodeData
+            dialogData.edges.Add(new EdgeData
+            {
+                output = requestAnswerData.guid,
+                input = potionRequestNodeData.guid,
+            });
+
+            // Wire up the additional discussion branch
+            // moreInfo => dialog
+            dialogData.edges.Add(new EdgeData
+            {
+                output = potionRequestNodeData.morePort.guid,
+                input = requestAnswerData.guid,
+            });
+
+            // dialog => potion request
+            dialogData.edges.Add(new EdgeData
+            {
+                output = requestAnswerData.answers[0].guid,
+                input = potionRequestNodeData.guid,
+            });
+
+            template.baseParts = new NonAppearancePart[] { quest, prefab, gender, dialogData };
+
             template.name = name;
             template.groupsOfContainers = new PartContainerGroup<NonAppearancePart>[0];
             template.appearance = new AppearanceContainer();
@@ -129,7 +263,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var crucibleTemplate = new CrucibleCustomerNpcTemplate(template);
 
-            if (!string.IsNullOrEmpty(copyAppearanceFrom))
+            if (copyFromTemplate != null)
             {
                 crucibleTemplate.CopyAppearanceFrom(copyFromTemplate);
             }

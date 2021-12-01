@@ -263,6 +263,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Adds this npc template to the queue.
+        /// </summary>
+        public void AddNpcToQueue()
+        {
+            Managers.Npc.AddToQueueForSpawn(this.NpcTemplate);
+            Managers.Npc.TryToSpawnNpc();
+        }
+
+        // FIXME: Move to CrucibleTraderNpcTemplate
+        /// <summary>
         /// If this npc is a trader, adds an item to this template's trader inventory.
         /// </summary>
         /// <remarks>
