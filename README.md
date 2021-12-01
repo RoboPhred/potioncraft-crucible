@@ -13,6 +13,9 @@ Additionally, Crucible provides an API for other mods to use that provides:
 
 - Shared access to sprite atlases, allowing mods to add new icons without conflicting.
 - Shared access to save data, allowing mods to add data to the save files in a way that will not conflict.
+- Adding new translatable text.
+- Identifying NPC templates by attribute.
+- Adding inventory items to NPC traders.
 - Access to create and customize ingredients, wrapped behind and API that will remain stable across game updates.
 - Support for mods that can add new features to Crucible Packages, both through new configuration sections and extending existing sections.
 
