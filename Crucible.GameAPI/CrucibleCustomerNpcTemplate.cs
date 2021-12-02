@@ -152,19 +152,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             gender.gender = Gender.GenderSet.Female;
 
             var dialogData = ScriptableObject.CreateInstance<DialogueData>();
-            /*
-             > > >  Dialogue Data
- > > > > StartDialogueNodeData guid=f5cfb36e-ed3a-4bcf-a7b5-81e6e0f99cf8
- > > > > > Child PotionRequestNodeData guid=144caf16-b1fc-4d02-8529-7eb9e48ebcf2
- > > > > PotionRequestNodeData guid=144caf16-b1fc-4d02-8529-7eb9e48ebcf2
- > > > > > More info request guid=87db4581-73e9-4c21-998b-f0f9f9af12fa key=Guard_1_StoneSkin_Dialogue_pr0_m text=How did you get by without potions before?
- > > > > > Child EndOfDialogueNodeData guid=8edb71f0-e5fb-45da-8e32-076a27586658
- > > > > > Child DialogueNodeData guid=b6478a76-0430-4f9d-ac84-6a056746347a
- > > > > EndOfDialogueNodeData guid=8edb71f0-e5fb-45da-8e32-076a27586658
- > > > > DialogueNodeData guid=b6478a76-0430-4f9d-ac84-6a056746347a key=Guard_1_StoneSkin_Dialogue_n0_p text=Well, we used to have a healer. He often helped me clean and bandage my wounds. Then he disappeared and no one has seen him since.
- > > > > > Answer guid=870efe2a-fd46-4347-912b-0b57bb044bc4 key=Guard_1_StoneSkin_Dialogue_n0_a1 text=[1]
- > > > > > Child PotionRequestNodeData guid=144caf16-b1fc-4d02-8529-7eb9e48ebcf2
-            */
 
             var startDialogueNodeData = new StartDialogueNodeData
             {
@@ -190,8 +177,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 guid = Guid.NewGuid().ToString(),
                 key = "__requestanswerdata",
                 text = "Hello world!  This is the potion request answer.",
-                answers = new List<AnswerData> {
-                    new AnswerData {
+                answers = new List<AnswerData>
+                {
+                    new AnswerData
+                    {
                         guid = Guid.NewGuid().ToString(),
                         key = "__requestanswerdata_answer1",
                         text = "Hello world!  This is answer data for requestAnswerData and I don't know what its here for.",

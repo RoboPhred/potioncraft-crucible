@@ -20,6 +20,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System.Collections.Generic;
     using System.Linq;
     using Npc.Parts;
+    using Npc.Parts.Appearance;
     using Npc.Parts.Settings;
     using ObjectBased.Deliveries;
     using QuestSystem;
@@ -114,6 +115,90 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Gets a value indicating whether this template is a customer.
         /// </summary>
         public bool IsCustomer => this.GetAllParts().Any(x => x is Quest);
+
+        /// <summary>
+        /// Gets or sets the left eye sprite for this NPC.
+        /// </summary>
+        /// <remarks>
+        /// If this NPC's eyes are randomized, this will set every possible left eye to the given value.
+        /// </remarks>
+        public Sprite LeftEyeSprite
+        {
+            get
+            {
+                var eyes = this.NpcTemplate.appearance.eyes.partsInGroup.FirstOrDefault();
+                if (eyes == null)
+                {
+                    return null;
+                }
+
+                return eyes.part.left;
+            }
+
+            set
+            {
+                if (this.NpcTemplate.appearance.eyes.partsInGroup.Length == 0)
+                {
+                    var eyes = ScriptableObject.CreateInstance<Eyes>();
+                    eyes.left = value;
+                    eyes.right = value;
+                    this.NpcTemplate.appearance.eyes.partsInGroup = new[]
+                    {
+                        new PartContainer<Eyes>
+                        {
+                            part = eyes,
+                        },
+                    };
+                }
+
+                foreach (var part in this.NpcTemplate.appearance.eyes.partsInGroup)
+                {
+                    part.part.left = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the left eye sprite for this NPC.
+        /// </summary>
+        /// <remarks>
+        /// If this NPC's eyes are randomized, this will set every possible left eye to the given value.
+        /// </remarks>
+        public Sprite RightEyeSprite
+        {
+            get
+            {
+                var eyes = this.NpcTemplate.appearance.eyes.partsInGroup.FirstOrDefault();
+                if (eyes == null)
+                {
+                    return null;
+                }
+
+                return eyes.part.right;
+            }
+
+            set
+            {
+                if (this.NpcTemplate.appearance.eyes.partsInGroup.Length == 0)
+                {
+                    var eyes = ScriptableObject.CreateInstance<Eyes>();
+                    eyes.left = value;
+                    eyes.right = value;
+                    this.NpcTemplate.appearance.eyes.partsInGroup = new[]
+                    {
+                        new PartContainer<Eyes>
+                        {
+                            part = eyes,
+                        },
+                    };
+                }
+
+                foreach (var part in this.NpcTemplate.appearance.eyes.partsInGroup)
+                {
+                    part.part.right = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the collection of child templates for this npc template.
@@ -348,6 +433,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
                     yield return x.part;
                 }
+            }
+        }
+
+        private void ClearPartsOfType<T>()
+        {
+            this.NpcTemplate.baseParts = this.NpcTemplate.baseParts.Where(x => x is not T).ToArray();
+
+            foreach (var group in this.NpcTemplate.groupsOfContainers)
+            {
+                if (group.groupChance == 0)
+                {
+                    continue;
+                }
+
+                group.partsInGroup = group.partsInGroup.Where(x => x.part is not T).ToArray();
             }
         }
     }

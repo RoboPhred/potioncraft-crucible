@@ -19,6 +19,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using UnityEngine;
     using YamlDotNet.Serialization;
 
     /// <summary>
@@ -37,6 +38,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// This can be another customer, or a trader.
         /// </summary>
         public string CopyAppearanceFrom { get; set; }
+
+        /// <summary>
+        /// Gets or sets the sprite to use for the left eye.
+        /// </summary>
+        public Sprite LeftEye { get; set; }
+
+        /// <summary>
+        /// Gets or sets the sprite to use for the right eye.
+        /// </summary>
+        public Sprite RightEye { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of effect names that this npc wants to buy.
@@ -86,6 +97,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                         subject.AcceptedEffects.Add(effect);
                     }
                 }
+            }
+
+            if (this.LeftEye != null)
+            {
+                subject.LeftEyeSprite = this.LeftEye;
+            }
+
+            if (this.RightEye != null)
+            {
+                subject.RightEyeSprite = this.RightEye;
             }
         }
     }
