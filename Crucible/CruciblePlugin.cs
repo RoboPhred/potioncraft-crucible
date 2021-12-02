@@ -27,7 +27,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
     /// <summary>
     /// BepInEx plugin for Crucible Config mods.
     /// </summary>
-    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible", "Crucible Modding Framework", "1.0.0.0")]
+    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible", "Crucible Modding Framework", "1.1.0.0")]
     public class CruciblePlugin : BaseUnityPlugin
     {
         private ICollection<CruciblePackageMod> mods;
