@@ -17,7 +17,6 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using HarmonyLib;
     using ObjectBased.RecipeMap;
@@ -29,6 +28,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     public sealed class CruciblePotionEffect : IEquatable<CruciblePotionEffect>
     {
         private static readonly Dictionary<PotionEffect, PotionEffectSettings> EffectSettings = new();
+        private static readonly HashSet<Icon> ClonedLockIcons = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CruciblePotionEffect"/> class.
@@ -40,7 +40,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets the effect ID of this effect.
+        /// Gets the ID of this effect.
         /// </summary>
         public string ID
         {
@@ -89,9 +89,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets or sets the icon texture for this effect.
+        /// Gets or sets the texture of the icon representing this effect.
         /// </summary>
-        public Texture2D EffectIcon
+        public Texture2D EffectIconTexture
         {
             get
             {
@@ -100,23 +100,88 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             set
             {
-                var icon = this.PotionEffect.icon;
-
-                if (icon.textures.Length != 1)
-                {
-                    icon.textures = new Texture2D[1];
-                }
-
-                icon.textures[0] = value;
-
-                // Clear the icon cache so our new sprite is generated.
-                // TODO: Should make this into a utility class/func.
-                // Do we want to try resetting the icon like this, or is it better to generate a new icon
-                // and remove the old icon from Icon.allIcons?
-                var variants = Traverse.Create(icon).Field("renderedVariants").GetValue() as IList;
-                variants.Clear();
+                new CrucibleIcon(this.PotionEffect.icon).SetTexture(value);
             }
         }
+
+        /// <summary>
+        /// Gets or sets the texture of the icon to use when this effect is unknown.
+        /// </summary>
+        public Texture2D EffectUnknownIconTexture
+        {
+            get
+            {
+                return this.GetSettingsOrFail().lockedEffectIcon.textures[0];
+            }
+
+            set
+            {
+                var settings = this.GetSettingsOrFail();
+                var icon = new CrucibleIcon(settings.lockedEffectIcon);
+
+                // To avoid changing the shared icon, we need to clone it.
+                if (!ClonedLockIcons.Contains(icon.Icon))
+                {
+                    icon = icon.Clone($"Crucible Effect {this.PotionEffect.name} Locked Icon");
+                    ClonedLockIcons.Add(icon.Icon);
+                }
+
+                icon.SetTexture(value);
+            }
+        }
+
+#if POTION_EFFECT_ICONS
+        /// <summary>
+        /// Gets or sets the icon for this effect when the effect is known.
+        /// <p>
+        /// <b>Warning:</b> Icons require distinct names, and changing the effect icon to one with a different name may result
+        /// in problems with the save file.  To change the texture without changing the icon, use <see cref="CrucibleIcon.SetTexture(Texture2D)"/>.
+        /// </p>
+        /// </summary>
+        /// <remarks>
+        /// A new icon can be generated from a texture using <see cref="CrucibleIcon.FromTexture(string, Texture2D)"/>.
+        /// </remarks>
+        public CrucibleIcon EffectIcon
+        {
+            get
+            {
+                return new CrucibleIcon(this.PotionEffect.icon);
+            }
+
+            set
+            {
+                this.PotionEffect.icon = value.Icon;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the icon to use on the potion map for this effect when the effect is unknown.
+        /// <b>Warning:</b> Icons require distinct names, and changing the effect icon to one with a different name may result
+        /// in problems with the save file.  To change the texture without changing the icon, use <see cref="CrucibleIcon.SetTexture(Texture2D)"/>.
+        /// </p>
+        /// </summary>
+        /// <remarks>
+        /// A new icon can be generated from a texture using <see cref="CrucibleIcon.FromTexture(string, Texture2D)"/>.
+        /// </remarks>
+        public CrucibleIcon EffectUnknownIcon
+        {
+            get
+            {
+                return new CrucibleIcon(this.GetSettingsOrFail().lockedEffectIcon);
+            }
+
+            set
+            {
+                if (!EffectSettings.TryGetValue(this.PotionEffect, out PotionEffectSettings settings) || settings == null)
+                {
+                    settings = new PotionEffectSettings();
+                    EffectSettings[this.PotionEffect] = settings;
+                }
+
+                settings.lockedEffectIcon = value.Icon;
+            }
+        }
+#endif
 
         /// <summary>
         /// Gets or sets the price of this effect for use when calculating potion costs.
@@ -151,45 +216,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets or sets the sprite to use when this effect is active.
+        /// Gets or sets the sprite that surrounds the potion effect.
         /// </summary>
-        public Sprite ActiveSprite
+        /// <remarks>
+        /// This sprite provides the visuals for the bottle that surrounds the <see cref="EffectIcon"/>.
+        /// </remarks>
+        /// <seealso cref="BottleActiveSprite"/>
+        public Sprite BottleSprite
         {
             get
             {
-                if (!EffectSettings.ContainsKey(this.PotionEffect))
-                {
-                    TryResolveSettingsFromMap(this.PotionEffect);
-                }
-
-                return EffectSettings[this.PotionEffect]?.effectSlotActiveSprite;
-            }
-
-            set
-            {
-                if (!EffectSettings.TryGetValue(this.PotionEffect, out PotionEffectSettings settings) || settings == null)
-                {
-                    settings = new PotionEffectSettings();
-                    EffectSettings[this.PotionEffect] = settings;
-                }
-
-                settings.effectSlotActiveSprite = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the sprite to use when this effect is idle.
-        /// </summary>
-        public Sprite IdleSprite
-        {
-            get
-            {
-                if (!EffectSettings.ContainsKey(this.PotionEffect))
-                {
-                    TryResolveSettingsFromMap(this.PotionEffect);
-                }
-
-                return EffectSettings[this.PotionEffect]?.effectSlotIdleSprite;
+                return this.GetSettingsOrFail().effectSlotIdleSprite;
             }
 
             set
@@ -205,32 +242,67 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets or sets the sprite that surrounds the potion effect when the player has placed the potion bottle over this effect.
+        /// </summary>
+        /// <remarks>
+        /// This sprite provides the visuals for the bottle that surrounds the <see cref="EffectIcon"/> when the player has positioned their potion over the effect.
+        /// </remarks>
+        /// <seealso cref="BottleSprite"/>
+        public Sprite BottleActiveSprite
+        {
+            get
+            {
+                return this.GetSettingsOrFail().effectSlotActiveSprite;
+            }
+
+            set
+            {
+                if (!EffectSettings.TryGetValue(this.PotionEffect, out PotionEffectSettings settings) || settings == null)
+                {
+                    settings = new PotionEffectSettings();
+                    EffectSettings[this.PotionEffect] = settings;
+                }
+
+                settings.effectSlotActiveSprite = value;
+            }
+        }
+
+        /// <summary>
         /// Creates a new Potion Effect.
         /// </summary>
         /// <param name="id">The ID of the potion effect to create.</param>
-        /// <returns>A <see cref="CruciblePotionEffect"> for manipulating the created potion effect.</returns>
+        /// <returns>A <see cref="CruciblePotionEffect"/> for manipulating the created potion effect.</returns>
         public static CruciblePotionEffect CreatePotionEffect(string id)
         {
+            if (PotionEffect.allPotionEffects.Find(x => x.name == id) != null)
+            {
+                throw new ArgumentException($"A potion effect with the ID \"{id}\" already exists.");
+            }
+
             var effect = ScriptableObject.CreateInstance<PotionEffect>();
             effect.name = id;
 
-            var icon = ScriptableObject.CreateInstance<Icon>();
             var blankTexture = TextureUtilities.CreateBlankTexture(1, 1, new Color(0, 0, 0, 0));
-            icon.textures = new[] { blankTexture };
-            icon.contourTexture = blankTexture;
-            icon.scratchesTexture = blankTexture;
-            icon.defaultIconColors = new Color[0];
-
-            // Perform icon initialization logic.
-            Icon.allIcons.Add(icon);
-            icon.GetElementBackgroundSprite();
-
-            effect.icon = icon;
+            effect.icon = CrucibleIcon.FromTexture($"Crucible Effect {id} Icon", blankTexture).Icon;
 
             effect.color = Color.white;
             effect.price = 10;
 
             PotionEffect.allPotionEffects.Add(effect);
+
+            var settings = ScriptableObject.CreateInstance<PotionEffectSettings>();
+            var defaultSettings = GetAnyEffectSettings();
+
+            // All of the below seem to be shared across all effects.
+            settings.lockedEffectIcon = defaultSettings.lockedEffectIcon;
+            settings.effectSlotActiveSprite = defaultSettings.effectSlotActiveSprite;
+            settings.effectSlotIdleSprite = defaultSettings.effectSlotIdleSprite;
+            settings.idleSepiaSettings = defaultSettings.idleSepiaSettings;
+            settings.unknownSepiaSettings = defaultSettings.unknownSepiaSettings;
+            settings.collectedSepiaSettings = defaultSettings.collectedSepiaSettings;
+            settings.collectAnimationTime = defaultSettings.collectAnimationTime;
+
+            EffectSettings.Add(effect, settings);
 
             return new CruciblePotionEffect(effect);
         }
@@ -276,6 +348,38 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             // We didn't find any settings.  Store a null so we know not to look in the future.
             EffectSettings[effect] = null;
+        }
+
+        private static PotionEffectSettings GetAnyEffectSettings()
+        {
+            // FIXME: We might capture a custom potion effect here, which might have customized
+            // bottle sprites.  We should restrict our search to base game effects.
+            foreach (var mapState in MapLoader.loadedMaps)
+            {
+                var mapObject = mapState.transform.gameObject;
+                var mapItem = mapObject.GetComponentInChildren<PotionEffectMapItem>();
+                if (mapItem != null)
+                {
+                    return Traverse.Create(mapItem).Field<PotionEffectSettings>("settings").Value;
+                }
+            }
+
+            throw new Exception("Failed to find a valid PotionEffectMapItem.  This can happen if another mod clears out all base game potion maps.");
+        }
+
+        private PotionEffectSettings GetSettingsOrFail()
+        {
+            if (!EffectSettings.ContainsKey(this.PotionEffect))
+            {
+                TryResolveSettingsFromMap(this.PotionEffect);
+            }
+
+            if (!EffectSettings.TryGetValue(this.PotionEffect, out PotionEffectSettings settings) || settings == null)
+            {
+                throw new InvalidOperationException($"No settings found for potion effect \"{this.PotionEffect.name}\".  This can occur for base game potion effects if another mod clears out the recipe map before Crucible can access it.");
+            }
+
+            return settings;
         }
     }
 }
