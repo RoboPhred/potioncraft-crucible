@@ -31,7 +31,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public OneOrMany<string> NpcTemplateName { get; set; }
 
         /// <inheritdoc/>
-        protected override IEnumerable<CrucibleNpcTemplate> GetTraders()
+        protected override IEnumerable<CrucibleTraderNpcTemplate> GetTraders()
         {
             foreach (string templateName in this.NpcTemplateName)
             {
@@ -46,7 +46,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                     throw new System.Exception($"NPC template {templateName} is not a trader.");
                 }
 
-                yield return trader;
+                yield return trader.AsTrader();
             }
         }
     }

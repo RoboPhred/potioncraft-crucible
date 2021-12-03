@@ -14,8 +14,6 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-#if ENABLE_POTION_BASE
-
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
@@ -31,7 +29,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="PotionBase"/>s.
     /// </summary>
-    public sealed class CruciblePotionBase
+    public sealed class CruciblePotionBase : IEquatable<CruciblePotionBase>
     {
         private static readonly HashSet<MapState> CustomMapStates = new();
         private static readonly HashSet<PotionBase> AtlasOverriddenPotionBases = new();
@@ -387,6 +385,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets an enumerable of all potion bases.
+        /// </summary>
+        /// <returns>An enumerable of all potion bases.</returns>
+        public static IEnumerable<CruciblePotionBase> GetAllPotionBases()
+        {
+            return MapLoader.loadedMaps.Select(x => new CruciblePotionBase(x));
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(CruciblePotionBase other)
+        {
+            return this.PotionBase == other.PotionBase;
+        }
+
+        /// <summary>
         /// Clears the recipe map of all entities.
         /// </summary>
         /// <remarks>
@@ -408,6 +421,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <para>
         /// This should be called after adding or removing game objects on the recipe map.
         /// </para>
+        /// </remarks>
         public void Reinitialize()
         {
             RecipeMapGameObjectUtilities.Reinitialize(this.MapGameObject);
@@ -453,7 +467,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var physicsOptimizerTraverse = Traverse.Create(typeof(RecipeMapPhysicsOptimizer));
 
             // Note: If we (or potioncraft itself) ever support varying map sizes, this logic will need to be reset if crucible changes the size.
-            Vector2 vector2 = 0.5f * Managers.RecipeMap.currentMap.mapBgRect.size;
+            Vector2 vector2 = 0.5f * mapState.mapBgRect.size;
             Rect rect = Rect.MinMaxRect(-vector2.x, -vector2.y, vector2.x, vector2.y);
 
             physicsOptimizerTraverse.Field<Dictionary<MapState, Rect>>("gridRectDictionary").Value.Add(mapState, rect);
@@ -490,7 +504,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 spriteAtlas = new CrucibleSpriteAtlas("CruciblePotionBases");
                 IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
                 {
-                    if (AtlasOverriddenPotionBases.Contains(e.Object))
+                    if (e.Object is not PotionBase potionBase)
+                    {
+                        return;
+                    }
+
+                    if (AtlasOverriddenPotionBases.Contains(potionBase))
                     {
                         e.AtlasResult = spriteAtlas.AtlasName;
                     }
@@ -523,5 +542,3 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
     }
 }
-
-#endif

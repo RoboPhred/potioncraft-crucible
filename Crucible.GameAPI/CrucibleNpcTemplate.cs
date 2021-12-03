@@ -20,16 +20,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System.Collections.Generic;
     using System.Linq;
     using Npc.Parts;
-    using Npc.Parts.Appearance;
     using Npc.Parts.Settings;
-    using ObjectBased.Deliveries;
     using QuestSystem;
-    using UnityEngine;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="NpcTemplate"/>s.
     /// </summary>
-    public class CrucibleNpcTemplate
+    public class CrucibleNpcTemplate : IEquatable<CrucibleNpcTemplate>
     {
         private static readonly Dictionary<string, HashSet<string>> NpcTemplateTagsById = new();
 
@@ -109,13 +106,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Gets a value indicating whether this template is a trader.
         /// </summary>
-        public bool IsTrader => this.GetAllParts().Any(x => x is TraderSettings);
+        public bool IsTrader => this.GetAllNonAppearanceParts().Any(x => x is TraderSettings);
 
         /// <summary>
         /// Gets a value indicating whether this template is a customer.
         /// </summary>
-        public bool IsCustomer => this.GetAllParts().Any(x => x is Quest);
+        public bool IsCustomer => this.GetAllNonAppearanceParts().Any(x => x is Quest);
 
+#if NPC_CUSTOM_APPEARANCE
         /// <summary>
         /// Gets or sets the left eye sprite for this NPC.
         /// </summary>
@@ -199,6 +197,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 }
             }
         }
+#endif
 
         /// <summary>
         /// Gets the collection of child templates for this npc template.
@@ -243,6 +242,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                           from tag in pair.Value
                           select tag;
             return allTags.Distinct();
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(CrucibleNpcTemplate other)
+        {
+            return this.NpcTemplate == other.NpcTemplate;
         }
 
         /// <summary>
@@ -348,6 +353,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// If this NPC Template is a trader, gets the API object for manipulating its trader data.
+        /// </summary>
+        /// <returns>The trader npc template, if this NPC template represents a trader.</returns>
+        public CrucibleTraderNpcTemplate AsTrader()
+        {
+            if (!this.IsTrader)
+            {
+                throw new InvalidOperationException("This NPC template is not a trader.");
+            }
+
+            return new CrucibleTraderNpcTemplate(this.NpcTemplate);
+        }
+
+        /// <summary>
         /// Adds this npc template to the queue.
         /// </summary>
         public void AddNpcToQueue()
@@ -356,61 +375,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             Managers.Npc.TryToSpawnNpc();
         }
 
-        // FIXME: Move to CrucibleTraderNpcTemplate
         /// <summary>
-        /// If this npc is a trader, adds an item to this template's trader inventory.
+        /// Gets all <see cref="NonAppearancePart"/>s that are associated with this NPC template.
+        /// This includes all optional / random chance parts.
         /// </summary>
-        /// <remarks>
-        /// The underlying <see cref="NpcTemplate"/> must have a <see cref="TraderSettings"/> part.
-        /// </remarks>
-        /// <param name="item">The inventory item to add to the trader's inventory.</param>
-        /// <param name="chance">The chance of the trader having the item for any given appearance.</param>
-        /// <param name="minCount">The minimum amount of the item to stock.</param>
-        /// <param name="maxCount">The maximum amount of the item to stock.</param>
-        public void AddTraderItem(CrucibleInventoryItem item, float chance = 1, int minCount = 1, int maxCount = 1)
-        {
-            var traderSettings = this.GetAllParts().OfType<TraderSettings>();
-            bool found = false;
-
-            // Typically, npc templates only have one TraderSettings in baseParts,
-            // but to be safe, try adding it to every trader settings found.
-            foreach (var settings in traderSettings)
-            {
-                found = true;
-                var crucibleCategory = settings.deliveriesCategories.Find(x => x.name == "Crucible");
-                if (crucibleCategory == null)
-                {
-                    crucibleCategory = new Category
-                    {
-                        name = "Crucible",
-                        deliveries = new List<Delivery>(),
-                    };
-                    settings.deliveriesCategories.Add(crucibleCategory);
-                }
-
-                // We could probably precreate the delivery outside the loop and re-use it,
-                // but the game does not reuse them, so let's play it safe.
-                crucibleCategory.deliveries.Add(new Delivery
-                {
-                    item = item.InventoryItem,
-                    appearingChance = chance,
-                    minCount = minCount,
-                    maxCount = maxCount,
-                    applyDiscounts = true,
-                    applyExtraCharge = true,
-                });
-            }
-
-            // TODO: Allow adding TraderSettings to base if not exists.  This will be to allow creation of new blank npc templates.
-            // We need to see if the game makes an npc a trader purely from the existence of TraderSettings, or if there is
-            // more work we need to do to make an npc into a trader.  Probably needs dialog nodes for it.
-            if (!found)
-            {
-                throw new IncompatibleNpcTemplateException("This NpcTemplate does not define a trader NPC.");
-            }
-        }
-
-        private IEnumerable<NonAppearancePart> GetAllParts()
+        /// <returns>An enumerable of all parts on this template.</returns>
+        protected IEnumerable<NonAppearancePart> GetAllNonAppearanceParts()
         {
             foreach (var part in this.NpcTemplate.baseParts)
             {
@@ -433,21 +403,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
                     yield return x.part;
                 }
-            }
-        }
-
-        private void ClearPartsOfType<T>()
-        {
-            this.NpcTemplate.baseParts = this.NpcTemplate.baseParts.Where(x => x is not T).ToArray();
-
-            foreach (var group in this.NpcTemplate.groupsOfContainers)
-            {
-                if (group.groupChance == 0)
-                {
-                    continue;
-                }
-
-                group.partsInGroup = group.partsInGroup.Where(x => x.part is not T).ToArray();
             }
         }
     }

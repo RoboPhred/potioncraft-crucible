@@ -35,7 +35,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
         /// <summary>
         /// Gets or sets the name of the NPC Template to copy the apperance from.
-        /// This can be another customer, or a trader.
+        /// This can be any NPC Template, including customers and traders.
         /// </summary>
         public string CopyAppearanceFrom { get; set; }
 
@@ -99,6 +99,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
             }
 
+#if NPC_CUSTOM_APPEARANCE
             if (this.LeftEye != null)
             {
                 subject.LeftEyeSprite = this.LeftEye;
@@ -108,6 +109,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
             {
                 subject.RightEyeSprite = this.RightEye;
             }
+#endif
         }
     }
 }

@@ -32,17 +32,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public OneOrMany<string> NpcTag { get; set; }
 
         /// <inheritdoc/>
-        protected override IEnumerable<CrucibleNpcTemplate> GetTraders()
+        protected override IEnumerable<CrucibleTraderNpcTemplate> GetTraders()
         {
             if (this.NpcTag == null)
             {
-                return new CrucibleNpcTemplate[0];
+                return new CrucibleTraderNpcTemplate[0];
             }
 
             var traders = from template in CrucibleNpcTemplate.GetAllNpcTemplates()
                           where template.IsTrader
                           where this.NpcTag.All(x => template.HasTag(x))
-                          select template;
+                          select template.AsTrader();
             return traders.Distinct();
         }
     }

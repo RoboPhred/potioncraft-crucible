@@ -51,7 +51,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         {
             foreach (var trader in this.GetTraders())
             {
-                trader.AddTraderItem(inventoryItem, this.ChanceToAppear, this.MinCount, this.MaxCount);
+                trader.AddTradeItem(inventoryItem, this.ChanceToAppear, this.MinCount, this.MaxCount);
             }
         }
 
@@ -59,6 +59,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// Enumerates the traders this item should be stocked by.
         /// </summary>
         /// <returns>An enumerable of npc templates that this item should be sold by.</returns>
-        protected abstract IEnumerable<CrucibleNpcTemplate> GetTraders();
+        protected abstract IEnumerable<CrucibleTraderNpcTemplate> GetTraders();
     }
 }
