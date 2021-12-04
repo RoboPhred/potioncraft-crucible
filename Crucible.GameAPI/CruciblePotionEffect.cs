@@ -19,6 +19,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using HarmonyLib;
+    using LocalizationSystem;
     using ObjectBased.RecipeMap;
     using UnityEngine;
 
@@ -47,6 +48,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             get
             {
                 return this.PotionEffect.name;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the name of the potion in the user's current language.
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                return new Key($"effect_{this.PotionEffect.name}").GetText();
+            }
+
+            set
+            {
+                CrucibleLocalization.SetLocalizationKey($"effect_{this.PotionEffect.name}", value);
             }
         }
 
@@ -304,6 +321,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             EffectSettings.Add(effect, settings);
 
+            CrucibleLocalization.SetLocalizationKey($"potion_{id}", id);
+            CrucibleLocalization.SetLocalizationKey($"effect_{id}", id);
+
             return new CruciblePotionEffect(effect);
         }
 
@@ -327,6 +347,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public bool Equals(CruciblePotionEffect other)
         {
             return this.PotionEffect == other.PotionEffect;
+        }
+
+        /// <summary>
+        /// Sets the localized name of this potion.
+        /// </summary>
+        /// <param name="name">The name to set.</param>
+        public void SetLocalizedName(LocalizedString name)
+        {
+            CrucibleLocalization.SetLocalizationKey($"potion_{this.PotionEffect.name}", name);
+            CrucibleLocalization.SetLocalizationKey($"effect_{this.PotionEffect.name}", name);
         }
 
         private static void TryResolveSettingsFromMap(PotionEffect effect)

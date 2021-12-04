@@ -1,4 +1,4 @@
-// <copyright file="CrucibleNPCsPlugin.cs" company="RoboPhredDev">
+﻿// <copyright file="CruciblePotionEffectsPlugin.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,17 +14,16 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.NPCs
+namespace RoboPhredDev.PotionCraft.Crucible.PotionEffects
 {
     using BepInEx;
-    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
 
     /// <summary>
     /// BepInEx plugin for Crucible Config mods.
     /// </summary>
-    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.NPCs", "NPC support for Crucible Modding Framework", "1.1.0.0")]
+    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.CruciblePotionEffectsPlugin", "Potion Effects support for Crucible Modding Framework", "1.0.0.0")]
     [BepInDependency("net.RoboPhredDev.PotionCraft.Crucible")]
-    public class CrucibleNPCsPlugin : BaseUnityPlugin
+    public class CruciblePotionEffectsPlugin : BaseUnityPlugin
     {
     }
 }

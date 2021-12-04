@@ -104,7 +104,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// <inheritdoc/>
         public override string ToString()
         {
-            return this.ID;
+            return this.PackageMod.Namespace + "." + this.ID;
         }
 
         /// <inheritdoc/>

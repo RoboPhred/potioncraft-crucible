@@ -30,7 +30,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
     {
         private static List<CruciblePackageConfigNode> loadingNodes;
 
-        private CruciblePackageModConfig root;
+        private CruciblePackageModConfig parsedData;
 
         private CruciblePackageMod(string directory)
             : base(directory)
@@ -41,22 +41,22 @@ namespace RoboPhredDev.PotionCraft.Crucible
         /// <summary>
         /// Gets the name of this mod.
         /// </summary>
-        public string Name => this.root.Name ?? this.ID;
+        public string Name => this.parsedData.Name ?? this.ID;
 
         /// <summary>
         /// Gets the author of this mod.
         /// </summary>
-        public string Author => this.root.Author;
+        public string Author => this.parsedData.Author;
 
         /// <summary>
         /// Gets the version of this mod.
         /// </summary>
-        public string Version => this.root.Version;
+        public string Version => this.parsedData.Version;
 
         /// <summary>
         /// Gets or the dependencies of this mod.
         /// </summary>
-        public List<CruciblePackageDependencyConfig> Dependencies => this.root.Dependencies;
+        public List<CruciblePackageDependencyConfig> Dependencies => this.parsedData.Dependencies;
 
         /// <summary>
         /// Gets the ID of this mod.
@@ -93,6 +93,11 @@ namespace RoboPhredDev.PotionCraft.Crucible
         }
 
         /// <summary>
+        /// Gets the collection of configuration roots for this mod.
+        /// </summary>
+        public ICollection<CruciblePackageConfigRoot> Roots => this.parsedData.ParsedRoots;
+
+        /// <summary>
         /// Loads the crucible package from the specified directory.
         /// </summary>
         /// <param name="directory">The package directory to load.</param>
@@ -103,7 +108,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
             try
             {
                 var mod = new CruciblePackageMod(directory);
-                mod.root = CrucibleResources.WithResourceProvider(mod, () => Deserializer.DeserializeFromResource<CruciblePackageModConfig>("package.yml"));
+                mod.parsedData = CrucibleResources.WithResourceProvider(mod, () => Deserializer.DeserializeFromResource<CruciblePackageModConfig>("package.yml"));
                 loadingNodes.ForEach(x => x.SetParentMod(mod));
                 return mod;
             }
@@ -138,13 +143,13 @@ namespace RoboPhredDev.PotionCraft.Crucible
         public void ApplyConfiguration()
         {
             // TODO: Collect exceptions for display to the user.
-            CrucibleResources.WithResourceProvider(this, () => CrucibleLog.RunInLogScope(this.Namespace, () => this.root.ParsedRoots.ForEach(x => x.ApplyConfiguration())));
+            CrucibleResources.WithResourceProvider(this, () => CrucibleLog.RunInLogScope(this.Namespace, () => this.parsedData.ParsedRoots.ForEach(x => x.ApplyConfiguration())));
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return this.ID;
+            return $"{this.ID} ({this.Namespace})";
         }
 
         /// <summary>

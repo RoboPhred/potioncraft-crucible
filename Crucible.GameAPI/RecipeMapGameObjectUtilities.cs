@@ -91,6 +91,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // Clear out map items such as effects, experience, vortecies, etc.
             foreach (var potionObject in recipeMapGameObject.GetComponentsInChildren<RecipeMapItem>())
             {
+                // Leave the base.
+                if (potionObject is PotionBaseMapItem)
+                {
+                    continue;
+                }
+
                 UnityEngine.Object.DestroyImmediate(potionObject.gameObject);
             }
 
@@ -154,8 +160,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     UnityEngine.Object.DestroyImmediate(line.gameObject);
                 }
 
-                var oldMap = Managers.RecipeMap.currentMap;
-                Managers.RecipeMap.currentMap = mapState;
                 DashedLineMapItem.CreateLinesOnMap(mapState);
             });
         }

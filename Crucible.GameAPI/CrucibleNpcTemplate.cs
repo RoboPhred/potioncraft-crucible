@@ -20,8 +20,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System.Collections.Generic;
     using System.Linq;
     using Npc.Parts;
+    using Npc.Parts.Appearance;
     using Npc.Parts.Settings;
     using QuestSystem;
+    using UnityEngine;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="NpcTemplate"/>s.
@@ -106,14 +108,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Gets a value indicating whether this template is a trader.
         /// </summary>
-        public bool IsTrader => this.GetAllNonAppearanceParts().Any(x => x is TraderSettings);
+        public bool IsTrader => this.NpcTemplate.baseParts.Any(x => x is TraderSettings);
 
         /// <summary>
         /// Gets a value indicating whether this template is a customer.
         /// </summary>
-        public bool IsCustomer => this.GetAllNonAppearanceParts().Any(x => x is Quest);
+        public bool IsCustomer => this.NpcTemplate.baseParts.Any(x => x is Quest);
 
-#if NPC_CUSTOM_APPEARANCE
         /// <summary>
         /// Gets or sets the left eye sprite for this NPC.
         /// </summary>
@@ -151,7 +152,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
                 foreach (var part in this.NpcTemplate.appearance.eyes.partsInGroup)
                 {
-                    part.part.left = value;
+                    // Clone the part so we do not modify other npcs that we may have copied data from
+                    var eyes = ScriptableObject.CreateInstance<Eyes>();
+                    eyes.left = value;
+                    eyes.right = part.part.right;
+                    part.part = eyes;
                 }
             }
         }
@@ -193,11 +198,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
                 foreach (var part in this.NpcTemplate.appearance.eyes.partsInGroup)
                 {
-                    part.part.right = value;
+                    // Clone the part so we do not modify other npcs that we may have copied data from
+                    var eyes = ScriptableObject.CreateInstance<Eyes>();
+                    eyes.left = part.part.left;
+                    eyes.right = value;
+                    part.part = eyes;
                 }
             }
         }
-#endif
 
         /// <summary>
         /// Gets the collection of child templates for this npc template.
@@ -303,38 +311,49 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="template">The template to copy the appearance from.</param>
         public void CopyAppearanceFrom(CrucibleNpcTemplate template)
         {
+            // There's lots of data encoded on the prefab :(
+            var prefab = this.RequirePart<Prefab>();
+            var templatePrefab = template.RequirePart<Prefab>();
+            prefab.prefab = templatePrefab.prefab;
+            prefab.clothesColorPalette1 = templatePrefab.clothesColorPalette1;
+            prefab.clothesColorPalette2 = templatePrefab.clothesColorPalette2;
+            prefab.clothesColorPalette3 = templatePrefab.clothesColorPalette3;
+            prefab.clothesColorPalette4 = templatePrefab.clothesColorPalette4;
+            prefab.hairColorPalette = templatePrefab.hairColorPalette;
+            prefab.skinColorPalette = templatePrefab.skinColorPalette;
+
             this.NpcTemplate.appearance = new AppearanceContainer
             {
-                skinColor = template.NpcTemplate.appearance.skinColor,
-                behindBodyFeature2 = template.NpcTemplate.appearance.behindBodyFeature2,
-                behindBodyFeature1 = template.NpcTemplate.appearance.behindBodyFeature1,
-                handBackFeature2 = template.NpcTemplate.appearance.handBackFeature2,
-                handBackFeature1 = template.NpcTemplate.appearance.handBackFeature1,
-                bodyFeature2 = template.NpcTemplate.appearance.bodyFeature2,
-                bodyFeature1 = template.NpcTemplate.appearance.bodyFeature1,
-                handFrontFeature2 = template.NpcTemplate.appearance.handFrontFeature2,
-                handFrontFeature1 = template.NpcTemplate.appearance.handFrontFeature1,
-                skullShapeFeature3 = template.NpcTemplate.appearance.skullShapeFeature3,
-                skullShapeFeature2 = template.NpcTemplate.appearance.skullShapeFeature2,
-                skullShapeFeature1 = template.NpcTemplate.appearance.skullShapeFeature1,
-                faceFeature2 = template.NpcTemplate.appearance.faceFeature2,
-                shortHairFeature2 = template.NpcTemplate.appearance.shortHairFeature2,
-                shortHairFeature1 = template.NpcTemplate.appearance.shortHairFeature1,
-                faceFeature1 = template.NpcTemplate.appearance.faceFeature1,
-                aboveHairFeature1 = template.NpcTemplate.appearance.aboveHairFeature1,
-                hairColor = template.NpcTemplate.appearance.hairColor,
-                clothesColor1 = template.NpcTemplate.appearance.clothesColor1,
-                clothesColor2 = template.NpcTemplate.appearance.clothesColor2,
-                clothesColor3 = template.NpcTemplate.appearance.clothesColor3,
-                aboveHairFeature2 = template.NpcTemplate.appearance.aboveHairFeature2,
-                body = template.NpcTemplate.appearance.body,
-                clothesColor4 = template.NpcTemplate.appearance.clothesColor4,
-                skullShape = template.NpcTemplate.appearance.skullShape,
-                face = template.NpcTemplate.appearance.face,
-                hat = template.NpcTemplate.appearance.hat,
-                hairstyle = template.NpcTemplate.appearance.hairstyle,
-                eyes = template.NpcTemplate.appearance.eyes,
-                breastSize = template.NpcTemplate.appearance.breastSize,
+                skinColor = ClonePartContainerGroup(template.NpcTemplate.appearance.skinColor),
+                behindBodyFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.behindBodyFeature2),
+                behindBodyFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.behindBodyFeature1),
+                handBackFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.handBackFeature2),
+                handBackFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.handBackFeature1),
+                bodyFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.bodyFeature2),
+                bodyFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.bodyFeature1),
+                handFrontFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.handFrontFeature2),
+                handFrontFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.handFrontFeature1),
+                skullShapeFeature3 = ClonePartContainerGroup(template.NpcTemplate.appearance.skullShapeFeature3),
+                skullShapeFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.skullShapeFeature2),
+                skullShapeFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.skullShapeFeature1),
+                faceFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.faceFeature2),
+                shortHairFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.shortHairFeature2),
+                shortHairFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.shortHairFeature1),
+                faceFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.faceFeature1),
+                aboveHairFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.aboveHairFeature1),
+                hairColor = ClonePartContainerGroup(template.NpcTemplate.appearance.hairColor),
+                clothesColor1 = ClonePartContainerGroup(template.NpcTemplate.appearance.clothesColor1),
+                clothesColor2 = ClonePartContainerGroup(template.NpcTemplate.appearance.clothesColor2),
+                clothesColor3 = ClonePartContainerGroup(template.NpcTemplate.appearance.clothesColor3),
+                aboveHairFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.aboveHairFeature2),
+                body = ClonePartContainerGroup(template.NpcTemplate.appearance.body),
+                clothesColor4 = ClonePartContainerGroup(template.NpcTemplate.appearance.clothesColor4),
+                skullShape = ClonePartContainerGroup(template.NpcTemplate.appearance.skullShape),
+                face = ClonePartContainerGroup(template.NpcTemplate.appearance.face),
+                hat = ClonePartContainerGroup(template.NpcTemplate.appearance.hat),
+                hairstyle = ClonePartContainerGroup(template.NpcTemplate.appearance.hairstyle),
+                eyes = ClonePartContainerGroup(template.NpcTemplate.appearance.eyes),
+                breastSize = ClonePartContainerGroup(template.NpcTemplate.appearance.breastSize),
             };
         }
 
@@ -376,34 +395,34 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets all <see cref="NonAppearancePart"/>s that are associated with this NPC template.
-        /// This includes all optional / random chance parts.
+        /// Gets the non appearance part of the specified type, or throw.
         /// </summary>
-        /// <returns>An enumerable of all parts on this template.</returns>
-        protected IEnumerable<NonAppearancePart> GetAllNonAppearanceParts()
+        /// <typeparam name="T">The type of the part to get.</typeparam>
+        /// <returns>The requested part.</returns>
+        protected T RequirePart<T>()
+            where T : NonAppearancePart
         {
-            foreach (var part in this.NpcTemplate.baseParts)
+            var part = this.NpcTemplate.baseParts.OfType<T>().FirstOrDefault();
+            if (part == null)
             {
-                yield return part;
+                throw new InvalidOperationException($"NPC template {this.ID} does not have a {typeof(T).Name} part.");
             }
 
-            foreach (var group in this.NpcTemplate.groupsOfContainers)
+            return part;
+        }
+
+        private static PartContainerGroup<T> ClonePartContainerGroup<T>(PartContainerGroup<T> group)
+        {
+            return new PartContainerGroup<T>
             {
-                if (group.groupChance == 0)
+                groupName = group.groupName,
+                groupChance = group.groupChance,
+                partsInGroup = group.partsInGroup.Select(x => new PartContainer<T>()
                 {
-                    continue;
-                }
-
-                foreach (var x in group.partsInGroup)
-                {
-                    if (x.chanceBtwParts == 0)
-                    {
-                        continue;
-                    }
-
-                    yield return x.part;
-                }
-            }
+                    chanceBtwParts = x.chanceBtwParts,
+                    part = x.part,
+                }).ToArray(),
+            };
         }
     }
 }

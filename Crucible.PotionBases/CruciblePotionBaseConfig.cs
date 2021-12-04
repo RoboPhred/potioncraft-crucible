@@ -16,10 +16,15 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
 {
+    using System;
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities;
+    using RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities;
     using UnityEngine;
+    using YamlDotNet.Core;
+    using YamlDotNet.Serialization;
 
     /// <summary>
     /// Configuration subject for a PotionCraft ingredient.
@@ -27,8 +32,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
     public class CruciblePotionBaseConfig : CruciblePackageConfigSubjectNode<CruciblePotionBase>
     {
         private static readonly HashSet<string> UnlockIdsOnStart = new();
-
-        private string id;
 
         static CruciblePotionBaseConfig()
         {
@@ -43,35 +46,30 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         }
 
         /// <summary>
-        /// Gets or sets the ID of this ingredient.
+        /// Gets or sets the ID of this potion base.
         /// </summary>
-        public string ID
-        {
-            get
-            {
-                return this.id ?? this.Name.Replace(" ", string.Empty);
-            }
-
-            set
-            {
-                this.id = value;
-            }
-        }
+        [YamlMember(Alias = "id")]
+        public string ID { get; set; }
 
         /// <summary>
         /// Gets or sets the name of this potion base.
         /// </summary>
-        public string Name { get; set; }
+        public LocalizedString Name { get; set; }
 
         /// <summary>
         /// Gets or sets the description of this potion base.
         /// </summary>
-        public string Description { get; set; }
+        public LocalizedString Description { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this potion base is available from the start of the game.
         /// </summary>
         public bool UnlockedOnStart { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color of this potion base.
+        /// </summary>
+        public Color? LiquidColor { get; set; }
 
         /// <summary>
         /// Gets or sets the small icon to display for this potion base in tooltips and ingredient lists.
@@ -118,6 +116,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         /// </summary>
         public Sprite MapOriginImage { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of map entities to spawn on this potion effect.
+        /// </summary>
+        public List<CrucibleMapEntityConfig> MapEntities { get; set; } = new();
+
+        /// <inheritdoc/>
+        protected override void OnDeserializeCompleted(Mark start, Mark end)
+        {
+            if (string.IsNullOrWhiteSpace(this.ID))
+            {
+                throw new Exception($"Potion base at {start} must have an id.");
+            }
+        }
+
         /// <inheritdoc/>
         protected override CruciblePotionBase GetSubject()
         {
@@ -138,8 +150,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
                 subject.Description = this.Description;
             }
 
-            // TODO: From config.  Make a deserializer for the Color class.  Use hex code string or rgba object
-            subject.LiquidColor = Color.red;
+            if (this.LiquidColor.HasValue)
+            {
+                subject.LiquidColor = this.LiquidColor.Value;
+            }
 
             if (this.IngredientListIcon != null)
             {
@@ -194,6 +208,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
             else
             {
                 UnlockIdsOnStart.Remove(subject.ID);
+            }
+
+            if (this.MapEntities != null)
+            {
+                using var spawner = CrucibleMapEntitySpawner.WithPotionBase(this.Subject);
+                spawner.ClearMap();
+                this.MapEntities.ForEach(x => x.AddEntityToSpawner(this.PackageMod.Namespace, spawner));
             }
         }
     }

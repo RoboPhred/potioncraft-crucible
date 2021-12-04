@@ -73,6 +73,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
             var prefab = GetPotionEffectPrefab();
 
             var go = UnityEngine.Object.Instantiate(prefab, Vector3.zero, Quaternion.identity, recipeMap.transform);
+            go.name = $"Crucible PotionEffect {this.PotionEffect.ID}";
             var mapItem = go.GetComponent<PotionEffectMapItem>();
 
             mapItem.effect = this.PotionEffect.PotionEffect;
@@ -108,6 +109,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
                 // Clone as inactive so the behaviors do not try to link up with a map.
                 go.SetActive(false);
                 potionEffectPrefab = UnityEngine.Object.Instantiate(go, Vector3.zero, Quaternion.identity, GameObjectUtilities.DisabledRoot.transform);
+                potionEffectPrefab.name = "Crucible RecipeMap Prefab";
                 go.SetActive(wasActive);
 
                 return potionEffectPrefab;

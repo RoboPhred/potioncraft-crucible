@@ -1,4 +1,4 @@
-// <copyright file="CrucibleNPCsPlugin.cs" company="RoboPhredDev">
+// <copyright file="CruciblePotionEffectsConfigRoot.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,17 +14,26 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.NPCs
+namespace RoboPhredDev.PotionCraft.Crucible.PotionEffects
 {
-    using BepInEx;
-    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using System.Collections.Generic;
+    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
 
     /// <summary>
-    /// BepInEx plugin for Crucible Config mods.
+    /// The configuration root for ingredients.
     /// </summary>
-    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.NPCs", "NPC support for Crucible Modding Framework", "1.1.0.0")]
-    [BepInDependency("net.RoboPhredDev.PotionCraft.Crucible")]
-    public class CrucibleNPCsPlugin : BaseUnityPlugin
+    [CruciblePackageConfigRoot]
+    public class CruciblePotionEffectsConfigRoot : CruciblePackageConfigRoot
     {
+        /// <summary>
+        /// Gets or sets the list of ingredients.
+        /// </summary>
+        public List<CruciblePotionEffectConfig> PotionEffects { get; set; } = new();
+
+        /// <inheritdoc/>
+        public override void ApplyConfiguration()
+        {
+            this.PotionEffects.ForEach(x => x.ApplyConfiguration());
+        }
     }
 }

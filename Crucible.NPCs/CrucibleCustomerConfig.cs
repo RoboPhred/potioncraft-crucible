@@ -40,6 +40,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public string CopyAppearanceFrom { get; set; }
 
         /// <summary>
+        /// Gets or sets the request this npc makes of the alchemist.
+        /// </summary>
+        public LocalizedString RequestText { get; set; }
+
+        /// <summary>
         /// Gets or sets the sprite to use for the left eye.
         /// </summary>
         public Sprite LeftEye { get; set; }
@@ -57,7 +62,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <inheritdoc/>
         public override string ToString()
         {
-            return this.ID;
+            return this.PackageMod.Namespace + "." + this.ID;
         }
 
         /// <inheritdoc/>
@@ -72,6 +77,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         {
             if (!string.IsNullOrEmpty(this.CopyAppearanceFrom))
             {
+                CrucibleLog.Log($"Copying appearance from {this.CopyAppearanceFrom}");
                 var template = CrucibleNpcTemplate.GetNpcTemplateById(this.CopyAppearanceFrom);
                 if (template == null)
                 {
@@ -79,15 +85,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
                 else
                 {
+                    CrucibleLog.Log($"Got template {template.ID}");
                     subject.CopyAppearanceFrom(template);
                 }
+            }
+
+            if (this.RequestText != null)
+            {
+                subject.SetLocalizedRequestText(this.RequestText);
             }
 
             if (this.AcceptedEffects != null)
             {
                 foreach (var effectId in this.AcceptedEffects)
                 {
-                    var effect = CruciblePotionEffect.GetPotionEffectByID(effectId);
+                    var effect = CruciblePotionEffect.GetPotionEffectByID(this.PackageMod.Namespace + "." + effectId) ?? CruciblePotionEffect.GetPotionEffectByID(effectId);
                     if (effect == null)
                     {
                         CrucibleLog.Log($"Could not add potion effect \"{effectId}\" to customer ID \"{this.ID}\" because no effect with an ID of \"{effectId}\" was found.");
@@ -99,7 +111,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
             }
 
-#if NPC_CUSTOM_APPEARANCE
             if (this.LeftEye != null)
             {
                 subject.LeftEyeSprite = this.LeftEye;
@@ -109,7 +120,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
             {
                 subject.RightEyeSprite = this.RightEye;
             }
-#endif
         }
     }
 }

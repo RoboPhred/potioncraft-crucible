@@ -1,4 +1,4 @@
-// <copyright file="CrucibleNPCsPlugin.cs" company="RoboPhredDev">
+// <copyright file="CrucibleMapEntityConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,17 +14,22 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.NPCs
+namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
 {
-    using BepInEx;
-    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities;
+    using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
-    /// BepInEx plugin for Crucible Config mods.
+    /// A config entry to create a potion base entity.
     /// </summary>
-    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible.NPCs", "NPC support for Crucible Modding Framework", "1.1.0.0")]
-    [BepInDependency("net.RoboPhredDev.PotionCraft.Crucible")]
-    public class CrucibleNPCsPlugin : BaseUnityPlugin
+    [DuckTypeCandidate(typeof(CruciblePotionEffectEntityConfig))]
+    public abstract class CrucibleMapEntityConfig
     {
+        /// <summary>
+        /// Add the configured entity to the spawner.
+        /// </summary>
+        /// <param name="packageNamespace">The namespace of the package mod spawning this entity.</param>
+        /// <param name="spawner">The spawner to add the entity to.</param>
+        public abstract void AddEntityToSpawner(string packageNamespace, CrucibleMapEntitySpawner spawner);
     }
 }

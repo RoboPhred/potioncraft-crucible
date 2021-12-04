@@ -36,6 +36,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets the ID of this icon.
+        /// </summary>
+        public string ID
+        {
+            get
+            {
+                return this.Icon.name;
+            }
+        }
+
+        /// <summary>
         /// Gets the wrapped icon.
         /// </summary>
         public Icon Icon
@@ -44,21 +55,32 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets an icon by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the icon to fetch.</param>
+        /// <returns>A <see cref="CrucibleIcon"/> api wrapper for working with the requested icon, or <c>null</c> if no icon exists with the given ID.</returns>
+        public static CrucibleIcon GetIconByID(string id)
+        {
+            var icon = Icon.allIcons.Find(x => x.name == id);
+            return icon != null ? new CrucibleIcon(icon) : null;
+        }
+
+        /// <summary>
         /// Creates a new icon from the given texture.
         /// </summary>
-        /// <param name="name">The name of this icon.</param>
+        /// <param name="id">The name of this icon.</param>
         /// <param name="texture">The texture to create the icon from.</param>
         /// <returns>A <see cref="CrucibleIcon"/> object for working with the created <see cref="Icon"/>.</returns>
-        public static CrucibleIcon FromTexture(string name, Texture2D texture)
+        public static CrucibleIcon FromTexture(string id, Texture2D texture)
         {
-            if (Icon.allIcons.Find(x => x.name == name) != null)
+            if (Icon.allIcons.Find(x => x.name == id) != null)
             {
-                throw new ArgumentException($"Icon with name \"{name}\" already exists.", nameof(name));
+                throw new ArgumentException($"Icon with ID \"{id}\" already exists.", nameof(id));
             }
 
             var blankTexture = TextureUtilities.CreateBlankTexture(1, 1, new Color(0, 0, 0, 0));
             var icon = ScriptableObject.CreateInstance<Icon>();
-            icon.name = name;
+            icon.name = id;
             icon.textures = new[] { texture };
             icon.contourTexture = blankTexture;
             icon.scratchesTexture = blankTexture;
@@ -73,18 +95,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Creates a brand new icon with data copied from this icon.
         /// </summary>
-        /// <param name="name">The name of the new icon.</param>
+        /// <param name="id">The name of the new icon.</param>
         /// <returns>The new icon.</returns>
-        public CrucibleIcon Clone(string name)
+        public CrucibleIcon Clone(string id)
         {
-            if (Icon.allIcons.Find(x => x.name == name) != null)
+            if (Icon.allIcons.Find(x => x.name == id) != null)
             {
-                throw new ArgumentException($"Icon with name \"{name}\" already exists.", nameof(name));
+                throw new ArgumentException($"Icon with ID \"{id}\" already exists.", nameof(id));
             }
 
             var icon = this.Icon;
             var clone = ScriptableObject.CreateInstance<Icon>();
-            icon.name = name;
+            icon.name = id;
             clone.textures = icon.textures;
             clone.contourTexture = icon.contourTexture;
             clone.scratchesTexture = icon.scratchesTexture;
@@ -105,6 +127,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var icon = this.Icon;
             icon.textures = new[] { texture };
             icon.defaultIconColors = new[] { Color.white };
+
+            // Clear the icon cache so our new sprite will generate on next request.
             this.ClearCache();
         }
 
@@ -113,10 +137,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         public void ClearCache()
         {
-            // Clear the icon cache so our new sprite is generated.
-            // TODO: Should make this into a utility class/func.
-            // Do we want to try resetting the icon like this, or is it better to generate a new icon
-            // and remove the old icon from Icon.allIcons?
             var variants = Traverse.Create(this.Icon).Field("renderedVariants").GetValue() as IList;
             variants.Clear();
         }
