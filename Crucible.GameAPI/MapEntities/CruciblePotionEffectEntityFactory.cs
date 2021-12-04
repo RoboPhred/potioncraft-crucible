@@ -60,6 +60,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         public Vector2 Position { get; set; }
 
         /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"PotionEffect PotionEffect={this.PotionEffect} Position={this.Position} Angle={this.Angle}";
+        }
+
+        /// <inheritdoc/>
         public GameObject SpawnEntity(GameObject recipeMap)
         {
             RecipeMapGameObjectUtilities.EnsureRecipeMapObject(recipeMap);

@@ -77,7 +77,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         {
             if (!string.IsNullOrEmpty(this.CopyAppearanceFrom))
             {
-                CrucibleLog.Log($"Copying appearance from {this.CopyAppearanceFrom}");
                 var template = CrucibleNpcTemplate.GetNpcTemplateById(this.CopyAppearanceFrom);
                 if (template == null)
                 {
@@ -85,7 +84,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
                 else
                 {
-                    CrucibleLog.Log($"Got template {template.ID}");
                     subject.CopyAppearanceFrom(template);
                 }
             }

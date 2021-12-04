@@ -42,9 +42,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         /// <param name="prefabType">The prefab type to use for an existing danger zone entity.</param>
         /// <param name="position">The position to spawn the danger zone at.</param>
         /// <param name="angle">The angle to spawn the danger zone at.</param>
-        public static void AddDangerZone(this CrucibleMapEntitySpawner spawner, string prefabType, Vector2 position, float angle = 0)
+        public static void AddDangerZonePart(this CrucibleMapEntitySpawner spawner, string prefabType, Vector2 position, float angle = 0)
         {
-            spawner.AddEntityFactory(new CrucibleDangerZoneEntityFactory(prefabType, position, angle));
+            spawner.AddEntityFactory(new CrucibleDangerZonePartEntityFactory(prefabType, position, angle));
         }
     }
 }

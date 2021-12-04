@@ -1,4 +1,4 @@
-// <copyright file="CrucibleDangerZoneEntityConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleDangerZonePartEntityConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -25,8 +25,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
     /// <summary>
     /// A configuration object defining a danger zone entity.
     /// </summary>
-    [TypePropertyCandidate("DangerZone")]
-    public class CrucibleDangerZoneEntityConfig : CrucibleMapEntityConfig, IAfterYamlDeserialization
+    [TypePropertyCandidate("DangerZonePart")]
+    public class CrucibleDangerZonePartEntityConfig : CrucibleMapEntityConfig, IAfterYamlDeserialization
     {
         /// <summary>
         /// Gets or sets the danger zone prefab name to spawn.
@@ -78,7 +78,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
         /// <inheritdoc/>
         public override void AddEntityToSpawner(string packageNamespace, CrucibleMapEntitySpawner spawner)
         {
-            spawner.AddDangerZone(this.Prefab, this.Position, this.Angle);
+            spawner.AddDangerZonePart(this.Prefab, this.Position, this.Angle);
         }
 
         /// <summary>

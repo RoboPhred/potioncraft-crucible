@@ -1,4 +1,4 @@
-// <copyright file="CrucibleDangerZoneEntityFactory.cs" company="RoboPhredDev">
+// <copyright file="CrucibleDangerZonePartEntityFactory.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -25,17 +25,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
     /// <summary>
     /// A factory for spawning danger zone (bone) entities.
     /// </summary>
-    public class CrucibleDangerZoneEntityFactory : ICrucibleMapEntityFactory
+    public class CrucibleDangerZonePartEntityFactory : ICrucibleMapEntityFactory
     {
         private static Dictionary<string, GameObject> capturedPrefabs = null;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CrucibleDangerZoneEntityFactory"/> class.
+        /// Initializes a new instance of the <see cref="CrucibleDangerZonePartEntityFactory"/> class.
         /// </summary>
         /// <param name="prefabType">The prefabricated danger zone variant to spawn.</param>
         /// <param name="position">The position to spawn the bone at.</param>
         /// <param name="angle">The angle to spawn the bone at.</param>
-        public CrucibleDangerZoneEntityFactory(string prefabType, Vector2 position, float angle)
+        public CrucibleDangerZonePartEntityFactory(string prefabType, Vector2 position, float angle)
         {
             this.PrefabType = prefabType;
             this.Position = position;
@@ -58,13 +58,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         public float Angle { get; set; }
 
         /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"DangerZonePart PrefabType={this.PrefabType} Position={this.Position} Angle={this.Angle}";
+        }
+
+        /// <inheritdoc/>
         public GameObject SpawnEntity(GameObject recipeMap)
         {
             // TODO: Danger zones are extremely simple.  We should build our own game objects intead of relying on copying others.
             // We will need to figure out how to grab the artwork for known bone types.
             // TODO: Support custom artwork and collision shapes.
-            var prefab = GetPrefabOrFail(this.PrefabType);
-
             var dangerZone = recipeMap.GetComponentInChildren<DangerZoneMapItem>();
 
             if (dangerZone == null)
@@ -78,11 +82,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
                 throw new Exception($"Could not find parts object for map {recipeMap.name}.");
             }
 
-            var go = this.ProduceGameObject();
-            go.transform.parent = parts;
-            prefab.transform.localPosition = this.Position;
-            prefab.transform.localRotation = Quaternion.Euler(0, 0, this.Angle);
-            return prefab;
+            return this.ProduceGameObject(parts);
         }
 
         private static GameObject GetPrefabOrFail(string prefabName)
@@ -129,15 +129,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
             capturedPrefabs.Add(name, prefab);
         }
 
-        private GameObject ProduceGameObject()
+        private GameObject ProduceGameObject(Transform parent)
         {
             if (!string.IsNullOrEmpty(this.PrefabType))
             {
                 var prefab = GetPrefabOrFail(this.PrefabType);
-                var go = UnityEngine.Object.Instantiate(prefab, Vector3.zero, Quaternion.identity, GameObjectUtilities.DisabledRoot.transform);
-                prefab.name = $"Crucible DangerZonePart";
-                prefab.SetActive(true);
-                return prefab;
+                var go = UnityEngine.Object.Instantiate(prefab, Vector3.zero, Quaternion.identity, parent);
+                go.transform.localPosition = this.Position;
+                go.transform.localRotation = Quaternion.Euler(0, 0, this.Angle);
+                go.name = $"Crucible DangerZonePart";
+                go.SetActive(true);
+                return go;
             }
 
             throw new NotImplementedException("Custom danger zones are not yet supported.");

@@ -14,28 +14,28 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible
+namespace RoboPhredDev.PotionCraft.Crucible.CruciblePackages
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.Resources;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
     /// Represents a Crucible configuration-derived mod.
     /// </summary>
-    public sealed class CruciblePackageMod : DirectoryResourceProvider
+    public sealed class CruciblePackageMod : ICrucibleResourceProvider
     {
         private static List<CruciblePackageConfigNode> loadingNodes;
 
+        private ICrucibleResourceProvider resources;
         private CruciblePackageModConfig parsedData;
 
-        private CruciblePackageMod(string directory)
-            : base(directory)
+        private CruciblePackageMod(string id, ICrucibleResourceProvider resourceProvider)
         {
-            this.ID = new DirectoryInfo(directory).Name;
+            this.ID = id;
+            this.resources = resourceProvider;
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
             loadingNodes = new List<CruciblePackageConfigNode>();
             try
             {
-                var mod = new CruciblePackageMod(directory);
+                var mod = new CruciblePackageMod(new DirectoryInfo(directory).Name, new DirectoryResourceProvider(directory));
                 mod.parsedData = CrucibleResources.WithResourceProvider(mod, () => Deserializer.DeserializeFromResource<CruciblePackageModConfig>("package.yml"));
                 loadingNodes.ForEach(x => x.SetParentMod(mod));
                 return mod;
@@ -121,6 +121,50 @@ namespace RoboPhredDev.PotionCraft.Crucible
             {
                 loadingNodes = null;
             }
+        }
+
+        /// <summary>
+        /// Loads the crucible package from the specified file.
+        /// </summary>
+        /// <param name="zipFilePath">The file path to the zip file containing the mod.</param>
+        /// <returns>A <see cref="CruciblePackageMod"/> loaded from the file.</returns>
+        public static CruciblePackageMod LoadFromZip(string zipFilePath)
+        {
+            loadingNodes = new List<CruciblePackageConfigNode>();
+            try
+            {
+                var mod = new CruciblePackageMod(new FileInfo(zipFilePath).Name, new ZipResourceProvider(zipFilePath));
+                mod.parsedData = CrucibleResources.WithResourceProvider(mod, () => Deserializer.DeserializeFromResource<CruciblePackageModConfig>("package.yml"));
+                loadingNodes.ForEach(x => x.SetParentMod(mod));
+                return mod;
+            }
+            catch (Exception ex)
+            {
+                // TODO: Collect exceptions for display to the user, return mod anyway.
+                throw new CruciblePackageModLoadException($"Failed to load crucible package from \"{zipFilePath}\": " + ex.Message, ex);
+            }
+            finally
+            {
+                loadingNodes = null;
+            }
+        }
+
+        /// <inheritdoc/>
+        public bool Exists(string resourceName)
+        {
+            return this.resources.Exists(resourceName);
+        }
+
+        /// <inheritdoc/>
+        public string ReadAllText(string resourceName)
+        {
+            return this.resources.ReadAllText(resourceName);
+        }
+
+        /// <inheritdoc/>
+        public byte[] ReadAllBytes(string resourceName)
+        {
+            return this.resources.ReadAllBytes(resourceName);
         }
 
         /// <summary>

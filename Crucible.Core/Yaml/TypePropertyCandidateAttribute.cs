@@ -27,6 +27,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
     [AttributeUsage(AttributeTargets.Class)]
     public class TypePropertyCandidateAttribute : Attribute
     {
+        private static readonly Dictionary<Type, Dictionary<string, Type>> CandidateCache = new();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TypePropertyCandidateAttribute"/> class.
         /// </summary>
@@ -48,12 +50,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
         /// <returns>An enumerable of pairs mapping type property values to types that can be instantiated for the given base type.</returns>
         public static IDictionary<string, Type> GetCandidateTypes(Type baseType)
         {
-            return (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                    from type in assembly.GetTypes()
-                    where baseType.IsAssignableFrom(type)
-                    let candidateAttribute = type.GetCustomAttribute<TypePropertyCandidateAttribute>()
-                    where candidateAttribute != null
-                    select new KeyValuePair<string, Type>(candidateAttribute.TypeName, type)).ToDictionary(x => x.Key, x => x.Value);
+            if (!CandidateCache.TryGetValue(baseType, out var candidates))
+            {
+                candidates = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                              from type in assembly.GetTypes()
+                              where baseType.IsAssignableFrom(type)
+                              let candidateAttribute = type.GetCustomAttribute<TypePropertyCandidateAttribute>()
+                              where candidateAttribute != null
+                              select new KeyValuePair<string, Type>(candidateAttribute.TypeName, type)).ToDictionary(x => x.Key, x => x.Value);
+                CandidateCache.Add(baseType, candidates);
+            }
+
+            return candidates;
         }
     }
 }
