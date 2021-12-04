@@ -1,4 +1,4 @@
-// <copyright file="CruciblePotionEffectEntityConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleDangerZoneEntityConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -17,22 +17,21 @@
 namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
 {
     using System;
-    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
     using UnityEngine;
     using YamlDotNet.Core;
 
     /// <summary>
-    /// A configuration object defining a potion effect entity.
+    /// A configuration object defining a danger zone entity.
     /// </summary>
-    [TypePropertyCandidate("PotionEffect")]
-    public class CruciblePotionEffectEntityConfig : CrucibleMapEntityConfig, IAfterYamlDeserialization
+    [TypePropertyCandidate("DangerZone")]
+    public class CrucibleDangerZoneEntityConfig : CrucibleMapEntityConfig, IAfterYamlDeserialization
     {
         /// <summary>
-        /// Gets or sets the name of the potion effect to spawn.
+        /// Gets or sets the danger zone prefab name to spawn.
         /// </summary>
-        public string Effect { get; set; }
+        public string Prefab { get; set; }
 
         /// <summary>
         /// Gets or sets the position to spawn the effect at.
@@ -79,13 +78,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
         /// <inheritdoc/>
         public override void AddEntityToSpawner(string packageNamespace, CrucibleMapEntitySpawner spawner)
         {
-            var effect = CruciblePotionEffect.GetPotionEffectByID(packageNamespace + "." + this.Effect) ?? CruciblePotionEffect.GetPotionEffectByID(this.Effect);
-            if (effect == null)
-            {
-                throw new Exception($"Could not find potion effect with ID \"{this.Effect}\".");
-            }
-
-            spawner.AddPotionEffect(effect, this.Position, this.Angle);
+            spawner.AddDangerZone(this.Prefab, this.Position, this.Angle);
         }
 
         /// <summary>
@@ -95,9 +88,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
         /// <param name="end">The end of the configuration object.</param>
         void IAfterYamlDeserialization.OnDeserializeCompleted(Mark start, Mark end)
         {
-            if (string.IsNullOrWhiteSpace(this.Effect))
+            if (string.IsNullOrWhiteSpace(this.Prefab))
             {
-                throw new Exception($"Potion effect entity at {start} must specify an effect.");
+                throw new Exception($"Danger zone entity at {start} must specify a prefab.");
             }
         }
     }

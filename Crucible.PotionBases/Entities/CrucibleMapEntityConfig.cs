@@ -22,7 +22,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
     /// <summary>
     /// A config entry to create a potion base entity.
     /// </summary>
-    [DuckTypeCandidate(typeof(CruciblePotionEffectEntityConfig))]
+    [TypeProperty("entityType")]
     public abstract class CrucibleMapEntityConfig
     {
         /// <summary>
