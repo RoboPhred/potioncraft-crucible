@@ -29,6 +29,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
     {
         private static readonly Dictionary<Type, Dictionary<string, Type>> CandidateCache = new();
 
+        static TypePropertyCandidateAttribute()
+        {
+            AppDomain.CurrentDomain.AssemblyLoad += (sender, args) => CandidateCache.Clear();
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TypePropertyCandidateAttribute"/> class.
         /// </summary>
