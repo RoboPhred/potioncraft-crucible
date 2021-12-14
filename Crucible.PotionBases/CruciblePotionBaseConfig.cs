@@ -188,7 +188,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
 
             if (this.LadleImage != null)
             {
-                subject.LadleIcon = Sprite.Create(this.LadleImage, new Rect(0, 0, this.LadleImage.width, this.LadleImage.height), new Vector2(0f, 0.5f));
+                subject.LadleIcon = Sprite.Create(this.LadleImage, new Rect(0, 0, this.LadleImage.width, this.LadleImage.height), new Vector2(-0.25f, 0.5f));
             }
 
             if (this.RecipeStepImage != null)
