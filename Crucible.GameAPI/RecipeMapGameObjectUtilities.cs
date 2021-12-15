@@ -64,7 +64,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 throw new InvalidOperationException("The recipe map game object's transform does not match the map state's transform.");
             }
 
-            var oldMapState = rmo.mapState;
+            var oldMapState = Managers.RecipeMap.currentMap;
             Managers.RecipeMap.currentMap = mapState;
             try
             {

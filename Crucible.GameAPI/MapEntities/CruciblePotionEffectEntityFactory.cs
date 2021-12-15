@@ -83,6 +83,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
             var mapItem = go.GetComponent<PotionEffectMapItem>();
 
             mapItem.effect = this.PotionEffect.PotionEffect;
+            mapItem.Status = PotionEffectStatus.Unknown;
 
             Traverse.Create(mapItem).Field<PotionEffectSettings>("settings").Value = settings;
 
