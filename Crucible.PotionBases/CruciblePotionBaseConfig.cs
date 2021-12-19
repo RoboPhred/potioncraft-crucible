@@ -31,12 +31,27 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
     /// </summary>
     public class CruciblePotionBaseConfig : CruciblePackageConfigSubjectNode<CruciblePotionBase>
     {
+        private static readonly HashSet<CruciblePotionBase> CreatedPotionBases = new();
         private static readonly HashSet<string> UnlockIdsOnStart = new();
 
         static CruciblePotionBaseConfig()
         {
             CrucibleGameEvents.OnSaveLoaded += (_, __) =>
             {
+                // HACK: Saves that did not previously contain a potion effect on a potion base will still load
+                // an empty serialized data object into the effect, zeroing out the status and making the effect
+                // unusable.
+                // FIXME: We might want to directly patch the game to supply sensible defaults in this case,
+                // but I want to avoid behavioral patches to keep crucible compatible with other mods.
+                // Hook into various MapItem OnLoad functions and implement the fix there?
+                foreach (var potionBase in CreatedPotionBases)
+                {
+                    foreach (var effect in potionBase.GetEffects())
+                    {
+                        effect.FixInvalidStatus();
+                    }
+                }
+
                 foreach (var potionBaseId in UnlockIdsOnStart)
                 {
                     var potionBase = CruciblePotionBase.GetPotionBaseById(potionBaseId);
@@ -134,7 +149,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         protected override CruciblePotionBase GetSubject()
         {
             var id = this.PackageMod.Namespace + "." + this.ID;
-            return CruciblePotionBase.GetPotionBaseById(id) ?? CruciblePotionBase.CreatePotionBase(id);
+
+            var potionBase = CruciblePotionBase.GetPotionBaseById(id);
+            if (potionBase != null)
+            {
+                return potionBase;
+            }
+
+            potionBase = CruciblePotionBase.CreatePotionBase(id);
+            CreatedPotionBases.Add(potionBase);
+            return potionBase;
         }
 
         /// <inheritdoc/>

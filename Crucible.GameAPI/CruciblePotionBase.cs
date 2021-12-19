@@ -400,6 +400,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets all potion effects on this potion base.
+        /// </summary>
+        /// <returns>An enumerable of potion effects on this potion base.</returns>
+        public IEnumerable<CruciblePotionBaseEffect> GetEffects()
+        {
+            foreach (var mapItem in this.MapGameObject.GetComponentsInChildren<PotionEffectMapItem>())
+            {
+                yield return new CruciblePotionBaseEffect(mapItem);
+            }
+        }
+
+        /// <summary>
         /// Clears the recipe map of all entities.
         /// </summary>
         /// <remarks>

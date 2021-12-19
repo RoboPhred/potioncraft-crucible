@@ -176,7 +176,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 subject.GroundColor = this.GroundColor.Value;
             }
 
-            if (this.StackItems.Count > 0)
+            if (this.StackItems != null && this.StackItems.Count > 0)
             {
                 subject.SetStack(this.StackItems.Select(x => x.ToStackItem()));
             }
