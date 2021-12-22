@@ -95,17 +95,33 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static void RaiseGameLoaded(File file)
         {
-            var e = new SaveLoadEventArgs(file);
-            onGameLoaded?.Invoke(null, e);
+            try
+            {
+                var e = new SaveLoadEventArgs(file);
+                onGameLoaded?.Invoke(null, e);
+            }
+            catch (Exception)
+            {
+                Notification.ShowText("Load Error", "Crucible failed to load data from the save.  Data loss might occur if you continue playing.", Notification.TextType.EventText);
+                throw;
+            }
         }
 
         private static void RaiseGameSaved(SavePool pool)
         {
-            // We dont get a direct reference to the file, but we can safely assume it was the
-            // most recent file in the given pool.
-            var file = FileStorage.GetNewestFromPool(pool);
-            var e = new SaveLoadEventArgs(file);
-            onGameSaved?.Invoke(null, e);
+            try
+            {
+                // We dont get a direct reference to the file, but we can safely assume it was the
+                // most recent file in the given pool.
+                var file = FileStorage.GetNewestSuitableFromPool(pool);
+                var e = new SaveLoadEventArgs(file);
+                onGameSaved?.Invoke(null, e);
+            }
+            catch (Exception)
+            {
+                Notification.ShowText("Save Error", "Crucible failed to save data.  Data loss may occur.", Notification.TextType.EventText);
+                throw;
+            }
         }
 
         private static IEnumerable<CodeInstruction> TranspileLoadLastProgressFromPool(IEnumerable<CodeInstruction> instructions)
