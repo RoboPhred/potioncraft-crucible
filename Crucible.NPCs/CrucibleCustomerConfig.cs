@@ -19,6 +19,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using RoboPhredDev.PotionCraft.Crucible.Yaml;
     using UnityEngine;
     using YamlDotNet.Serialization;
 
@@ -45,19 +46,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public LocalizedString RequestText { get; set; }
 
         /// <summary>
-        /// Gets or sets the sprite to use for the left eye.
-        /// </summary>
-        public Sprite LeftEye { get; set; }
-
-        /// <summary>
-        /// Gets or sets the sprite to use for the right eye.
-        /// </summary>
-        public Sprite RightEye { get; set; }
-
-        /// <summary>
         /// Gets or sets the collection of effect names that this npc wants to buy.
         /// </summary>
         public List<string> AcceptedEffects { get; set; }
+
+        /// <summary>
+        /// Gets or sets the collection of appearances that this npc will make.
+        /// </summary>
+        public OneOrMany<CrucibleNpcCalendarAppearanceConfig> AppearsAt { get; set; }
 
         /// <inheritdoc/>
         public override string ToString()
@@ -109,14 +105,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
             }
 
-            if (this.LeftEye != null)
+            if (this.AppearsAt != null)
             {
-                subject.LeftEyeSprite = this.LeftEye;
-            }
-
-            if (this.RightEye != null)
-            {
-                subject.RightEyeSprite = this.RightEye;
+                foreach (var appearance in this.AppearsAt)
+                {
+                    appearance.AddToDay(subject);
+                }
             }
         }
     }
