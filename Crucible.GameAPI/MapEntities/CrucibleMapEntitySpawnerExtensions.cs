@@ -46,5 +46,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         {
             spawner.AddEntityFactory(new CrucibleDangerZonePartEntityFactory(prefabType, position, angle));
         }
+
+        /// <summary>
+        /// Adds a vortex entity to the spawn queue.
+        /// </summary>
+        /// <param name="spawner">The map entity spawner to add the vortex to.</param>
+        /// <param name="prefabType">The prefab type to use for an existing vortex entity.</param>
+        /// <param name="position">The position to spawn the vortex at.</param>
+        public static void AddVortex(this CrucibleMapEntitySpawner spawner, string prefabType, Vector2 position)
+        {
+            spawner.AddEntityFactory(new CrucibleVortexEntityFactory(prefabType, position));
+        }
     }
 }

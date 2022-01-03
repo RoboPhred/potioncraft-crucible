@@ -1,4 +1,4 @@
-// <copyright file="CrucibleDangerZonePartEntityConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleVortexEntityConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -23,25 +23,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
     using YamlDotNet.Core;
 
     /// <summary>
-    /// A configuration object defining a danger zone entity.
+    /// A configuration object defining a vortex entity.
     /// </summary>
-    [TypePropertyCandidate("DangerZonePart")]
-    public class CrucibleDangerZonePartEntityConfig : CrucibleMapEntityConfig, IAfterYamlDeserialization
+    [TypePropertyCandidate("Vortex")]
+    public class CrucibleVortexEntityConfig : CrucibleMapEntityConfig, IAfterYamlDeserialization
     {
         /// <summary>
-        /// Gets or sets the danger zone prefab name to spawn.
+        /// Gets or sets the vortex prefab name to spawn.
         /// </summary>
         public string Prefab { get; set; }
 
         /// <summary>
-        /// Gets or sets the position to spawn the danger zone part at.
+        /// Gets or sets the position to spawn the vortex at.
         /// </summary>
         public Vector2 Position { get; set; }
-
-        /// <summary>
-        /// Gets or sets the angle to spawn the effect at.
-        /// </summary>
-        public float Angle { get; set; }
 
         /// <summary>
         /// Gets or sets the x coordinate to spawn the entity at.
@@ -78,7 +73,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
         /// <inheritdoc/>
         public override void AddEntityToSpawner(string packageNamespace, CrucibleMapEntitySpawner spawner)
         {
-            spawner.AddDangerZonePart(this.Prefab, this.Position, this.Angle);
+            spawner.AddVortex(this.Prefab, this.Position);
         }
 
         /// <summary>
@@ -90,7 +85,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
         {
             if (string.IsNullOrWhiteSpace(this.Prefab))
             {
-                throw new Exception($"Danger zone entity at {start} must specify a prefab.");
+                throw new Exception($"Vortex entity at {start} must specify a prefab.");
             }
         }
     }
