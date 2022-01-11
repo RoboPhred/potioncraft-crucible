@@ -80,7 +80,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
                 PopulatePrefabs();
             }
 
-            if (!capturedPrefabs.TryGetValue(prefabName, out var prefab))
+            if (!capturedPrefabs.TryGetValue("Vortex" + prefabName, out var prefab))
             {
                 throw new Exception($"Could not locate prefab \"{prefabName}\" for use as a vortex.");
             }

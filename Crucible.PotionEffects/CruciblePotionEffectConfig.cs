@@ -42,6 +42,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionEffects
         /// </summary>
         public Texture2D Icon { get; set; }
 
+        /// <summary>
+        /// Gets or sets the color used to represent this effect in a potion.
+        /// </summary>
+        public Color? PotionColor { get; set; }
+
         /// <inheritdoc/>
         protected override CruciblePotionEffect GetSubject()
         {
@@ -60,6 +65,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionEffects
             if (this.Icon != null)
             {
                 subject.EffectIconTexture = this.Icon;
+            }
+
+            if (this.PotionColor.HasValue)
+            {
+                subject.PotionColor = this.PotionColor.Value;
             }
         }
     }

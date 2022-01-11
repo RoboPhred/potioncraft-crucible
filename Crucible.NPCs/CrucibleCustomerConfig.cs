@@ -20,7 +20,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
-    using UnityEngine;
     using YamlDotNet.Serialization;
 
     /// <summary>
