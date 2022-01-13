@@ -64,7 +64,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionEffects
 
             if (this.Icon != null)
             {
-                subject.EffectIconTexture = this.Icon;
+                subject.IconTexture = this.Icon;
             }
 
             if (this.PotionColor.HasValue)

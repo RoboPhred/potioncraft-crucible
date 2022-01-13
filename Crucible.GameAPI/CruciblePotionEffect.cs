@@ -21,6 +21,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using HarmonyLib;
     using LocalizationSystem;
     using ObjectBased.RecipeMap;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
     using UnityEngine;
 
     /// <summary>
@@ -30,6 +31,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     {
         private static readonly Dictionary<PotionEffect, PotionEffectSettings> EffectSettings = new();
         private static readonly HashSet<Icon> ClonedLockIcons = new();
+
+        private static readonly HashSet<PotionEffect> AtlasOverriddenPotionEffects = new();
+        private static CrucibleSpriteAtlas spriteAtlas;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CruciblePotionEffect"/> class.
@@ -108,7 +112,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Gets or sets the texture of the icon representing this effect.
         /// </summary>
-        public Texture2D EffectIconTexture
+        public Texture2D IconTexture
         {
             get
             {
@@ -118,6 +122,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             set
             {
                 new CrucibleIcon(this.PotionEffect.icon).SetTexture(value);
+                SetPotionEffectIcon(this.PotionEffect, value);
             }
         }
 
@@ -357,6 +362,36 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             CrucibleLocalization.SetLocalizationKey($"potion_{this.PotionEffect.name}", name);
             CrucibleLocalization.SetLocalizationKey($"effect_{this.PotionEffect.name}", name);
+        }
+
+        private static void SetPotionEffectIcon(PotionEffect potionEffect, Texture2D texture)
+        {
+            if (spriteAtlas == null)
+            {
+                spriteAtlas = new CrucibleSpriteAtlas("CruciblePotionEffects");
+
+                // TODO: Hyjack icon atlas requests.
+                /*
+                IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
+                {
+                    if (e.Object is not PotionEffect potionEffect)
+                    {
+                        return;
+                    }
+
+                    if (AtlasOverriddenPotionEffects.Contains(potionEffect))
+                    {
+                        e.AtlasResult = spriteAtlas.AtlasName;
+                    }
+                };
+
+                CrucibleSpriteAtlasManager.AddAtlas(spriteAtlas);
+                */
+            }
+
+            spriteAtlas.SetIcon(potionEffect.icon.name, texture, yOffset: texture.height - 5);
+
+            AtlasOverriddenPotionEffects.Add(potionEffect);
         }
 
         private static void TryResolveSettingsFromMap(PotionEffect effect)

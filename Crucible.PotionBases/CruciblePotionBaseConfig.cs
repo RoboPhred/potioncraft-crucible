@@ -164,12 +164,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(CruciblePotionBase subject)
         {
-            if (!string.IsNullOrEmpty(this.Name))
+            if (this.Name != null)
             {
                 subject.Name = this.Name;
             }
 
-            if (!string.IsNullOrEmpty(this.Description))
+            if (this.Description != null)
             {
                 subject.Description = this.Description;
             }
@@ -204,7 +204,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
                 subject.MenuLockedIcon = this.MenuButtonLockedImage;
             }
 
-            // FIXME: This isnt working.  Image is missing from tooltip.
             if (this.TooltipImage != null)
             {
                 subject.TooltipIcon = this.TooltipImage;
