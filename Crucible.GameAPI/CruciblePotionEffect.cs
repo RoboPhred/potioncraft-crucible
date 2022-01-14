@@ -438,7 +438,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             if (!EffectSettings.TryGetValue(this.PotionEffect, out PotionEffectSettings settings) || settings == null)
             {
-                throw new InvalidOperationException($"No settings found for potion effect \"{this.PotionEffect.name}\".  This can occur for base game potion effects if another mod clears out the recipe map before Crucible can access it.");
+                throw new InvalidOperationException($"No settings found for potion effect \"{this.PotionEffect.name}\".  This can occur for non-Crucible potion effects that have not been added to any potion base.");
             }
 
             return settings;
