@@ -18,7 +18,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Collections;
+    using ElementChangerWindow;
     using HarmonyLib;
+    using PotionCustomizationWindow;
     using UnityEngine;
 
     /// <summary>
@@ -86,8 +88,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             icon.scratchesTexture = blankTexture;
             icon.defaultIconColors = new Color[0];
 
-            // This seems to be used for deserializing icon data from the save file.
-            Icon.allIcons.Add(icon);
+            RegisterIcon(icon);
 
             return new CrucibleIcon(icon);
         }
@@ -139,6 +140,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             var variants = Traverse.Create(this.Icon).Field("renderedVariants").GetValue() as IList;
             variants.Clear();
+        }
+
+        private static void RegisterIcon(Icon icon)
+        {
+            // This seems to be used for deserializing icon data from the save file.
+            Icon.allIcons.Add(icon);
+
+            // FIXME: Does every single icon get displayed here?
+            // Should probably make this optional.
+            var skinChangerWindow = GameObject.FindObjectOfType<PotionSkinChangerWindow>();
+            var panelGroup = Traverse.Create(skinChangerWindow).Field<ElementChangerPanelGroup>("iconSkinChangerPanelGroup").Value;
+            var mainPanel = panelGroup.mainPanel as ElementChangerPanelWithElements;
+            if (mainPanel != null)
+            {
+                mainPanel.elements.Add(icon);
+            }
         }
     }
 }
