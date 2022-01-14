@@ -370,9 +370,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 spriteAtlas = new CrucibleSpriteAtlas("CruciblePotionEffects");
 
-                // TODO: Hyjack icon atlas requests.
-                /*
-                IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
+                IconsResolveAtlasEvent.OnAtlasRequest += (_, e) =>
                 {
                     if (e.Object is not PotionEffect potionEffect)
                     {
@@ -386,7 +384,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 };
 
                 CrucibleSpriteAtlasManager.AddAtlas(spriteAtlas);
-                */
             }
 
             spriteAtlas.SetIcon(potionEffect.icon.name, texture, yOffset: texture.height - 5);
