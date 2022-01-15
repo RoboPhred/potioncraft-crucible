@@ -115,7 +115,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
 
                 // Clone as inactive so the behaviors do not try to link up with a map.
                 go.SetActive(false);
-                potionEffectPrefab = UnityEngine.Object.Instantiate(go, Vector3.zero, Quaternion.identity, GameObjectUtilities.DisabledRoot.transform);
+                potionEffectPrefab = UnityEngine.Object.Instantiate(go, Vector3.zero, Quaternion.identity, GameObjectUtilities.CruciblePrefabRoot.transform);
                 potionEffectPrefab.name = "Crucible RecipeMap Prefab";
                 go.SetActive(wasActive);
 

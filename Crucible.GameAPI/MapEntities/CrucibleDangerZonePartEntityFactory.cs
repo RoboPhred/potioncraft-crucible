@@ -122,7 +122,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
             var go = part.gameObject;
             var active = go.activeSelf;
             go.SetActive(false);
-            var prefab = UnityEngine.Object.Instantiate(go, Vector3.zero, Quaternion.identity, GameObjectUtilities.DisabledRoot.transform);
+            var prefab = UnityEngine.Object.Instantiate(go, Vector3.zero, Quaternion.identity, GameObjectUtilities.CruciblePrefabRoot.transform);
             prefab.name = $"Crucible Danger Zone Prefab {name}";
             go.SetActive(active);
 

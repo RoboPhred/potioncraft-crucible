@@ -391,6 +391,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 name = $"{this.ID} Stack",
             };
+            prefab.transform.parent = GameObjectUtilities.CruciblePrefabRoot.transform;
             prefab.SetActive(false);
 
             var stack = prefab.AddComponent<Stack>();
@@ -526,7 +527,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 name = $"{this.ID} Stack Item {depth}",
             };
-            stackItem.transform.parent = GameObjectUtilities.DisabledRoot.transform;
+            stackItem.transform.parent = GameObjectUtilities.CruciblePrefabRoot.transform;
             stackItem.transform.localPosition = crucibleStackItem.PositionInStack;
             stackItem.transform.localRotation = Quaternion.Euler(0, 0, crucibleStackItem.AngleInStack);
 
