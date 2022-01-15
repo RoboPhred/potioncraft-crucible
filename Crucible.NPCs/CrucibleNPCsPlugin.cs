@@ -17,7 +17,6 @@
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
     using BepInEx;
-    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
 
     /// <summary>
     /// BepInEx plugin for Crucible Config mods.

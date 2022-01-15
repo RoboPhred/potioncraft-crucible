@@ -320,6 +320,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             newBase.name = id;
             newBase.mapPrefab = GetBlankMapPrefab();
 
+            var localizationKey = $"potion_base_{id.ToLowerInvariant().Replace(" ", "_")}";
+            CrucibleLocalization.SetLocalizationKey(localizationKey, id);
+            CrucibleLocalization.SetLocalizationKey($"{localizationKey}_description", string.Empty);
+
             newBase.baseColor = waterBase.baseColor;
             newBase.smallIconSprite = waterBase.smallIconSprite;
             newBase.markerIconHoverSprite = waterBase.markerIconHoverSprite;
