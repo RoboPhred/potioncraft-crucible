@@ -304,7 +304,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Creates a new potion base with the given id.
         /// </summary>
         /// <param name="id">The id of the potion base to create.</param>
-        /// <returns>The potion base api object for the created potion base.</returns>
+        /// <returns>The api object for the created potion base.</returns>
         public static CruciblePotionBase CreatePotionBase(string id)
         {
             if (GetPotionBaseById(id) != null)

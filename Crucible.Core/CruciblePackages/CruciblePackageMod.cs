@@ -131,7 +131,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.CruciblePackages
         /// <returns>A <see cref="CruciblePackageMod"/> loaded from the file.</returns>
         public static CruciblePackageMod LoadFromZip(string zipFilePath)
         {
-            UnityEngine.Debug.Log($"Loading mod from zip file {new FileInfo(zipFilePath).Name}");
             loadingNodes = new List<CruciblePackageConfigNode>();
             try
             {

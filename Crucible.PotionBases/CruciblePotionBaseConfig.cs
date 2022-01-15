@@ -27,7 +27,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
     using YamlDotNet.Serialization;
 
     /// <summary>
-    /// Configuration subject for a PotionCraft ingredient.
+    /// Configuration subject for a PotionCraft potion base.
     /// </summary>
     public class CruciblePotionBaseConfig : CruciblePackageConfigSubjectNode<CruciblePotionBase>
     {

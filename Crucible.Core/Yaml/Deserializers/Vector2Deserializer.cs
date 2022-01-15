@@ -33,9 +33,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
         /// <inheritdoc/>
         public bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
-            if (expectedType != typeof(Vector2) && Nullable.GetUnderlyingType(expectedType) != typeof(Vector2?))
+            if (expectedType != typeof(Vector2) && Nullable.GetUnderlyingType(expectedType) != typeof(Vector2))
             {
-                value = false;
+                value = null;
                 return false;
             }
 

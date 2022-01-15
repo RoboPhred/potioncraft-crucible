@@ -31,7 +31,6 @@
     <Reference Include="UnityEngine.ImageConversionModule" CopyToPublishDirectory="Never">
       <HintPath>..\externals\UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
-
     <Reference Include="Unity.TextMeshPro" CopyToPublishDirectory="Never">
       <HintPath>..\externals\Unity.TextMeshPro.dll</HintPath>
     </Reference>
@@ -43,6 +42,9 @@
     </Reference>
     <Reference Include="UnityEngine.JSONSerializeModule" CopyToPublishDirectory="Never">
       <HintPath>..\externals\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.SpriteMaskModule" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.SpriteMaskModule.dll</HintPath>
     </Reference>
 
     <Reference Include="Assembly-CSharp" CopyToPublishDirectory="Never">

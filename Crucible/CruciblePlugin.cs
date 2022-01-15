@@ -131,7 +131,6 @@ namespace RoboPhredDev.PotionCraft.Crucible
 
         private static CruciblePackageMod TryLoadDirectoryMod(string modFolder)
         {
-            CrucibleLog.Log($"Loading Crucible mod from directory: {modFolder}");
             try
             {
                 var mod = CruciblePackageMod.LoadFromFolder(modFolder);
@@ -147,7 +146,6 @@ namespace RoboPhredDev.PotionCraft.Crucible
 
         private static CruciblePackageMod TryLoadFileMod(string zipFilePath)
         {
-            CrucibleLog.Log($"Loading Crucible mod from file: {zipFilePath}");
             try
             {
                 var mod = CruciblePackageMod.LoadFromZip(zipFilePath);
