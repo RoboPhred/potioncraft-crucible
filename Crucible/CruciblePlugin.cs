@@ -114,11 +114,13 @@ namespace RoboPhredDev.PotionCraft.Crucible
             var path = Path.Combine("crucible", "mods");
             if (!Directory.Exists(path))
             {
+                Directory.CreateDirectory(path);
                 return mods;
             }
 
             var directories = Directory.GetDirectories(path);
             var directoryMods = directories.Select(folder => TryLoadDirectoryMod(folder)).Where(x => x != null);
+            mods.AddRange(directoryMods);
 
             var zipFiles = Directory.GetFiles(path, "*.zip");
             var zipMods = zipFiles.Select(file => TryLoadFileMod(file)).Where(x => x != null);
@@ -129,6 +131,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
 
         private static CruciblePackageMod TryLoadDirectoryMod(string modFolder)
         {
+            CrucibleLog.Log($"Loading Crucible mod from directory: {modFolder}");
             try
             {
                 var mod = CruciblePackageMod.LoadFromFolder(modFolder);
@@ -144,6 +147,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
 
         private static CruciblePackageMod TryLoadFileMod(string zipFilePath)
         {
+            CrucibleLog.Log($"Loading Crucible mod from file: {zipFilePath}");
             try
             {
                 var mod = CruciblePackageMod.LoadFromZip(zipFilePath);
