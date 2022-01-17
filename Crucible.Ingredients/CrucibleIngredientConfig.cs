@@ -20,6 +20,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     using System.Linq;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using RoboPhredDev.PotionCraft.Crucible.SVG;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
     using UnityEngine;
     using YamlDotNet.Core;

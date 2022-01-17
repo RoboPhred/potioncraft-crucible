@@ -14,7 +14,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
+namespace RoboPhredDev.PotionCraft.Crucible.SVG
 {
     using System;
     using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
     using UnityEngine;
 
     /// <summary>
-    /// A list of <see cref="CrucibleIngredientPathSegment"/>s parsable from an SVG Path.
+    /// A class representing a textual SVG path, which can be converted to bezier curves or points.
     /// </summary>
     public class SvgPath
     {
@@ -55,10 +55,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public Vector2 Scale { get; set; } = Vector2.one;
 
         /// <summary>
-        /// Parses an SVG Path into a list of <see cref="CrucibleIngredientPathSegment"/>s.
+        /// Parses an SVG Path into a list of <see cref="CrucibleBezierCurve"/>s.
         /// </summary>
         /// <returns>An enumerable of path segments derived from the svg path.</returns>
-        public IEnumerable<CrucibleIngredientPathSegment> ToPathSegments()
+        public IEnumerable<CrucibleBezierCurve> ToPathSegments()
         {
             var path = this.Data;
 
@@ -67,7 +67,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             var scale = new Vector2(this.Scale.x, this.Scale.y * -1);
 
             var lastEnd = Vector2.zero;
-            CrucibleIngredientPathSegment curve;
+            CrucibleBezierCurve curve;
             while ((curve = PartToCurve(ref path, lastEnd)) != null)
             {
                 // Apply the scale
@@ -209,7 +209,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             return result;
         }
 
-        private static CrucibleIngredientPathSegment PartToCurve(ref string svgPath, Vector2 start)
+        private static CrucibleBezierCurve PartToCurve(ref string svgPath, Vector2 start)
         {
             var token = GetToken(ref svgPath);
             if (token == null)
@@ -247,10 +247,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             return new Vector2[0];
         }
 
-        private static CrucibleIngredientPathSegment AbsoluteLineToCurve(ref string svgPath)
+        private static CrucibleBezierCurve AbsoluteLineToCurve(ref string svgPath)
         {
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
-            return CrucibleIngredientPathSegment.LineTo(end);
+            return CrucibleBezierCurve.LineTo(end);
         }
 
         private static Vector2[] AbsoluteLineToPoints(ref string svgPath)
@@ -259,10 +259,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             return new[] { end };
         }
 
-        private static CrucibleIngredientPathSegment RelativeLineToCurve(ref string svgPath)
+        private static CrucibleBezierCurve RelativeLineToCurve(ref string svgPath)
         {
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
-            return CrucibleIngredientPathSegment.RelativeLineTo(end);
+            return CrucibleBezierCurve.RelativeLineTo(end);
         }
 
         private static Vector2[] RelativeLineToPoints(ref string svgPath, Vector2 start)
@@ -271,16 +271,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             return new[] { end };
         }
 
-        private static CrucibleIngredientPathSegment AbsoluteHorizontalToCurve(ref string svgPath, Vector2 start)
+        private static CrucibleBezierCurve AbsoluteHorizontalToCurve(ref string svgPath, Vector2 start)
         {
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), start.y);
-            return CrucibleIngredientPathSegment.LineTo(end);
+            return CrucibleBezierCurve.LineTo(end);
         }
 
-        private static CrucibleIngredientPathSegment RelativeHorizontalToCurve(ref string svgPath)
+        private static CrucibleBezierCurve RelativeHorizontalToCurve(ref string svgPath)
         {
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), 0);
-            return CrucibleIngredientPathSegment.RelativeLineTo(end);
+            return CrucibleBezierCurve.RelativeLineTo(end);
         }
 
         private static Vector2[] RelativeHorizontalToPoints(ref string svgPath, Vector2 start)
@@ -289,10 +289,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             return new[] { end };
         }
 
-        private static CrucibleIngredientPathSegment AbsoluteVerticalToCurve(ref string svgPath, Vector2 start)
+        private static CrucibleBezierCurve AbsoluteVerticalToCurve(ref string svgPath, Vector2 start)
         {
             var end = new Vector2(start.x, GetFloatTokenOrFail(ref svgPath));
-            return CrucibleIngredientPathSegment.LineTo(end);
+            return CrucibleBezierCurve.LineTo(end);
         }
 
         private static Vector2[] AbsoluteVerticalToPoints(ref string svgPath, Vector2 start)
@@ -301,10 +301,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             return new[] { end };
         }
 
-        private static CrucibleIngredientPathSegment RelativeVerticalToCurve(ref string svgPath)
+        private static CrucibleBezierCurve RelativeVerticalToCurve(ref string svgPath)
         {
             var end = new Vector2(0, GetFloatTokenOrFail(ref svgPath));
-            return CrucibleIngredientPathSegment.RelativeLineTo(end);
+            return CrucibleBezierCurve.RelativeLineTo(end);
         }
 
         private static Vector2[] RelativeVerticalToPoints(ref string svgPath, Vector2 start)
@@ -313,12 +313,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             return new[] { end };
         }
 
-        private static CrucibleIngredientPathSegment AbsoluteCubicCurveToCurve(ref string svgPath)
+        private static CrucibleBezierCurve AbsoluteCubicCurveToCurve(ref string svgPath)
         {
             var p1 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             var p2 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
-            return CrucibleIngredientPathSegment.CurveTo(p1, p2, end);
+            return CrucibleBezierCurve.CurveTo(p1, p2, end);
         }
 
         private static Vector2[] AbsoluteCubicCurveToPoints(ref string svgPath)
@@ -331,12 +331,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             return new[] { p1, p2, end };
         }
 
-        private static CrucibleIngredientPathSegment RelativeCubicCurveToCurve(ref string svgPath)
+        private static CrucibleBezierCurve RelativeCubicCurveToCurve(ref string svgPath)
         {
             var p1 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             var p2 = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
             var end = new Vector2(GetFloatTokenOrFail(ref svgPath), GetFloatTokenOrFail(ref svgPath));
-            return CrucibleIngredientPathSegment.RelativeCurveTo(p1, p2, end);
+            return CrucibleBezierCurve.RelativeCurveTo(p1, p2, end);
         }
 
         private static Vector2[] RelativeCubicCurveToPoints(ref string svgPath, Vector2 start)

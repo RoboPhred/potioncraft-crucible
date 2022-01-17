@@ -427,11 +427,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Gets an enumerable enumerating the potion path for this ingredient.
         /// </summary>
         /// <returns>An enumerable of the potion path for this ingredient.</returns>
-        public IEnumerable<CrucibleIngredientPathSegment> GetPath()
+        public IEnumerable<CrucibleBezierCurve> GetPath()
         {
             foreach (var part in this.Ingredient.path.path)
             {
-                yield return CrucibleIngredientPathSegment.FromPotioncraftCurve(part);
+                yield return CrucibleBezierCurve.FromPotioncraftCurve(part);
             }
         }
 
@@ -439,7 +439,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Sets the ingredient's potion path to the given path.
         /// </summary>
         /// <param name="path">The path to set the ingredient's path to.</param>
-        public void SetPath(IEnumerable<CrucibleIngredientPathSegment> path)
+        public void SetPath(IEnumerable<CrucibleBezierCurve> path)
         {
             var list = new List<CubicBezierCurve>();
 
@@ -551,14 +551,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             goOuter.transform.localRotation = Quaternion.identity;
             var colliderInner = goInner.AddComponent<PolygonCollider2D>();
 
-            var positionCorrectedCollider = crucibleStackItem.ColliderPolygon;
-            var positionCorrectedInnerCollider = crucibleStackItem.InnerColliderPolygon ?? crucibleStackItem.ColliderPolygon;
+            var colliderOuterPolygon = crucibleStackItem.ColliderPolygon;
+            var colliderInnerPolygon = crucibleStackItem.InnerColliderPolygon ?? crucibleStackItem.ColliderPolygon;
 
-            if (positionCorrectedCollider?.Count > 0)
+            if (colliderOuterPolygon?.Count > 0)
             {
                 colliderOuter.pathCount = 1;
 
-                colliderOuter.SetPath(0, positionCorrectedCollider);
+                colliderOuter.SetPath(0, colliderOuterPolygon);
             }
             else
             {
@@ -572,11 +572,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 colliderOuter.SetPath(0, dummyCollider);
             }
 
-            if (positionCorrectedInnerCollider?.Count > 0)
+            if (colliderInnerPolygon?.Count > 0)
             {
                 colliderInner.pathCount = 1;
 
-                colliderInner.SetPath(0, positionCorrectedInnerCollider);
+                colliderInner.SetPath(0, colliderInnerPolygon);
             }
             else
             {

@@ -16,13 +16,10 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
 {
-    using System;
-    using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
-    using RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities;
+    using RoboPhredDev.PotionCraft.Crucible.SVG;
     using UnityEngine;
-    using YamlDotNet.Core;
     using YamlDotNet.Serialization;
 
     /// <summary>
@@ -50,6 +47,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
         /// Gets or sets the mask for the bottle.
         /// </summary>
         public Sprite BottleMask { get; set; }
+
+        /// <summary>
+        /// Gets or sets the path that makes up the bottle's collision.
+        /// </summary>
+        public SvgPath BottleCollision { get; set; }
 
         /// <summary>
         /// Gets or sets the offset of the label.
@@ -85,43 +87,36 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
         /// <summary>
         /// Gets or sets the first liquid sprite to use for four-effect potions.
         /// </summary>
-        /// <value></value>
         public Sprite Liquid1Of4 { get; set; }
 
         /// <summary>
         /// Gets or sets the third liquid sprite to use for four-effect potions.
         /// </summary>
-        /// <value></value>
         public Sprite Liquid3Of4 { get; set; }
 
         /// <summary>
         /// Gets or sets the fourth liquid sprite to use for four-effect potions.
         /// </summary>
-        /// <value></value>
         public Sprite Liquid4Of4 { get; set; }
 
         /// <summary>
         /// Gets or sets the first liquid sprite to use for five-effect potions.
         /// </summary>
-        /// <value></value>
         public Sprite Liquid1Of5 { get; set; }
 
         /// <summary>
         /// Gets or sets the second liquid sprite to use for five-effect potions.
         /// </summary>
-        /// <value></value>
         public Sprite Liquid2Of5 { get; set; }
 
         /// <summary>
         /// Gets or sets the fourth liquid sprite to use for five-effect potions.
         /// </summary>
-        /// <value></value>
         public Sprite Liquid4Of5 { get; set; }
 
         /// <summary>
         /// Gets or sets the fifth liquid sprite to use for five-effect potions.
         /// </summary>
-        /// <value></value>
         public Sprite Liquid5Of5 { get; set; }
 
         /// <inheritdoc/>
@@ -129,14 +124,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
         {
             var id = this.PackageMod.Namespace + "." + this.ID;
 
-            var potionBottle = CruciblePotionBottle.GetPotionBottleById(id);
-            if (potionBottle != null)
-            {
-                return potionBottle;
-            }
-
-            potionBottle = CruciblePotionBottle.CreatePotionBottle(id);
-            return potionBottle;
+            return CruciblePotionBottle.GetPotionBottleById(id) ?? CruciblePotionBottle.CreatePotionBottle(id);
         }
 
         /// <inheritdoc/>
@@ -159,8 +147,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
 
             if (this.LabelOffset.HasValue)
             {
-                UnityEngine.Debug.Log("Setting label offset from " + subject.LabelOffset + "to " + this.LabelOffset.Value);
                 subject.LabelOffset = this.LabelOffset.Value;
+            }
+
+            if (this.BottleCollision != null)
+            {
+                subject.SetColliderPolygon(this.BottleCollision.ToPoints());
             }
 
             if (this.LiquidMain != null)

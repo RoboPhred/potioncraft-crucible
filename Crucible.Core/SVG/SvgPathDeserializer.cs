@@ -14,7 +14,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
+namespace RoboPhredDev.PotionCraft.Crucible.SVG
 {
     using System;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;

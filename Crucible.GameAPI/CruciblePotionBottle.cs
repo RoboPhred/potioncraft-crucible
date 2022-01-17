@@ -17,6 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using ElementChangerWindow;
     using HarmonyLib;
@@ -365,6 +366,33 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             return new CruciblePotionBottle(bottle);
+        }
+
+        /// <summary>
+        /// Gets the enumerable of points that define the bottle's collision.
+        /// </summary>
+        /// <returns>An enumerable of points that make up the bottle's collision.</returns>
+        public IEnumerable<Vector2> GetColliderPolygon()
+        {
+            var collider = this.PotionBottle.potionItemPrefab.GetComponent<PolygonCollider2D>();
+            if (collider == null)
+            {
+                return Enumerable.Empty<Vector2>();
+            }
+
+            return collider.points;
+        }
+
+        /// <summary>
+        /// Sets the points that define the bottle's collision.
+        /// </summary>
+        /// <param name="points">An enumerable of points to define the collision of the bottle.</param>
+        public void SetColliderPolygon(IEnumerable<Vector2> points)
+        {
+            var prefab = this.PotionBottle.potionItemPrefab;
+            var collider = prefab.GetComponent<PolygonCollider2D>() ?? prefab.AddComponent<PolygonCollider2D>();
+
+            collider.points = points.ToArray();
         }
     }
 }
