@@ -57,6 +57,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets or sets the icon texture.
+        /// </summary>
+        public Texture2D IconTexture
+        {
+            get
+            {
+                return this.Icon.textures[0];
+            }
+
+            set
+            {
+                this.Icon.textures[0] = value;
+            }
+        }
+
+        /// <summary>
         /// Gets an icon by its ID.
         /// </summary>
         /// <param name="id">The ID of the icon to fetch.</param>

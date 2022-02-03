@@ -109,7 +109,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             CrucibleNpcTemplate copyFromTemplate = null;
             if (!string.IsNullOrEmpty(copyAppearanceFrom))
             {
-                copyFromTemplate = copyAppearanceFrom != null ? CrucibleNpcTemplate.GetNpcTemplateById(copyAppearanceFrom) : null;
+                copyFromTemplate = copyAppearanceFrom != null ? GetNpcTemplateById(copyAppearanceFrom) : null;
                 if (copyFromTemplate == null)
                 {
                     throw new ArgumentException($"Could not find NPC template with id \"{copyAppearanceFrom}\" to copy appearance from.", nameof(copyAppearanceFrom));
@@ -188,7 +188,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 },
             };
             CrucibleLocalization.SetLocalizationKey($"__requestanswerdata", "This is an answer!");
-            CrucibleLocalization.SetLocalizationKey($"__requestanswerdata_answer1", "This is... im not sure what this is!");
+            CrucibleLocalization.SetLocalizationKey($"__requestanswerdata_answer1", "This is the player's response to the answer!");
             dialogData.dialogues.Add(requestAnswerData);
 
             var endNodeData = new EndOfDialogueNodeData

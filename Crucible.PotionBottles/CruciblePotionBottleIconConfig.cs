@@ -1,4 +1,4 @@
-﻿// <copyright file="CruciblePotionBottlesConfigRoot.cs" company="RoboPhredDev">
+// <copyright file="CruciblePotionBottleIconConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,30 +16,42 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
 {
-    using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using UnityEngine;
+    using YamlDotNet.Serialization;
 
     /// <summary>
-    /// The configuration root for potion bottles.
+    /// Configuration subject for a PotionCraft potion bottle.
     /// </summary>
-    [CruciblePackageConfigRoot]
-    public class CruciblePotionBottlesConfigRoot : CruciblePackageConfigRoot
+    public class CruciblePotionBottleIconConfig : CruciblePackageConfigSubjectNode<CrucibleIcon>
     {
         /// <summary>
-        /// Gets or sets the list of potion bottles.
+        /// Gets or sets the ID of this icon.
         /// </summary>
-        public List<CruciblePotionBottleConfig> PotionBottles { get; set; } = new();
+        [YamlMember(Alias = "id")]
+        public string ID { get; set; }
 
         /// <summary>
-        /// Gets or sets the list of potion bottle icons.
+        /// Gets or sets the icon texture.
         /// </summary>
-        public List<CruciblePotionBottleIconConfig> PotionBottleIcons { get; set; } = new();
+        public Texture2D Icon { get; set; }
 
         /// <inheritdoc/>
-        public override void ApplyConfiguration()
+        protected override CrucibleIcon GetSubject()
         {
-            this.PotionBottles.ForEach(x => x.ApplyConfiguration());
-            this.PotionBottleIcons.ForEach(x => x.ApplyConfiguration());
+            var id = this.PackageMod.Namespace + "." + this.ID;
+
+            return CrucibleIcon.GetIconByID(id) ?? CrucibleIcon.FromTexture(id, TextureUtilities.CreateBlankTexture(10, 10, new Color(0, 0, 0, 0)));
+        }
+
+        /// <inheritdoc/>
+        protected override void OnApplyConfiguration(CrucibleIcon subject)
+        {
+            if (this.Icon != null)
+            {
+                subject.IconTexture = this.Icon;
+            }
         }
     }
 }

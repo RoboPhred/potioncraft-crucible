@@ -44,6 +44,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
         public Sprite BottleForeground { get; set; }
 
         /// <summary>
+        /// Gets or sets the shadows sprite for the bottle.
+        /// </summary>
+        public Sprite BottleShadows { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cork sprite for the bottle.
+        /// </summary>
+        public Sprite BottleCork { get; set; }
+
+        /// <summary>
+        /// Gets or sets the scratches sprite for the bottle.
+        /// </summary>
+        public Sprite BottleScratches { get; set; }
+
+        /// <summary>
         /// Gets or sets the mask for the bottle.
         /// </summary>
         public Sprite BottleMask { get; set; }
@@ -138,6 +153,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
             if (this.BottleForeground != null)
             {
                 subject.BottleForeground = this.BottleForeground;
+            }
+
+            if (this.BottleShadows != null)
+            {
+                subject.BottleShadows = this.BottleShadows;
+            }
+
+            if (this.BottleCork != null)
+            {
+                subject.BottleCork = this.BottleCork;
+            }
+
+            if (this.BottleScratches != null)
+            {
+                subject.BottleScratches = this.BottleScratches;
             }
 
             if (this.BottleMask != null)
