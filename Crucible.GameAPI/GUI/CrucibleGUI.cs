@@ -48,7 +48,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GUI
         public static ICrucibleGUIWindow CreateWindow(string title, int width, int height, Action<ICrucibleGUIWindow> render)
         {
             var window = Manager.Value.CreateWindow(title, render);
-            UnityEngine.Debug.Log($"Created window {window.Title} at {window.X}, {window.Y} with size {window.Width}, {window.Height}");
             window.Visible = true;
             window.Width = width;
             window.Height = height;
