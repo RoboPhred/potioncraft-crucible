@@ -78,6 +78,14 @@ namespace RoboPhredDev.PotionCraft.Crucible
                         Notification.ShowText("New Crucible Packages", $"{newModCount} new {(newModCount != 1 ? "mods were" : "mod was")} installed.", Notification.TextType.EventText);
                     }
 
+                    GameAPI.GUI.CrucibleGUI.CreateWindow("This is a test", 10, 10, (window) =>
+                        {
+                            GUILayout.Label("This is a test");
+                            if (GUILayout.Button("Close", GUILayout.ExpandHeight(true)))
+                            {
+                                window.Close();
+                            }
+                        });
                 }
             };
 

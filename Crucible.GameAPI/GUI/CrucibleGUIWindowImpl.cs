@@ -49,9 +49,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GUI
             debugWindow.gameObject.SetActive(true);
             this.debugWindow = debugWindow;
 
-            var windowTraverse = Traverse.Create(this.debugWindow);
-            windowTraverse.Method("FixOutOfBoundsCase").GetValue();
-            // windowTraverse.Method("RecalculateWindowSize").GetValue();
+            Traverse.Create(this.debugWindow).Method("FixOutOfBoundsCase").GetValue();
         }
 
         /// <summary>
@@ -145,6 +143,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GUI
         }
 
         /// <inheritdoc/>
+        public Rect LayoutRect
+        {
+            get
+            {
+                var headerScreenOffset = new Vector2(0, 35);
+                var margin = new Vector2(5, 5);
+                var windowSize = this.WindowSizeToScreen(this.debugWindow.colliderBackground.size) - headerScreenOffset - (margin * 2);
+                var windowPos = this.WindowPosToScreen(this.debugWindow.transform.position) + headerScreenOffset + margin;
+                return new Rect(windowPos, windowSize);
+            }
+        }
+
+        /// <inheritdoc/>
         public void Close()
         {
             this.OnCloseRequested?.Invoke(this, EventArgs.Empty);
@@ -165,22 +176,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GUI
         /// This should be called inside a Unity behavior's <c>OnGUI</c> function.
         public void OnGUI()
         {
-            var headerScreenOffset = new Vector2(0, 35);
-            var margin = new Vector2(5, 5);
-            var windowSize = this.WindowSizeToScreen(this.debugWindow.colliderBackground.size) - headerScreenOffset - (margin * 2);
-            var windowPos = this.WindowPosToScreen(this.debugWindow.transform.position) + headerScreenOffset + margin;
-
             var defaultContentColor = GUI.contentColor;
+            var defaultBackgroundColor = GUI.backgroundColor;
             GUI.contentColor = Color.black;
+            GUI.backgroundColor = new Color(0, 0, 0, 0);
             try
             {
-                GUILayout.BeginArea(new Rect(windowPos.x, windowPos.y, windowSize.x, windowSize.y));
+                GUILayout.BeginArea(this.LayoutRect);
                 this.render(this);
                 GUILayout.EndArea();
             }
             finally
             {
                 GUI.contentColor = defaultContentColor;
+                GUI.backgroundColor = defaultBackgroundColor;
             }
         }
 

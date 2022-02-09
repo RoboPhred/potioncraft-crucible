@@ -30,7 +30,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GUI
         /// Creates a new GUI window.
         /// </summary>
         /// <param name="title">The title of the window.</param>
-        /// <param name="render">A function to render the window using <c>GUILayout</c></param>
+        /// <param name="render">A function to render the window using <c>GUILayout</c>.</param>
         /// <returns>A reference to the window.</returns>
         public static ICrucibleGUIWindow CreateWindow(string title, Action<ICrucibleGUIWindow> render)
         {

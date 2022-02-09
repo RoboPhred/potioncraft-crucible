@@ -16,6 +16,8 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GUI
 {
+    using UnityEngine;
+
     /// <summary>
     /// A GUI window managed by Crucible.
     /// </summary>
@@ -50,6 +52,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GUI
         /// Gets or sets the Y position of the window.
         /// </summary>
         float Y { get; set; }
+
+        /// <summary>
+        /// Gets the GUILayout rect for the window.
+        /// </summary>
+        Rect LayoutRect { get; }
 
         /// <summary>
         /// Closes the window.
