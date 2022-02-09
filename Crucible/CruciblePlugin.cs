@@ -77,6 +77,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
                     {
                         Notification.ShowText("New Crucible Packages", $"{newModCount} new {(newModCount != 1 ? "mods were" : "mod was")} installed.", Notification.TextType.EventText);
                     }
+
                 }
             };
 

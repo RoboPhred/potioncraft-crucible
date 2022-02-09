@@ -1,4 +1,4 @@
-// <copyright file="CruciblePotionBottleIconConfig.cs" company="RoboPhredDev">
+// <copyright file="CruciblePotionBottleStickerConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -22,9 +22,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
     using YamlDotNet.Serialization;
 
     /// <summary>
-    /// Configuration subject for a PotionCraft potion bottle icon.
+    /// Configuration subject for a PotionCraft potion bottle sticker.
     /// </summary>
-    public class CruciblePotionBottleIconConfig : CruciblePackageConfigSubjectNode<CrucibleIcon>
+    public class CruciblePotionBottleStickerConfig : CruciblePackageConfigSubjectNode<CruciblePotionSticker>
     {
         /// <summary>
         /// Gets or sets the ID of this icon.
@@ -33,24 +33,44 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
         public string ID { get; set; }
 
         /// <summary>
-        /// Gets or sets the icon texture.
+        /// Gets or sets the foreground sprite.
         /// </summary>
-        public Texture2D Icon { get; set; }
+        public Sprite Foreground { get; set; }
+
+        /// <summary>
+        /// Gets or sets the background sprite.
+        /// </summary>
+        public Sprite Background { get; set; }
+
+        /// <summary>
+        /// Gets or sets the icon for this sticker in the sticker choice menu.
+        /// </summary>
+        public Sprite MenuIcon { get; set; }
 
         /// <inheritdoc/>
-        protected override CrucibleIcon GetSubject()
+        protected override CruciblePotionSticker GetSubject()
         {
             var id = this.PackageMod.Namespace + "." + this.ID;
 
-            return CrucibleIcon.GetIconByID(id) ?? CrucibleIcon.FromTexture(id, TextureUtilities.CreateBlankTexture(10, 10, new Color(0, 0, 0, 0)));
+            return CruciblePotionSticker.CreatePotionSticker(id) ?? CruciblePotionSticker.CreatePotionSticker(id);
         }
 
         /// <inheritdoc/>
-        protected override void OnApplyConfiguration(CrucibleIcon subject)
+        protected override void OnApplyConfiguration(CruciblePotionSticker subject)
         {
-            if (this.Icon != null)
+            if (this.Foreground != null)
             {
-                subject.IconTexture = this.Icon;
+                subject.Foreground = this.Foreground;
+            }
+
+            if (this.Background != null)
+            {
+                subject.Background = this.Background;
+            }
+
+            if (this.MenuIcon != null)
+            {
+                subject.MenuIcon = this.MenuIcon;
             }
         }
     }

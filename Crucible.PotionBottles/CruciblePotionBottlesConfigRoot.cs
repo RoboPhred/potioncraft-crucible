@@ -26,20 +26,26 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
     public class CruciblePotionBottlesConfigRoot : CruciblePackageConfigRoot
     {
         /// <summary>
-        /// Gets or sets the list of potion bottles.
+        /// Gets or sets a list of potion bottles.
         /// </summary>
         public List<CruciblePotionBottleConfig> PotionBottles { get; set; } = new();
 
         /// <summary>
-        /// Gets or sets the list of potion bottle icons.
+        /// Gets or sets a list of potion bottle icons.
         /// </summary>
         public List<CruciblePotionBottleIconConfig> PotionBottleIcons { get; set; } = new();
+
+        /// <summary>
+        /// Gets or sets a list of potion bottle stickers.
+        /// </summary>
+        public List<CruciblePotionBottleStickerConfig> PotionBottleStickers { get; set; } = new();
 
         /// <inheritdoc/>
         public override void ApplyConfiguration()
         {
             this.PotionBottles.ForEach(x => x.ApplyConfiguration());
             this.PotionBottleIcons.ForEach(x => x.ApplyConfiguration());
+            this.PotionBottleStickers.ForEach(x => x.ApplyConfiguration());
         }
     }
 }

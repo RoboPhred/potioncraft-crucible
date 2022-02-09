@@ -166,7 +166,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // FIXME: Does every single icon get displayed here?
             // Should probably make this optional.
             var skinChangerWindow = GameObject.FindObjectOfType<PotionSkinChangerWindow>();
-            var panelGroup = Traverse.Create(skinChangerWindow).Field<ElementChangerPanelGroup>("iconSkinChangerPanelGroup").Value;
+            if (skinChangerWindow == null)
+            {
+                return;
+            }
+
+            var iconSkinChangerField = Traverse.Create(skinChangerWindow).Field<ElementChangerPanelGroup>("iconSkinChangerPanelGroup");
+            if (iconSkinChangerField == null)
+            {
+                return;
+            }
+
+            var panelGroup = iconSkinChangerField.Value;
             var mainPanel = panelGroup.mainPanel as ElementChangerPanelWithElements;
             if (mainPanel != null)
             {
