@@ -35,6 +35,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         /// <remarks>
         /// PotionCraft uses line 0 (for metadata) and 1 (for game data).
+        /// We give a generous boundary for the game to use, to ensure we do not conflict.
         /// </remarks>
         private const int CrucibleFileLine = 511;
 

@@ -18,6 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Collections;
+    using System.Linq;
     using ElementChangerWindow;
     using HarmonyLib;
     using PotionCustomizationWindow;
@@ -102,7 +103,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             icon.textures = new[] { texture };
             icon.contourTexture = blankTexture;
             icon.scratchesTexture = blankTexture;
-            icon.defaultIconColors = new Color[0];
+            icon.defaultIconColors = new[] { GetDefaultColor() };
 
             RegisterIcon(icon);
 
@@ -143,7 +144,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             var icon = this.Icon;
             icon.textures = new[] { texture };
-            icon.defaultIconColors = new[] { Color.white };
+            icon.defaultIconColors = new[] { GetDefaultColor() };
 
             // Clear the icon cache so our new sprite will generate on next request.
             this.ClearCache();
@@ -183,6 +184,33 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 mainPanel.elements.Add(icon);
             }
+        }
+
+        private static Color GetDefaultColor()
+        {
+            // Color panel isn't available on game load, so we need to hard code a default color.
+            // This needs to map to a default color option in the color chooser panel, or the color dialog will throw an error.
+            return new Color(0.894f, 0.894f, 0.894f, 1);
+
+            // var panel = GameObject.FindObjectOfType<ColorPaletteSkinChangerPanelGroup>();
+            // if (panel == null)
+            // {
+            //     Debug.Log("Could not find panel for custom color.");
+            //     return Color.white;
+            // }
+
+            // var skinChangerPanel = panel.mainPanel as DefaultColorsSkinChangerPanel;
+            // var elements = skinChangerPanel.GetElements().OfType<ColorPanelElement>().ToArray();
+
+            // if (elements.Length == 0)
+            // {
+            //     Debug.Log("Could not find elements for custom color.");
+            //     return Color.white;
+            // }
+
+            // var color = (Array.Find(elements, x => x.isDefaultColor) ?? elements[0]).color;
+            // Debug.Log("Found default color " + color);
+            // return color;
         }
     }
 }

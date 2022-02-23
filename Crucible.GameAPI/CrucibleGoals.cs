@@ -15,6 +15,7 @@
 // </copyright>
 
 #if CRUCIBLE_GOALS
+
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System.Collections.Generic;
@@ -30,7 +31,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var dummyChapter = Managers.Goals.settings.chaptersGroups[0].chapters[0];
 
-            Debug.Log("Adding group");
             var group = new ChaptersGroup
             {
                 name = "test_group",
@@ -39,7 +39,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             CrucibleLocalization.SetLocalizationKey(group.GetLocalizationPrefix() + "_goals_book_chapter_title", "Test Group");
             CrucibleLocalization.SetLocalizationKey("finish_current_chapter_to_complete_" + group.GetLocalizationPrefix(), "Finish current chapter to complete Test Group");
 
-            Debug.Log("Adding chapter");
             var chapter = new Chapter
             {
                 name = "test_chapter",
@@ -50,8 +49,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             };
             group.chapters.Add(chapter);
 
-            Debug.Log("Building first goal");
-
             var goal = ScriptableObject.CreateInstance<Goal>();
             goal.name = "test_goal";
             CrucibleLocalization.SetLocalizationKey("goal_" + goal.name, "Test Goal");
@@ -59,12 +56,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             goal.inBook = true;
             goal.showProgress = true;
 
-            Debug.Log("Adding first goal");
             chapter.goals.Add(goal);
             Traverse.Create(typeof(GoalsLoader)).Field("AllGoals").GetValue<Dictionary<string, Goal>>().Add(goal.name, goal);
 
             // Overall goal for the chapter.  Required.
-            Debug.Log("Building chapter goal");
             var chapterGoal = ScriptableObject.CreateInstance<Goal>();
             chapterGoal.name = "chapter_goal";
             CrucibleLocalization.SetLocalizationKey("goal_" + chapterGoal.name, "Chapter Goal");
@@ -79,8 +74,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // This needs to be done after the game loads, as the game will deserialize the bookmarks from the save file.
             CrucibleGameEvents.OnSaveLoaded += (_, __) =>
             {
-                Debug.Log("Adding bookmark");
-
                 // Reproduced from GoalsBook.AddPagesOnBookStart, adapted to add missing pages instead of adding all.
                 var groupController = Managers.Goals.goalsBook.bookmarkControllersGroupController;
                 var chaptersGroups = Managers.Goals.settings.chaptersGroups;
@@ -105,9 +98,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 Traverse.Create(Managers.Goals.goalsBook).Method("UpdateBookmarksContents").GetValue();
             };
 
-            Debug.Log("Adding xp");
             GoalsLoader.GetGoalByName(goal.name).ProgressIncrement(2);
         }
     }
 }
+
 #endif
