@@ -29,7 +29,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="PotionBase"/>s.
     /// </summary>
-    public sealed class CruciblePotionBase : IEquatable<CruciblePotionBase>
+    public sealed class CruciblePotionBase : IEquatable<CruciblePotionBase>, ICrucibleInventoryItemProvider
     {
         private static readonly HashSet<MapState> CustomMapStates = new();
         private static readonly HashSet<PotionBase> AtlasOverriddenPotionBases = new();
@@ -75,6 +75,30 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             get
             {
                 return this.mapState.potionBase;
+            }
+        }
+
+        /// <summary>
+        /// Gets the inventory item used to unlock this potion base.
+        /// </summary>
+        /// <remarks>
+        /// If no upgrade item exists for this potion base, one will be created.
+        /// </remarks>
+        public CrucibleInventoryItem UpgradeItem
+        {
+            get
+            {
+                var upgrade = TradableUpgrade.allTradableUpgrades.OfType<PotionBaseUpgrade>().FirstOrDefault(x => x.potionBase == this.PotionBase);
+                if (upgrade == null)
+                {
+                    upgrade = ScriptableObject.CreateInstance<PotionBaseUpgrade>();
+                    upgrade.name = $"Crucible PotionBase {this.ID} Upgrade";
+                    upgrade.inventoryIconObject = SpriteUtilities.CreateBlankSprite(32, 32, new Color(0, 0, 0, 0));
+                    upgrade.potionBase = this.PotionBase;
+                    TradableUpgrade.allTradableUpgrades.Add(upgrade);
+                }
+
+                return new CrucibleInventoryItem(upgrade);
             }
         }
 
@@ -401,6 +425,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public bool Equals(CruciblePotionBase other)
         {
             return this.PotionBase == other.PotionBase;
+        }
+
+        /// <inheritdoc/>
+        CrucibleInventoryItem ICrucibleInventoryItemProvider.GetInventoryItem()
+        {
+            return this.UpgradeItem;
         }
 
         /// <summary>

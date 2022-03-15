@@ -82,6 +82,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         public bool UnlockedOnStart { get; set; }
 
         /// <summary>
+        /// Gets or sets the icon used for the upgrade item that unlocks this potion base.
+        /// </summary>
+        public Sprite InventoryItemIcon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the price of the upgrade item that unlocks this potion base.
+        /// </summary>
+        public int? InventoryItemPrice { get; set; }
+
+        /// <summary>
         /// Gets or sets the color of this potion base.
         /// </summary>
         public Color? LiquidColor { get; set; }
@@ -172,6 +182,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
             if (this.Description != null)
             {
                 subject.Description = this.Description;
+            }
+
+            if (this.InventoryItemIcon != null)
+            {
+                subject.UpgradeItem.InventoryIcon = this.InventoryItemIcon;
+            }
+
+            if (this.InventoryItemPrice.HasValue)
+            {
+                subject.UpgradeItem.Price = this.InventoryItemPrice.Value;
             }
 
             if (this.LiquidColor.HasValue)

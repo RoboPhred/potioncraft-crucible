@@ -47,6 +47,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionEffects
         /// </summary>
         public Color? PotionColor { get; set; }
 
+        /// <summary>
+        /// Gets or sets the base price of the effect.
+        /// </summary>
+        public int? BasePrice { get; set; }
+
         /// <inheritdoc/>
         protected override CruciblePotionEffect GetSubject()
         {
@@ -70,6 +75,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionEffects
             if (this.PotionColor.HasValue)
             {
                 subject.PotionColor = this.PotionColor.Value;
+            }
+
+            if (this.BasePrice.HasValue)
+            {
+                subject.BasePrice = this.BasePrice.Value;
             }
         }
     }

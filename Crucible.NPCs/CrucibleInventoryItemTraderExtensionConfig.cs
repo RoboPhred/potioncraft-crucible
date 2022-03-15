@@ -23,8 +23,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     /// <summary>
     /// A configuration extention allowing the specification of trader npcs selling the extended inventory item.
     /// </summary>
-    [CruciblePackageConfigExtension(typeof(CrucibleInventoryItem))]
-    public class CrucibleInventoryItemTraderExtensionConfig : CruciblePackageConfigNode, ICruciblePackageConfigExtension<CrucibleInventoryItem>
+    [CruciblePackageConfigExtension(typeof(ICrucibleInventoryItemProvider))]
+    public class CrucibleInventoryItemTraderExtensionConfig : CruciblePackageConfigNode, ICruciblePackageConfigExtension<ICrucibleInventoryItemProvider>
     {
         /// <summary>
         /// Gets or sets the collection of configs denotating who sells this inventory item.
@@ -32,13 +32,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public OneOrMany<CrucibleInventoryItemSoldByConfig> SoldBy { get; set; }
 
         /// <inheritdoc/>
-        public void OnApplyConfiguration(CrucibleInventoryItem subject)
+        public void OnApplyConfiguration(ICrucibleInventoryItemProvider subject)
         {
             if (this.SoldBy != null)
             {
+                var item = subject.GetInventoryItem();
                 foreach (var soldBy in this.SoldBy)
                 {
-                    soldBy.OnApplyConfiguration(subject);
+                    soldBy.OnApplyConfiguration(item);
                 }
             }
         }

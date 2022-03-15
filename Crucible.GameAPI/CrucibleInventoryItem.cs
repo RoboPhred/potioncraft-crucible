@@ -23,7 +23,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="InventoryItem"/>s.
     /// </summary>
-    public abstract class CrucibleInventoryItem : IEquatable<CrucibleInventoryItem>
+    public class CrucibleInventoryItem : IEquatable<CrucibleInventoryItem>, ICrucibleInventoryItemProvider
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CrucibleInventoryItem"/> class.
@@ -82,6 +82,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Gets the game item being controlled by this api wrapper.
         /// </summary>
         internal InventoryItem InventoryItem { get; }
+
+        /// <inheritdoc/>
+        CrucibleInventoryItem ICrucibleInventoryItemProvider.GetInventoryItem()
+        {
+            return this;
+        }
 
         /// <inheritdoc/>
         public bool Equals(CrucibleInventoryItem other)
