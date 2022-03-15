@@ -29,6 +29,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     /// </summary>
     public static class SaveLoadEvent
     {
+        private static bool patchApplied = false;
+
         private static EventHandler<SaveLoadEventArgs> onGameSaved;
 
         private static EventHandler<SaveLoadEventArgs> onGameLoaded;
@@ -69,6 +71,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static void EnsurePatches()
         {
+            if (patchApplied)
+            {
+                return;
+            }
+
+            patchApplied = true;
+
             var loadLastProgressFromPool = AccessTools.Method(typeof(SaveLoadManager), nameof(SaveLoadManager.LoadLastProgressFromPool));
             if (loadLastProgressFromPool == null)
             {
