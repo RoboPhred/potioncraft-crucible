@@ -42,7 +42,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBottles
         {
             var id = this.PackageMod.Namespace + "." + this.ID;
 
-            return CrucibleIcon.GetIconByID(id) ?? CrucibleIcon.FromTexture(id, TextureUtilities.CreateBlankTexture(10, 10, new Color(0, 0, 0, 0)));
+            return CrucibleIcon.GetIconByID(id) ?? CrucibleIcon.FromTexture(id, TextureUtilities.CreateBlankTexture(10, 10, Color.clear));
         }
 
         /// <inheritdoc/>

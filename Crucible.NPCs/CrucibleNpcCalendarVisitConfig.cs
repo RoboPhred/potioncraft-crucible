@@ -22,7 +22,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     /// <summary>
     /// Configuration for specifying on what day an npc appears.
     /// </summary>
-    public class CrucibleNpcCalendarAppearanceConfig
+    public class CrucibleNpcCalendarVisitConfig
     {
         /// <summary>
         /// Gets or sets the day this npc will appear on.

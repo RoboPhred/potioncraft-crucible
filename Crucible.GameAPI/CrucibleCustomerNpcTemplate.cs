@@ -109,7 +109,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             CrucibleNpcTemplate copyFromTemplate = null;
             if (!string.IsNullOrEmpty(copyAppearanceFrom))
             {
-                copyFromTemplate = copyAppearanceFrom != null ? GetNpcTemplateById(copyAppearanceFrom) : null;
+                copyFromTemplate = GetNpcTemplateById(copyAppearanceFrom);
                 if (copyFromTemplate == null)
                 {
                     throw new ArgumentException($"Could not find NPC template with id \"{copyAppearanceFrom}\" to copy appearance from.", nameof(copyAppearanceFrom));
@@ -254,7 +254,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             if (copyFromTemplate != null)
             {
-                crucibleTemplate.CopyAppearanceFrom(copyFromTemplate);
+                crucibleTemplate.Appearance.CopyFrom(copyFromTemplate);
+            }
+            else
+            {
+                crucibleTemplate.Appearance.Clear();
             }
 
             return crucibleTemplate;

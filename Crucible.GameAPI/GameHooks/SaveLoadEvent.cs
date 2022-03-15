@@ -89,7 +89,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 HarmonyInstance.Instance.Patch(loadLastProgressFromPool, transpiler: new HarmonyMethod(transpiler));
             }
 
-            // FIXME: IL error
             var saveProgressToPool = AccessTools.Method(typeof(SaveLoadManager), nameof(SaveLoadManager.SaveProgressToPool));
             if (saveProgressToPool == null)
             {

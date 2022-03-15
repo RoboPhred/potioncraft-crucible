@@ -93,7 +93,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var sticker = ScriptableObject.CreateInstance<PotionSticker>();
 
-            var blankSprite = SpriteUtilities.CreateBlankSprite(1, 1, new Color(0, 0, 0, 0));
+            var blankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear);
             sticker.backgroundSprite = blankSprite;
             sticker.foregroundSprite = blankSprite;
             sticker.backgroundSkinElementSprite = blankSprite;

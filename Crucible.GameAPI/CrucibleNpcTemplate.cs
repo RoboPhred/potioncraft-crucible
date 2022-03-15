@@ -116,95 +116,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public bool IsCustomer => this.NpcTemplate.baseParts.Any(x => x is Quest);
 
         /// <summary>
-        /// Gets or sets the left eye sprite for this NPC.
+        /// Gets the appearance controller for this npc.
         /// </summary>
-        /// <remarks>
-        /// If this NPC's eyes are randomized, this will set every possible left eye to the given value.
-        /// </remarks>
-        public Sprite LeftEyeSprite
+        public CrucibleNpcAppearance Appearance
         {
-            get
-            {
-                var eyes = this.NpcTemplate.appearance.eyes.partsInGroup.FirstOrDefault();
-                if (eyes == null)
-                {
-                    return null;
-                }
-
-                return eyes.part.left;
-            }
-
-            set
-            {
-                if (this.NpcTemplate.appearance.eyes.partsInGroup.Length == 0)
-                {
-                    var eyes = ScriptableObject.CreateInstance<Eyes>();
-                    eyes.left = value;
-                    eyes.right = value;
-                    this.NpcTemplate.appearance.eyes.partsInGroup = new[]
-                    {
-                        new PartContainer<Eyes>
-                        {
-                            part = eyes,
-                        },
-                    };
-                }
-
-                foreach (var part in this.NpcTemplate.appearance.eyes.partsInGroup)
-                {
-                    // Clone the part so we do not modify other npcs that we may have copied data from
-                    var eyes = ScriptableObject.CreateInstance<Eyes>();
-                    eyes.left = value;
-                    eyes.right = part.part.right;
-                    part.part = eyes;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the left eye sprite for this NPC.
-        /// </summary>
-        /// <remarks>
-        /// If this NPC's eyes are randomized, this will set every possible left eye to the given value.
-        /// </remarks>
-        public Sprite RightEyeSprite
-        {
-            get
-            {
-                var eyes = this.NpcTemplate.appearance.eyes.partsInGroup.FirstOrDefault();
-                if (eyes == null)
-                {
-                    return null;
-                }
-
-                return eyes.part.right;
-            }
-
-            set
-            {
-                if (this.NpcTemplate.appearance.eyes.partsInGroup.Length == 0)
-                {
-                    var eyes = ScriptableObject.CreateInstance<Eyes>();
-                    eyes.left = value;
-                    eyes.right = value;
-                    this.NpcTemplate.appearance.eyes.partsInGroup = new[]
-                    {
-                        new PartContainer<Eyes>
-                        {
-                            part = eyes,
-                        },
-                    };
-                }
-
-                foreach (var part in this.NpcTemplate.appearance.eyes.partsInGroup)
-                {
-                    // Clone the part so we do not modify other npcs that we may have copied data from
-                    var eyes = ScriptableObject.CreateInstance<Eyes>();
-                    eyes.left = part.part.left;
-                    eyes.right = value;
-                    part.part = eyes;
-                }
-            }
+            get => new(this.NpcTemplate);
         }
 
         /// <summary>
@@ -302,62 +218,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Copies the apperance from an npc template to this one.
-        /// </summary>
-        /// <remarks>
-        /// Appearance data is made up of multiple parts that themselves contain random chances.  This copy command
-        /// copies all data, including the randomized data.  As such, the npc appearance might change whenever the NPC shows up.
-        /// </remarks>
-        /// <param name="template">The template to copy the appearance from.</param>
-        public void CopyAppearanceFrom(CrucibleNpcTemplate template)
-        {
-            // There's lots of data encoded on the prefab :(
-            var prefab = this.RequirePart<Prefab>();
-            var templatePrefab = template.RequirePart<Prefab>();
-            prefab.prefab = templatePrefab.prefab;
-            prefab.clothesColorPalette1 = templatePrefab.clothesColorPalette1;
-            prefab.clothesColorPalette2 = templatePrefab.clothesColorPalette2;
-            prefab.clothesColorPalette3 = templatePrefab.clothesColorPalette3;
-            prefab.clothesColorPalette4 = templatePrefab.clothesColorPalette4;
-            prefab.hairColorPalette = templatePrefab.hairColorPalette;
-            prefab.skinColorPalette = templatePrefab.skinColorPalette;
-
-            this.NpcTemplate.appearance = new AppearanceContainer
-            {
-                skinColor = ClonePartContainerGroup(template.NpcTemplate.appearance.skinColor),
-                behindBodyFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.behindBodyFeature2),
-                behindBodyFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.behindBodyFeature1),
-                handBackFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.handBackFeature2),
-                handBackFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.handBackFeature1),
-                bodyFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.bodyFeature2),
-                bodyFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.bodyFeature1),
-                handFrontFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.handFrontFeature2),
-                handFrontFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.handFrontFeature1),
-                skullShapeFeature3 = ClonePartContainerGroup(template.NpcTemplate.appearance.skullShapeFeature3),
-                skullShapeFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.skullShapeFeature2),
-                skullShapeFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.skullShapeFeature1),
-                faceFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.faceFeature2),
-                shortHairFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.shortHairFeature2),
-                shortHairFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.shortHairFeature1),
-                faceFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.faceFeature1),
-                aboveHairFeature1 = ClonePartContainerGroup(template.NpcTemplate.appearance.aboveHairFeature1),
-                hairColor = ClonePartContainerGroup(template.NpcTemplate.appearance.hairColor),
-                clothesColor1 = ClonePartContainerGroup(template.NpcTemplate.appearance.clothesColor1),
-                clothesColor2 = ClonePartContainerGroup(template.NpcTemplate.appearance.clothesColor2),
-                clothesColor3 = ClonePartContainerGroup(template.NpcTemplate.appearance.clothesColor3),
-                aboveHairFeature2 = ClonePartContainerGroup(template.NpcTemplate.appearance.aboveHairFeature2),
-                body = ClonePartContainerGroup(template.NpcTemplate.appearance.body),
-                clothesColor4 = ClonePartContainerGroup(template.NpcTemplate.appearance.clothesColor4),
-                skullShape = ClonePartContainerGroup(template.NpcTemplate.appearance.skullShape),
-                face = ClonePartContainerGroup(template.NpcTemplate.appearance.face),
-                hat = ClonePartContainerGroup(template.NpcTemplate.appearance.hat),
-                hairstyle = ClonePartContainerGroup(template.NpcTemplate.appearance.hairstyle),
-                eyes = ClonePartContainerGroup(template.NpcTemplate.appearance.eyes),
-                breastSize = ClonePartContainerGroup(template.NpcTemplate.appearance.breastSize),
-            };
-        }
-
-        /// <summary>
         /// If this NPC Template is a customer, gets the API object for manipulating its customer data.
         /// </summary>
         /// <returns>The customer npc template, if this NPC template represents a customer.</returns>
@@ -409,20 +269,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             return part;
-        }
-
-        private static PartContainerGroup<T> ClonePartContainerGroup<T>(PartContainerGroup<T> group)
-        {
-            return new PartContainerGroup<T>
-            {
-                groupName = group.groupName,
-                groupChance = group.groupChance,
-                partsInGroup = group.partsInGroup.Select(x => new PartContainer<T>()
-                {
-                    chanceBtwParts = x.chanceBtwParts,
-                    part = x.part,
-                }).ToArray(),
-            };
         }
     }
 }

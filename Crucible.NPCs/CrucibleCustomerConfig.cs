@@ -20,6 +20,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
+    using UnityEngine;
     using YamlDotNet.Serialization;
 
     /// <summary>
@@ -49,10 +50,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// </summary>
         public List<string> AcceptedEffects { get; set; }
 
+        public Sprite HeadBackground { get; set; }
+
+        public Sprite BodyBackground { get; set; }
+
         /// <summary>
         /// Gets or sets the collection of appearances that this npc will make.
         /// </summary>
-        public OneOrMany<CrucibleNpcCalendarAppearanceConfig> AppearsAt { get; set; }
+        public OneOrMany<CrucibleNpcCalendarVisitConfig> Visits { get; set; }
 
         /// <inheritdoc/>
         public override string ToString()
@@ -79,7 +84,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
                 else
                 {
-                    subject.CopyAppearanceFrom(template);
+                    subject.Appearance.CopyFrom(template);
                 }
             }
 
@@ -104,11 +109,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
             }
 
-            if (this.AppearsAt != null)
+            if (this.HeadBackground != null)
             {
-                foreach (var appearance in this.AppearsAt)
+                subject.Appearance.HeadBackground = this.HeadBackground;
+            }
+
+            if (this.BodyBackground != null)
+            {
+                subject.Appearance.BodyBackground = this.BodyBackground;
+            }
+
+            if (this.Visits != null)
+            {
+                foreach (var visit in this.Visits)
                 {
-                    appearance.AddToDay(subject);
+                    visit.AddToDay(subject);
                 }
             }
         }

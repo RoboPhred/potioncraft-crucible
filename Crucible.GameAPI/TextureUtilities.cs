@@ -48,6 +48,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return tex;
         }
 
+        public static void WriteTextureToFile(string filePath, Texture2D texture)
+        {
+            var bytes = texture.EncodeToPNG();
+            File.WriteAllBytes(filePath, bytes);
+        }
+
         /// <summary>
         /// Creates an empty texure filled with the given color.
         /// </summary>

@@ -97,7 +97,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 throw new ArgumentException($"Icon with ID \"{id}\" already exists.", nameof(id));
             }
 
-            var blankTexture = TextureUtilities.CreateBlankTexture(1, 1, new Color(0, 0, 0, 0));
+            var blankTexture = TextureUtilities.CreateBlankTexture(1, 1, Color.clear);
             var icon = ScriptableObject.CreateInstance<Icon>();
             icon.name = id;
             icon.textures = new[] { texture };

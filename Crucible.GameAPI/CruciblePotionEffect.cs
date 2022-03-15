@@ -304,7 +304,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var effect = ScriptableObject.CreateInstance<PotionEffect>();
             effect.name = id;
 
-            var blankTexture = TextureUtilities.CreateBlankTexture(1, 1, new Color(0, 0, 0, 0));
+            var blankTexture = TextureUtilities.CreateBlankTexture(1, 1, Color.clear);
             effect.icon = CrucibleIcon.FromTexture($"Crucible Effect {id} Icon", blankTexture).Icon;
 
             effect.color = Color.white;

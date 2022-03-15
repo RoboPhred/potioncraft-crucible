@@ -181,7 +181,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GUI
             var defaultContentColor = GUI.contentColor;
             var defaultBackgroundColor = GUI.backgroundColor;
             GUI.contentColor = Color.black;
-            GUI.backgroundColor = new Color(0, 0, 0, 0);
+            GUI.backgroundColor = Color.clear;
             try
             {
                 GUILayout.BeginArea(this.LayoutRect);

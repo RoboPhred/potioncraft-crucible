@@ -93,7 +93,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 {
                     upgrade = ScriptableObject.CreateInstance<PotionBaseUpgrade>();
                     upgrade.name = $"Crucible PotionBase {this.ID} Upgrade";
-                    upgrade.inventoryIconObject = SpriteUtilities.CreateBlankSprite(32, 32, new Color(0, 0, 0, 0));
+                    upgrade.inventoryIconObject = SpriteUtilities.CreateBlankSprite(32, 32, Color.clear);
                     upgrade.potionBase = this.PotionBase;
                     TradableUpgrade.allTradableUpgrades.Add(upgrade);
                 }
