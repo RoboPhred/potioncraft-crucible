@@ -50,9 +50,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// </summary>
         public List<string> AcceptedEffects { get; set; }
 
-        public Sprite HeadBackground { get; set; }
+        public Texture2D HeadBackground { get; set; }
 
         public Sprite BodyBackground { get; set; }
+
+        public Sprite ArmRightBackground { get; set; }
+
+        public Texture2D Face { get; set; }
+
+        public Sprite EyeLeft { get; set; }
+        public Sprite EyeRight { get; set; }
+
+        public Texture2D HairFrontRight { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of appearances that this npc will make.
@@ -73,7 +82,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         }
 
         /// <inheritdoc/>
-        protected override void OnApplyConfiguration(CrucibleCustomerNpcTemplate subject)
+        protected override async void OnApplyConfiguration(CrucibleCustomerNpcTemplate subject)
         {
             if (!string.IsNullOrEmpty(this.CopyAppearanceFrom))
             {
@@ -111,12 +120,39 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             if (this.HeadBackground != null)
             {
-                subject.Appearance.HeadBackground = this.HeadBackground;
+                // TODO: Use a more sensible pivot.  Should let the artist specify where the pivot is.
+                subject.Appearance.HeadBackground = SpriteUtilities.FromTexture(this.HeadBackground, new Vector2(0.35f, .3f));
             }
 
             if (this.BodyBackground != null)
             {
                 subject.Appearance.BodyBackground = this.BodyBackground;
+            }
+
+            if (this.ArmRightBackground != null)
+            {
+                subject.Appearance.ArmRightBackground = this.ArmRightBackground;
+            }
+
+            if (this.Face != null)
+            {
+                // TODO: Use a more sensible pivot.  Should let the artist specify where the pivot is.
+                subject.Appearance.FaceContour = SpriteUtilities.FromTexture(this.Face, new Vector2(0.1f, .3f));
+            }
+
+            if (this.EyeLeft != null)
+            {
+                subject.Appearance.EyeLeft = this.EyeLeft;
+            }
+
+            if (this.EyeRight != null)
+            {
+                subject.Appearance.EyeRight = this.EyeRight;
+            }
+
+            if (this.HairFrontRight != null)
+            {
+                subject.Appearance.HairFrontRight = SpriteUtilities.FromTexture(this.HairFrontRight, new Vector2(0.4f, 0.1f));
             }
 
             if (this.Visits != null)

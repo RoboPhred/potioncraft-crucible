@@ -81,6 +81,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     };
                 }
 
+                newPart.shape = newPart.shape.Clone();
                 newPart.shape.background = value;
 
                 this.npcTemplate.appearance.skullShape.partsInGroup = new[]
@@ -134,6 +135,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     newPart.handFrontSkin = blankColorablePart;
                 }
 
+                newPart.bodyBase[0] = newPart.bodyBase[0].Clone();
                 newPart.bodyBase[0].background = value;
 
                 this.npcTemplate.appearance.body.partsInGroup = new[]
@@ -146,20 +148,252 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        public Sprite ArmRightBackground
+        {
+            get
+            {
+                return this.npcTemplate.appearance.body.partsInGroup.FirstOrDefault()?.part.handFront[0].background;
+            }
+
+            set
+            {
+                var oldPart = this.npcTemplate.appearance.body.partsInGroup.FirstOrDefault()?.part;
+                var newPart = ScriptableObject.CreateInstance<Body>();
+
+                if (oldPart != null)
+                {
+                    newPart.bodyBase = oldPart.bodyBase.Select(x => x.Clone()).ToArray();
+                    newPart.bodyBaseSkin = oldPart.bodyBaseSkin.Clone();
+                    newPart.handBack = oldPart.handBack.Select(x => x.Clone()).ToArray();
+                    newPart.handBackSkin = oldPart.handBackSkin.Clone();
+                    newPart.handFront = oldPart.handFront.Select(x => x.Clone()).ToArray();
+                    newPart.handFrontSkin = oldPart.handFrontSkin.Clone();
+                    newPart.hinge = oldPart.hinge.Select(x => x.Clone()).ToArray();
+                    newPart.hingePartColor = oldPart.hingePartColor;
+                }
+                else
+                {
+                    var blankTexture = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
+                    var blankColorablePart = new AppearancePart.ColorablePart
+                    {
+                        background = blankTexture,
+                        contour = blankTexture,
+                        scratches = blankTexture,
+                    };
+                    var blankColorablePartSet = new[] { blankColorablePart, blankColorablePart, blankColorablePart, blankColorablePart, blankColorablePart };
+                    newPart.bodyBase = blankColorablePartSet;
+                    newPart.bodyBaseSkin = blankColorablePart;
+                    newPart.handBack = blankColorablePartSet;
+                    newPart.handBackSkin = blankColorablePart;
+                    newPart.handFront = blankColorablePartSet;
+                    newPart.handFrontSkin = blankColorablePart;
+                }
+
+                newPart.handFront[0] = newPart.handFront[0].Clone();
+                newPart.handFront[0].background = value;
+
+                this.npcTemplate.appearance.body.partsInGroup = new[]
+                {
+                    new PartContainer<Body>
+                    {
+                        part = newPart,
+                    },
+                };
+            }
+        }
+
+        public Sprite FaceContour
+        {
+            get
+            {
+                return this.npcTemplate.appearance.face.partsInGroup.FirstOrDefault()?.part.hair[0].contour;
+            }
+
+            set
+            {
+                var oldPart = this.npcTemplate.appearance.face.partsInGroup.FirstOrDefault();
+                var newPart = ScriptableObject.CreateInstance<Face>();
+
+                if (oldPart != null)
+                {
+                    newPart.hair = oldPart.part.hair.Select(x => x.Clone()).ToArray();
+                    newPart.skin = oldPart.part.skin.Select(x => x.Clone()).ToArray();
+                }
+                else
+                {
+                    var blankTexture = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
+                    var blankColorablePart = new AppearancePart.ColorablePart
+                    {
+                        background = blankTexture,
+                        contour = blankTexture,
+                        scratches = blankTexture,
+                    };
+
+                    // 5 of these:
+                    // 0 - wrong potion flash
+                    // 1, 2 - anger states for being given wrong potions
+                    // 3 - idle
+                    // 4 - satisfied, given potion and leaviong
+                    // 5 - o-face emotion when shown a matching potion
+                    var blankColorablePartSet = new[] { blankColorablePart, blankColorablePart, blankColorablePart, blankColorablePart, blankColorablePart };
+                    newPart.hair = blankColorablePartSet;
+                    newPart.skin = blankColorablePartSet;
+                }
+
+                // Set the face contour for all emotions
+                newPart.hair = newPart.hair.Select(x =>
+                {
+                    var r = x.Clone();
+                    r.contour = value;
+                    return r;
+                }).ToArray();
+
+                this.npcTemplate.appearance.face.partsInGroup = new[]
+                {
+                    new PartContainer<Face>
+                    {
+                        part = newPart,
+                    },
+                };
+            }
+        }
+
+        public Sprite EyeLeft
+        {
+            get
+            {
+                return this.npcTemplate.appearance.eyes.partsInGroup.FirstOrDefault()?.part.left;
+            }
+
+            set
+            {
+                var oldPart = this.npcTemplate.appearance.eyes.partsInGroup.FirstOrDefault();
+                var newPart = ScriptableObject.CreateInstance<Eyes>();
+
+                if (oldPart != null)
+                {
+                    newPart.left = oldPart.part.left;
+                    newPart.right = oldPart.part.right;
+                }
+                else
+                {
+                    var blankTexture = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
+                    newPart.left = blankTexture;
+                    newPart.right = blankTexture;
+                }
+
+                newPart.left = value;
+
+                this.npcTemplate.appearance.eyes.partsInGroup = new[]
+                {
+                    new PartContainer<Eyes>
+                    {
+                        part = newPart,
+                    },
+                };
+            }
+        }
+
+        public Sprite EyeRight
+        {
+            get
+            {
+                return this.npcTemplate.appearance.eyes.partsInGroup.FirstOrDefault()?.part.right;
+            }
+
+            set
+            {
+                var oldPart = this.npcTemplate.appearance.eyes.partsInGroup.FirstOrDefault();
+                var newPart = ScriptableObject.CreateInstance<Eyes>();
+
+                if (oldPart != null)
+                {
+                    newPart.left = oldPart.part.left;
+                    newPart.right = oldPart.part.right;
+                }
+                else
+                {
+                    var blankTexture = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
+                    newPart.left = blankTexture;
+                    newPart.right = blankTexture;
+                }
+
+                newPart.right = value;
+
+                this.npcTemplate.appearance.eyes.partsInGroup = new[]
+                {
+                    new PartContainer<Eyes>
+                    {
+                        part = newPart,
+                    },
+                };
+            }
+        }
+
+        public Sprite HairFrontRight
+        {
+            get
+            {
+                return this.npcTemplate.appearance.hairstyle.partsInGroup.FirstOrDefault()?.part.longFront.contour;
+            }
+
+            set
+            {
+                var oldPart = this.npcTemplate.appearance.hairstyle.partsInGroup.FirstOrDefault();
+                var newPart = ScriptableObject.CreateInstance<Hairstyle>();
+
+                if (oldPart != null)
+                {
+                    newPart.back = oldPart.part.back.Clone();
+                    newPart.longFront = oldPart.part.longFront.Clone();
+                    newPart.shortFront = oldPart.part.shortFront.Clone();
+                    newPart.middle = oldPart.part.middle.Clone();
+                }
+                else
+                {
+                    var blankTexture = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
+                    var blankColorablePart = new AppearancePart.ColorablePart
+                    {
+                        background = blankTexture,
+                        contour = blankTexture,
+                        scratches = blankTexture,
+                    };
+                    newPart.back = blankColorablePart.Clone();
+                    newPart.longFront = blankColorablePart.Clone();
+                    newPart.shortFront = blankColorablePart.Clone();
+                    newPart.middle = blankColorablePart.Clone();
+                }
+
+                newPart.longFront.background = value;
+
+                this.npcTemplate.appearance.hairstyle.partsInGroup = new[]
+                {
+                    new PartContainer<Hairstyle>
+                    {
+                        part = newPart,
+                    },
+                };
+            }
+        }
+
         /// <summary>
         /// Clears out all appearance data.
         /// </summary>
         public void Clear()
         {
-            var blankTexture = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
+            var blankSprite = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
+            blankSprite.name = "Crucible npc sprite placeholder";
             var blankColorablePart = new AppearancePart.ColorablePart
             {
-                background = blankTexture,
-                contour = blankTexture,
-                scratches = blankTexture,
+                background = blankSprite,
+                contour = blankSprite,
+                scratches = blankSprite,
             };
+
+            // Colorable sets seem to always involve 5 parts: 1 base and 4 recolorable.
             var blankColorablePartSet = new[] { blankColorablePart, blankColorablePart, blankColorablePart, blankColorablePart, blankColorablePart };
 
+            // The following assets need to be set to blank sprites, otherwise default art assets from the herbalist will be used.
             var body = ScriptableObject.CreateInstance<Body>();
             body.bodyBase = blankColorablePartSet;
             body.bodyBaseSkin = blankColorablePart;
@@ -169,7 +403,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             body.handFrontSkin = blankColorablePart;
 
             var skullShape = ScriptableObject.CreateInstance<SkullShape>();
-            skullShape.mask = blankTexture;
+            skullShape.mask = blankSprite;
             skullShape.shape = blankColorablePart;
 
             var hairStyle = ScriptableObject.CreateInstance<Hairstyle>();
@@ -177,6 +411,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             hairStyle.longFront = blankColorablePart;
             hairStyle.middle = blankColorablePart;
             hairStyle.shortFront = blankColorablePart;
+
+            var face = ScriptableObject.CreateInstance<Face>();
+            face.hair = blankColorablePartSet;
+            face.skin = blankColorablePartSet;
+
+            var eyes = ScriptableObject.CreateInstance<Eyes>();
+            eyes.left = blankSprite;
+            eyes.right = blankSprite;
 
             this.npcTemplate.appearance = new AppearanceContainer
             {
@@ -201,8 +443,26 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 clothesColor2 = new PartContainerGroup<AppearanceColor>(),
                 clothesColor3 = new PartContainerGroup<AppearanceColor>(),
                 clothesColor4 = new PartContainerGroup<AppearanceColor>(),
-                eyes = new PartContainerGroup<Eyes>(),
-                face = new PartContainerGroup<Face>(),
+                eyes = new PartContainerGroup<Eyes>
+                {
+                    partsInGroup = new[]
+                    {
+                        new PartContainer<Eyes>
+                        {
+                            part = eyes,
+                        },
+                    },
+                },
+                face = new PartContainerGroup<Face>
+                {
+                    partsInGroup = new[]
+                    {
+                        new PartContainer<Face>
+                        {
+                            part = face,
+                        },
+                    },
+                },
                 faceFeature1 = new PartContainerGroup<Npc.Parts.Appearance.Accessories.AccessoryFace>(),
                 faceFeature2 = new PartContainerGroup<Npc.Parts.Appearance.Accessories.AccessoryFace>(),
                 hairColor = new PartContainerGroup<AppearanceColor>(),

@@ -1,4 +1,4 @@
-// <copyright file="CrucibleNpcCalendarAppearanceConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleNpcCalendarVisitConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify

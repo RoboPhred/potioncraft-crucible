@@ -139,6 +139,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 throw new Exception("Copy target had no prefab!");
             }
 
+            // FIXME: Create our own prefab.  Need to disable our prefab but re-enable when npc spawns
+            // var npcPrefab = UnityEngine.Object.Instantiate(parentPrefab.prefab);
+            // npcPrefab.transform.parent = GameObjectUtilities.CruciblePrefabRoot;
+
             prefab.prefab = parentPrefab.prefab;
             prefab.clothesColorPalette1 = parentPrefab.clothesColorPalette1;
             prefab.clothesColorPalette2 = parentPrefab.clothesColorPalette2;
