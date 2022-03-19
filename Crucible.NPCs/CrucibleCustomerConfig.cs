@@ -35,10 +35,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public string ID { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the NPC Template to copy the apperance from.
-        /// This can be any NPC Template, including customers and traders.
+        /// Gets or sets the appearance configuration for this npc.
         /// </summary>
-        public string CopyAppearanceFrom { get; set; }
+        public CrucibleNpcAppearanceConfig Appearance { get; set; }
 
         /// <summary>
         /// Gets or sets the request this npc makes of the alchemist.
@@ -49,19 +48,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// Gets or sets the collection of effect names that this npc wants to buy.
         /// </summary>
         public List<string> AcceptedEffects { get; set; }
-
-        public Sprite HeadBackground { get; set; }
-
-        public Sprite BodyBackground { get; set; }
-
-        public Sprite ArmRightBackground { get; set; }
-
-        public Sprite Face { get; set; }
-
-        public Sprite EyeLeft { get; set; }
-        public Sprite EyeRight { get; set; }
-
-        public Sprite HairFrontRight { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of appearances that this npc will make.
@@ -84,17 +70,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(CrucibleCustomerNpcTemplate subject)
         {
-            if (!string.IsNullOrEmpty(this.CopyAppearanceFrom))
+            if (this.Appearance != null)
             {
-                var template = CrucibleNpcTemplate.GetNpcTemplateById(this.CopyAppearanceFrom);
-                if (template == null)
-                {
-                    CrucibleLog.Log($"Could not apply \"copyAppearanceFrom\" for customer ID \"{this.ID}\" because no NPC template with an ID of \"{this.CopyAppearanceFrom}\" was found.");
-                }
-                else
-                {
-                    subject.Appearance.CopyFrom(template);
-                }
+                this.Appearance.ApplyAppearance(subject);
             }
 
             if (this.RequestText != null)
@@ -118,34 +96,34 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
             }
 
-            if (this.HeadBackground != null)
-            {
-                // Note: Example pivot was .35, .3
-                subject.Appearance.AddHeadShape(this.HeadBackground);
-            }
+            // if (this.HeadBackground != null)
+            // {
+            //     // Note: Example pivot was .35, .3
+            //     subject.Appearance.AddHeadShape(this.HeadBackground);
+            // }
 
-            var blankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear);
-            if (this.BodyBackground != null || this.ArmRightBackground != null)
-            {
-                subject.Appearance.AddBody(this.BodyBackground ?? blankSprite, blankSprite, this.ArmRightBackground ?? blankSprite);
-            }
+            // var blankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear);
+            // if (this.BodyBackground != null || this.ArmRightBackground != null)
+            // {
+            //     subject.Appearance.AddBody(this.BodyBackground ?? blankSprite, blankSprite, this.ArmRightBackground ?? blankSprite);
+            // }
 
-            if (this.Face != null)
-            {
-                // Note: Example pivot was .1, .3
-                subject.Appearance.AddFace(this.Face);
-            }
+            // if (this.Face != null)
+            // {
+            //     // Note: Example pivot was .1, .3
+            //     subject.Appearance.AddFace(this.Face);
+            // }
 
-            if (this.EyeLeft != null || this.EyeRight != null)
-            {
-                subject.Appearance.AddEyes(this.EyeLeft ?? blankSprite, this.EyeRight ?? blankSprite);
-            }
+            // if (this.EyeLeft != null || this.EyeRight != null)
+            // {
+            //     subject.Appearance.AddEyes(this.EyeLeft ?? blankSprite, this.EyeRight ?? blankSprite);
+            // }
 
-            if (this.HairFrontRight != null)
-            {
-                // Note: Example pivot was 0.4f, 0.1f
-                subject.Appearance.AddHairStyle(new[] { CrucibleNpcAppearance.Hair.Right(this.HairFrontRight) });
-            }
+            // if (this.HairFrontRight != null)
+            // {
+            //     // Note: Example pivot was 0.4f, 0.1f
+            //     subject.Appearance.AddHairStyle(new[] { CrucibleNpcAppearance.Hair.Right(this.HairFrontRight) });
+            // }
 
             if (this.Visits != null)
             {

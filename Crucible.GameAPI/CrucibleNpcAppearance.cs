@@ -28,7 +28,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public sealed class CrucibleNpcAppearance
     {
-        private static readonly Sprite BlankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear).WithName("Crucible appearance blank");
+        private static readonly Sprite BlankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear).WithName("Crucible cleared appearance sprite");
 
         private static readonly AppearancePart.ColorablePart BlankColorablePart = new AppearancePart.ColorablePart
         {
