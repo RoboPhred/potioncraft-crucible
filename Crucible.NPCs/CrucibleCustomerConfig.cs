@@ -143,7 +143,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             if (this.HairFrontRight != null)
             {
-                subject.Appearance.AddHairStyle(new[] { CrucibleNpcAppearance.HairAppearance.Right(SpriteUtilities.FromTexture(this.HairFrontRight, new Vector2(0.4f, 0.1f))});
+                subject.Appearance.AddHairStyle(new[] { CrucibleNpcAppearance.Hair.Right(SpriteUtilities.FromTexture(this.HairFrontRight, new Vector2(0.4f, 0.1f))});
             }
 
             if (this.Visits != null)

@@ -180,9 +180,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public void AddBody(Sprite body, Sprite leftArm, Sprite rightArm, float chance = 1f)
         {
             this.AddBody(
-                new[] { LayerAppearance.Base(body) },
-                new[] { LayerAppearance.Base(leftArm) },
-                new[] { LayerAppearance.Base(rightArm) },
+                new[] { Layer.Base(body) },
+                new[] { Layer.Base(leftArm) },
+                new[] { Layer.Base(rightArm) },
                 chance
             );
         }
@@ -194,7 +194,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="leftArmLayers">The layers that make up the left arm.</param>
         /// <param name="rightArmLayers">The layers that make up the right arm.</param>
         /// <param name="chance">The chance for this body to be selected.</param>
-        public void AddBody(LayerAppearance[] bodyLayers, LayerAppearance[] leftArmLayers, LayerAppearance[] rightArmLayers, float chance = 1f)
+        public void AddBody(Layer[] bodyLayers, Layer[] leftArmLayers, Layer[] rightArmLayers, float chance = 1f)
         {
             var body = ScriptableObject.CreateInstance<Body>();
 
@@ -257,20 +257,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         public void AddFace(Sprite idle, float chance = 1f)
         {
-            this.AddFace(new[] { EmotionAppearance.Idle(idle) }, chance);
+            this.AddFace(new[] { Emotion.Idle(idle) }, chance);
         }
 
         public void AddFace(Sprite idle, Sprite positiveReaction, Sprite negativeReaction, float chance = 1f)
         {
             this.AddFace(new[]
             {
-                EmotionAppearance.Idle(idle),
-                EmotionAppearance.PositiveReaction(positiveReaction),
-                EmotionAppearance.NegativeReaction(negativeReaction),
+                Emotion.Idle(idle),
+                Emotion.PositiveReaction(positiveReaction),
+                Emotion.NegativeReaction(negativeReaction),
             }, chance);
         }
 
-        public void AddFace(EmotionAppearance[] emotions, float chance = 1f)
+        public void AddFace(Emotion[] emotions, float chance = 1f)
         {
             var face = ScriptableObject.CreateInstance<Face>();
             face.hair = Enumerable.Repeat(BlankColorablePart, 6).ToArray();
@@ -368,7 +368,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             };
         }
 
-        public void AddHairStyle(HairAppearance[] hairs, float chance = 1)
+        public void AddHairStyle(Hair[] hairs, float chance = 1)
         {
             var hairStyle = ScriptableObject.CreateInstance<Hairstyle>();
 
@@ -547,60 +547,60 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Defines the appearance of an emotion
         /// </summary>
-        public sealed class EmotionAppearance : AppearanceArraySetter
+        public sealed class Emotion : AppearanceArraySetter
         {
-            internal EmotionAppearance(int index) : base(index)
+            internal Emotion(int index) : base(index)
             {
             }
 
-            public static EmotionAppearance NegativeReaction(Sprite contour, Sprite background = null, Sprite scratches = null)
+            public static Emotion NegativeReaction(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new EmotionAppearance(0);
+                var emotion = new Emotion(0);
                 emotion.Background = background;
                 emotion.Contour = contour;
                 emotion.Scratches = scratches;
                 return emotion;
             }
 
-            public static EmotionAppearance Anger2(Sprite contour, Sprite background = null, Sprite scratches = null)
+            public static Emotion Anger2(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new EmotionAppearance(1);
+                var emotion = new Emotion(1);
                 emotion.Background = background;
                 emotion.Contour = contour;
                 emotion.Scratches = scratches;
                 return emotion;
             }
 
-            public static EmotionAppearance Anger1(Sprite contour, Sprite background = null, Sprite scratches = null)
+            public static Emotion Anger1(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new EmotionAppearance(2);
+                var emotion = new Emotion(2);
                 emotion.Background = background;
                 emotion.Contour = contour;
                 emotion.Scratches = scratches;
                 return emotion;
             }
 
-            public static EmotionAppearance Idle(Sprite contour, Sprite background = null, Sprite scratches = null)
+            public static Emotion Idle(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new EmotionAppearance(3);
+                var emotion = new Emotion(3);
                 emotion.Background = background;
                 emotion.Contour = contour;
                 emotion.Scratches = scratches;
                 return emotion;
             }
 
-            public static EmotionAppearance Happy1(Sprite contour, Sprite background = null, Sprite scratches = null)
+            public static Emotion Happy1(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new EmotionAppearance(4);
+                var emotion = new Emotion(4);
                 emotion.Background = background;
                 emotion.Contour = contour;
                 emotion.Scratches = scratches;
                 return emotion;
             }
 
-            public static EmotionAppearance PositiveReaction(Sprite contour, Sprite background = null, Sprite scratches = null)
+            public static Emotion PositiveReaction(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new EmotionAppearance(5);
+                var emotion = new Emotion(5);
                 emotion.Background = background;
                 emotion.Contour = contour;
                 emotion.Scratches = scratches;
@@ -611,68 +611,68 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Defines a sprite on a specified appearance layer.
         /// </summary>
-        public class LayerAppearance : AppearanceArraySetter
+        public class Layer : AppearanceArraySetter
         {
-            internal LayerAppearance(int index, Sprite background, Sprite contour, Sprite scratches) : base(index)
+            internal Layer(int index, Sprite background, Sprite contour, Sprite scratches) : base(index)
             {
                 this.Background = background;
                 this.Contour = contour;
                 this.Scratches = scratches;
             }
 
-            public static LayerAppearance Base(Sprite background, Sprite contour = null, Sprite scratches = null)
+            public static Layer Base(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new LayerAppearance(0, background, contour, scratches);
+                return new Layer(0, background, contour, scratches);
             }
 
-            public static LayerAppearance Colorable1(Sprite background, Sprite contour = null, Sprite scratches = null)
+            public static Layer Colorable1(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new LayerAppearance(1, background, contour, scratches);
+                return new Layer(1, background, contour, scratches);
             }
 
-            public static LayerAppearance Colorable2(Sprite background, Sprite contour = null, Sprite scratches = null)
+            public static Layer Colorable2(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new LayerAppearance(2, background, contour, scratches);
+                return new Layer(2, background, contour, scratches);
             }
 
-            public static LayerAppearance Colorable3(Sprite background, Sprite contour = null, Sprite scratches = null)
+            public static Layer Colorable3(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new LayerAppearance(3, background, contour, scratches);
+                return new Layer(3, background, contour, scratches);
             }
 
-            public static LayerAppearance Colorable4(Sprite background, Sprite contour = null, Sprite scratches = null)
+            public static Layer Colorable4(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new LayerAppearance(4, background, contour, scratches);
+                return new Layer(4, background, contour, scratches);
             }
         }
 
-        public sealed class HairAppearance : AppearanceArraySetter
+        public sealed class Hair : AppearanceArraySetter
         {
-            internal HairAppearance(int index, Sprite background, Sprite contour, Sprite scratches) : base(index)
+            internal Hair(int index, Sprite background, Sprite contour, Sprite scratches) : base(index)
             {
                 this.Background = background;
                 this.Contour = contour;
                 this.Scratches = scratches;
             }
 
-            public static HairAppearance Right(Sprite background, Sprite contour = null, Sprite scratches = null)
+            public static Hair Right(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new HairAppearance(0, background, contour, scratches);
+                return new Hair(0, background, contour, scratches);
             }
 
-            public static HairAppearance Middle(Sprite background, Sprite contour = null, Sprite scratches = null)
+            public static Hair Middle(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new HairAppearance(1, background, contour, scratches);
+                return new Hair(1, background, contour, scratches);
             }
 
-            public static HairAppearance Left(Sprite background, Sprite contour = null, Sprite scratches = null)
+            public static Hair Left(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new HairAppearance(2, background, contour, scratches);
+                return new Hair(2, background, contour, scratches);
             }
 
-            public static HairAppearance Back(Sprite background, Sprite contour = null, Sprite scratches = null)
+            public static Hair Back(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new HairAppearance(3, background, contour, scratches);
+                return new Hair(3, background, contour, scratches);
             }
         }
     }
