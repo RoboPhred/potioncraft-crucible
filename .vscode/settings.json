@@ -1,0 +1,72 @@
+{
+    "editor.tokenColorCustomizations": {
+        "[Default Dark+]": {
+            "textMateRules": [
+                {
+                    "scope": "comment.documentation",
+                    "settings": {
+                        "foreground": "#608B4E",
+                    }
+                },
+                {
+                    "scope": "comment.documentation.attribute",
+                    "settings": {
+                        "foreground": "#C8C8C8",
+                    }
+                },
+                {
+                    "scope": "comment.documentation.cdata",
+                    "settings": {
+                        "foreground": "#E9D585",
+                    }
+                },
+                {
+                    "scope": "comment.documentation.delimiter",
+                    "settings": {
+                        "foreground": "#808080",
+                    }
+                },
+                {
+                    "scope": "comment.documentation.name",
+                    "settings": {
+                        "foreground": "#569CD6",
+                    }
+                },
+            ]
+        },
+        "[Default Light+]": {
+            "textMateRules": [
+                {
+                    "scope": "comment.documentation",
+                    "settings": {
+                        "foreground": "#008000",
+                    }
+                },
+                {
+                    "scope": "comment.documentation.attribute",
+                    "settings": {
+                        "foreground": "#282828",
+                    }
+                },
+                {
+                    "scope": "comment.documentation.cdata",
+                    "settings": {
+                        "foreground": "#808080",
+                    }
+                },
+                {
+                    "scope": "comment.documentation.delimiter",
+                    "settings": {
+                        "foreground": "#808080",
+                    }
+                },
+                {
+                    "scope": "comment.documentation.name",
+                    "settings": {
+                        "foreground": "#808080",
+                    }
+                }
+            ]
+        }
+    },
+}

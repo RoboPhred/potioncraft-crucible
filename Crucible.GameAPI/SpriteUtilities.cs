@@ -58,5 +58,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), pivot ?? new Vector2(0.5f, 0.5f));
         }
+
+        /// <summary>
+        /// Associates a name with a sprite.
+        /// </summary>
+        /// <param name="sprite">The sprite to name.</param>
+        /// <param name="name">The name to apply to the sprite.</param>
+        /// <returns>The sprite.</returns>
+        public static Sprite WithName(this Sprite sprite, string name)
+        {
+            sprite.name = name;
+            return sprite;
+        }
     }
 }
