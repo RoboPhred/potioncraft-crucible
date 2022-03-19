@@ -50,18 +50,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// </summary>
         public List<string> AcceptedEffects { get; set; }
 
-        public Texture2D HeadBackground { get; set; }
+        public Sprite HeadBackground { get; set; }
 
         public Sprite BodyBackground { get; set; }
 
         public Sprite ArmRightBackground { get; set; }
 
-        public Texture2D Face { get; set; }
+        public Sprite Face { get; set; }
 
         public Sprite EyeLeft { get; set; }
         public Sprite EyeRight { get; set; }
 
-        public Texture2D HairFrontRight { get; set; }
+        public Sprite HairFrontRight { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of appearances that this npc will make.
@@ -120,8 +120,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             if (this.HeadBackground != null)
             {
-                // TODO: Let artist choose pivot.
-                subject.Appearance.AddHeadShape(SpriteUtilities.FromTexture(this.HeadBackground, new Vector2(0.35f, .3f)));
+                // Note: Example pivot was .35, .3
+                subject.Appearance.AddHeadShape(this.HeadBackground);
             }
 
             var blankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear);
@@ -132,8 +132,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             if (this.Face != null)
             {
-                // TODO: Let artist choose pivot.
-                subject.Appearance.AddFace(SpriteUtilities.FromTexture(this.Face, new Vector2(0.1f, .3f)));
+                // Note: Example pivot was .1, .3
+                subject.Appearance.AddFace(this.Face);
             }
 
             if (this.EyeLeft != null || this.EyeRight != null)
@@ -143,7 +143,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             if (this.HairFrontRight != null)
             {
-                subject.Appearance.AddHairStyle(new[] { CrucibleNpcAppearance.Hair.Right(SpriteUtilities.FromTexture(this.HairFrontRight, new Vector2(0.4f, 0.1f))});
+                // Note: Example pivot was 0.4f, 0.1f
+                subject.Appearance.AddHairStyle(new[] { CrucibleNpcAppearance.Hair.Right(this.HairFrontRight) });
             }
 
             if (this.Visits != null)
