@@ -92,35 +92,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
             }
 
-            // if (this.HeadBackground != null)
-            // {
-            //     // Note: Example pivot was .35, .3
-            //     subject.Appearance.AddHeadShape(this.HeadBackground);
-            // }
-
-            // var blankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear);
-            // if (this.BodyBackground != null || this.ArmRightBackground != null)
-            // {
-            //     subject.Appearance.AddBody(this.BodyBackground ?? blankSprite, blankSprite, this.ArmRightBackground ?? blankSprite);
-            // }
-
-            // if (this.Face != null)
-            // {
-            //     // Note: Example pivot was .1, .3
-            //     subject.Appearance.AddFace(this.Face);
-            // }
-
-            // if (this.EyeLeft != null || this.EyeRight != null)
-            // {
-            //     subject.Appearance.AddEyes(this.EyeLeft ?? blankSprite, this.EyeRight ?? blankSprite);
-            // }
-
-            // if (this.HairFrontRight != null)
-            // {
-            //     // Note: Example pivot was 0.4f, 0.1f
-            //     subject.Appearance.AddHairStyle(new[] { CrucibleNpcAppearance.Hair.Right(this.HairFrontRight) });
-            // }
-
             if (this.Visits != null)
             {
                 foreach (var visit in this.Visits)
