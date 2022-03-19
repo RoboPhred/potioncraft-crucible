@@ -270,7 +270,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }, chance);
         }
 
-        public async void AddFace(EmotionAppearance[] emotions, float chance = 1f)
+        public void AddFace(EmotionAppearance[] emotions, float chance = 1f)
         {
             var face = ScriptableObject.CreateInstance<Face>();
             face.hair = Enumerable.Repeat(BlankColorablePart, 6).ToArray();
@@ -340,6 +340,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var group = this.npcTemplate.appearance.eyes;
 
+            // Remove our blank placeholder if present.
             if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.left.name == BlankSprite.name)
             {
                 group.partsInGroup = new[] { part };
@@ -350,49 +351,53 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
-        public Sprite HairFrontRight
+        public void ClearHairStyles()
         {
-            get
+            var hairStyle = ScriptableObject.CreateInstance<Hairstyle>();
+            hairStyle.back = BlankColorablePart;
+            hairStyle.longFront = BlankColorablePart;
+            hairStyle.middle = BlankColorablePart;
+            hairStyle.shortFront = BlankColorablePart;
+
+            this.npcTemplate.appearance.hairstyle.partsInGroup = new[]
             {
-                return this.npcTemplate.appearance.hairstyle.partsInGroup.FirstOrDefault()?.part.longFront.contour;
+                new PartContainer<Hairstyle>
+                {
+                    part = hairStyle,
+                },
+            };
+        }
+
+        public void AddHairStyle(HairAppearance[] hairs, float chance = 1)
+        {
+            var hairStyle = ScriptableObject.CreateInstance<Hairstyle>();
+
+            // Hair isnt stored in an array, but the API is more convienent.
+            var hairArray = Enumerable.Repeat(BlankColorablePart, 4).ToArray();
+            foreach (var hair in hairs)
+            {
+                hair.Set(hairArray);
             }
+            hairStyle.longFront = hairArray[0];
+            hairStyle.middle = hairArray[1];
+            hairStyle.shortFront = hairArray[2];
+            hairStyle.back = hairArray[3];
 
-            set
+            var part = new PartContainer<Hairstyle>
             {
-                var oldPart = this.npcTemplate.appearance.hairstyle.partsInGroup.FirstOrDefault();
-                var newPart = ScriptableObject.CreateInstance<Hairstyle>();
+                part = hairStyle
+            };
 
-                if (oldPart != null)
-                {
-                    newPart.back = oldPart.part.back.Clone();
-                    newPart.longFront = oldPart.part.longFront.Clone();
-                    newPart.shortFront = oldPart.part.shortFront.Clone();
-                    newPart.middle = oldPart.part.middle.Clone();
-                }
-                else
-                {
-                    var blankTexture = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
-                    var blankColorablePart = new AppearancePart.ColorablePart
-                    {
-                        background = blankTexture,
-                        contour = blankTexture,
-                        scratches = blankTexture,
-                    };
-                    newPart.back = blankColorablePart.Clone();
-                    newPart.longFront = blankColorablePart.Clone();
-                    newPart.shortFront = blankColorablePart.Clone();
-                    newPart.middle = blankColorablePart.Clone();
-                }
+            var group = this.npcTemplate.appearance.hairstyle;
 
-                newPart.longFront.background = value;
-
-                this.npcTemplate.appearance.hairstyle.partsInGroup = new[]
-                {
-                    new PartContainer<Hairstyle>
-                    {
-                        part = newPart,
-                    },
-                };
+            // Remove our blank placeholder if present.
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.longFront.background.name == BlankSprite.name)
+            {
+                group.partsInGroup = new[] { part };
+            }
+            else
+            {
+                group.partsInGroup = group.partsInGroup.Concat(new[] { part }).ToArray();
             }
         }
 
@@ -401,27 +406,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         public void Clear()
         {
-            var hairStyle = ScriptableObject.CreateInstance<Hairstyle>();
-            hairStyle.back = BlankColorablePart;
-            hairStyle.longFront = BlankColorablePart;
-            hairStyle.middle = BlankColorablePart;
-            hairStyle.shortFront = BlankColorablePart;
+            this.npcTemplate.appearance = new AppearanceContainer();
 
-            var appearance = this.npcTemplate.appearance = new AppearanceContainer();
-
-            // Set blanks into part groups that default to herbalist art.
-            appearance.hairstyle.partsInGroup = new[]
-            {
-                new PartContainer<Hairstyle>
-                {
-                    part = hairStyle,
-                },
-            };
-
+            // Apply blank sprites to override the default herbalist art.
             this.ClearBodies();
             this.ClearHeadShapes();
             this.ClearFaces();
             this.ClearEyes();
+            this.ClearHairStyles();
         }
 
         /// <summary>
@@ -651,6 +643,36 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             public static LayerAppearance Colorable4(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
                 return new LayerAppearance(4, background, contour, scratches);
+            }
+        }
+
+        public sealed class HairAppearance : AppearanceArraySetter
+        {
+            internal HairAppearance(int index, Sprite background, Sprite contour, Sprite scratches) : base(index)
+            {
+                this.Background = background;
+                this.Contour = contour;
+                this.Scratches = scratches;
+            }
+
+            public static HairAppearance Right(Sprite background, Sprite contour = null, Sprite scratches = null)
+            {
+                return new HairAppearance(0, background, contour, scratches);
+            }
+
+            public static HairAppearance Middle(Sprite background, Sprite contour = null, Sprite scratches = null)
+            {
+                return new HairAppearance(1, background, contour, scratches);
+            }
+
+            public static HairAppearance Left(Sprite background, Sprite contour = null, Sprite scratches = null)
+            {
+                return new HairAppearance(2, background, contour, scratches);
+            }
+
+            public static HairAppearance Back(Sprite background, Sprite contour = null, Sprite scratches = null)
+            {
+                return new HairAppearance(3, background, contour, scratches);
             }
         }
     }
