@@ -79,6 +79,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             Colorable4,
         }
 
+        public enum Emotion
+        {
+            NegativeReaction = 0,
+            Anger2 = 1,
+            Anger1 = 2,
+            Idle = 3,
+            Happy1 = 4,
+            PositiveReaction = 5,
+        }
+
         /// <summary>
         /// Clear all head shapes from this appearance.
         /// </summary>
@@ -179,7 +189,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="chance">The chance for this body to be selected.</param>
         public void AddBody(Sprite body, Sprite leftArm, Sprite rightArm, float chance = 1f)
         {
-            this.AddBody(new[] { new AppearanceLayer(ColorLayer.Base, body) }, new[] { new AppearanceLayer(ColorLayer.Colorable1, leftArm) }, new[] { new AppearanceLayer(ColorLayer.Colorable2, rightArm) }, chance);
+            this.AddBody(new[] { new LayerAppearance(ColorLayer.Base, body) }, new[] { new LayerAppearance(ColorLayer.Colorable1, leftArm) }, new[] { new LayerAppearance(ColorLayer.Colorable2, rightArm) }, chance);
         }
 
         /// <summary>
@@ -189,7 +199,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="leftArmLayers">The layers that make up the left arm.</param>
         /// <param name="rightArmLayers">The layers that make up the right arm.</param>
         /// <param name="chance">The chance for this body to be selected.</param>
-        public void AddBody(AppearanceLayer[] bodyLayers, AppearanceLayer[] leftArmLayers, AppearanceLayer[] rightArmLayers, float chance = 1f)
+        public void AddBody(LayerAppearance[] bodyLayers, LayerAppearance[] leftArmLayers, LayerAppearance[] rightArmLayers, float chance = 1f)
         {
             var bodyBaseSet = new AppearancePart.ColorablePart[]
             {
@@ -245,131 +255,107 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
-        public Sprite FaceContour
+        public void ClearFaces()
         {
-            get
+            var face = ScriptableObject.CreateInstance<Face>();
+            var blankEmotions = new[] { BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart };
+            face.hair = blankEmotions;
+            face.skin = blankEmotions;
+
+            this.npcTemplate.appearance.face.partsInGroup = new[]
             {
-                return this.npcTemplate.appearance.face.partsInGroup.FirstOrDefault()?.part.hair[0].contour;
+                new PartContainer<Face>
+                {
+                    part = face,
+                },
+            };
+        }
+
+        public void AddFace(Sprite idle, float chance = 1f)
+        {
+            this.AddFace(new[] { new EmotionAppearance(Emotion.Idle, idle) }, chance);
+        }
+
+        public void AddFace(Sprite idle, Sprite positiveReaction, Sprite negativeReaction, float chance = 1f)
+        {
+            this.AddFace(new[]
+            {
+                new EmotionAppearance(Emotion.Idle, idle),
+                new EmotionAppearance(Emotion.PositiveReaction, positiveReaction),
+                new EmotionAppearance(Emotion.NegativeReaction, negativeReaction),
+            }, chance);
+        }
+
+        public void AddFace(EmotionAppearance[] emotions, float chance = 1f)
+        {
+            var face = ScriptableObject.CreateInstance<Face>();
+            var idleEmotion = Array.Find(emotions, e => e.Emotion == Emotion.Idle)?.ToColorablePart() ?? BlankColorablePart;
+            face.hair = new[] {
+                Array.Find(emotions, e => e.Emotion == Emotion.NegativeReaction)?.ToColorablePart() ?? idleEmotion,
+                Array.Find(emotions, e => e.Emotion == Emotion.Anger2)?.ToColorablePart() ?? idleEmotion,
+                Array.Find(emotions, e => e.Emotion == Emotion.Anger1)?.ToColorablePart() ?? idleEmotion,
+                idleEmotion,
+                Array.Find(emotions, e => e.Emotion == Emotion.Happy1)?.ToColorablePart() ?? idleEmotion,
+                Array.Find(emotions, e => e.Emotion == Emotion.PositiveReaction)?.ToColorablePart() ?? idleEmotion,
+            };
+
+            var blankEmotions = new[] { BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart };
+            face.skin = blankEmotions;
+
+            var part = new PartContainer<Face>
+            {
+                part = face,
+                chanceBtwParts = chance,
+            };
+
+            var group = this.npcTemplate.appearance.face;
+
+            // Remove our blank if present.
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.hair.Length >= 6 && group.partsInGroup[0].part.hair[3].contour.name == BlankSprite.name)
+            {
+                group.partsInGroup = new[] { part };
             }
-
-            set
+            else
             {
-                var oldPart = this.npcTemplate.appearance.face.partsInGroup.FirstOrDefault();
-                var newPart = ScriptableObject.CreateInstance<Face>();
-
-                if (oldPart != null)
-                {
-                    newPart.hair = oldPart.part.hair.Select(x => x.Clone()).ToArray();
-                    newPart.skin = oldPart.part.skin.Select(x => x.Clone()).ToArray();
-                }
-                else
-                {
-                    var blankTexture = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
-                    var blankColorablePart = new AppearancePart.ColorablePart
-                    {
-                        background = blankTexture,
-                        contour = blankTexture,
-                        scratches = blankTexture,
-                    };
-
-                    // 5 of these:
-                    // 0 - wrong potion flash
-                    // 1, 2 - anger states for being given wrong potions
-                    // 3 - idle
-                    // 4 - satisfied, given potion and leaviong
-                    // 5 - o-face emotion when shown a matching potion
-                    var blankColorablePartSet = new[] { blankColorablePart, blankColorablePart, blankColorablePart, blankColorablePart, blankColorablePart };
-                    newPart.hair = blankColorablePartSet;
-                    newPart.skin = blankColorablePartSet;
-                }
-
-                // Set the face contour for all emotions
-                newPart.hair = newPart.hair.Select(x =>
-                {
-                    var r = x.Clone();
-                    r.contour = value;
-                    return r;
-                }).ToArray();
-
-                this.npcTemplate.appearance.face.partsInGroup = new[]
-                {
-                    new PartContainer<Face>
-                    {
-                        part = newPart,
-                    },
-                };
+                group.partsInGroup = group.partsInGroup.Concat(new[] { part }).ToArray();
             }
         }
 
-        public Sprite EyeLeft
+        public void ClearEyes()
         {
-            get
+            var eyes = ScriptableObject.CreateInstance<Eyes>();
+            eyes.left = BlankSprite;
+            eyes.right = BlankSprite;
+
+            this.npcTemplate.appearance.eyes.partsInGroup = new[]
             {
-                return this.npcTemplate.appearance.eyes.partsInGroup.FirstOrDefault()?.part.left;
-            }
-
-            set
-            {
-                var oldPart = this.npcTemplate.appearance.eyes.partsInGroup.FirstOrDefault();
-                var newPart = ScriptableObject.CreateInstance<Eyes>();
-
-                if (oldPart != null)
+                new PartContainer<Eyes>
                 {
-                    newPart.left = oldPart.part.left;
-                    newPart.right = oldPart.part.right;
-                }
-                else
-                {
-                    var blankTexture = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
-                    newPart.left = blankTexture;
-                    newPart.right = blankTexture;
-                }
-
-                newPart.left = value;
-
-                this.npcTemplate.appearance.eyes.partsInGroup = new[]
-                {
-                    new PartContainer<Eyes>
-                    {
-                        part = newPart,
-                    },
-                };
-            }
+                    part = eyes,
+                },
+            };
         }
 
-        public Sprite EyeRight
+        public void AddEyes(Sprite leftEye, Sprite rightEye, float chance = 1f)
         {
-            get
+            var eyes = ScriptableObject.CreateInstance<Eyes>();
+            eyes.left = BlankSprite;
+            eyes.right = BlankSprite;
+
+            var part = new PartContainer<Eyes>
             {
-                return this.npcTemplate.appearance.eyes.partsInGroup.FirstOrDefault()?.part.right;
+                part = eyes,
+            };
+
+            var group = this.npcTemplate.appearance.eyes;
+
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.left.name == BlankSprite.name)
+            {
+                group.partsInGroup = new[] { part };
             }
-
-            set
+            else
             {
-                var oldPart = this.npcTemplate.appearance.eyes.partsInGroup.FirstOrDefault();
-                var newPart = ScriptableObject.CreateInstance<Eyes>();
-
-                if (oldPart != null)
-                {
-                    newPart.left = oldPart.part.left;
-                    newPart.right = oldPart.part.right;
-                }
-                else
-                {
-                    var blankTexture = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
-                    newPart.left = blankTexture;
-                    newPart.right = blankTexture;
-                }
-
-                newPart.right = value;
-
-                this.npcTemplate.appearance.eyes.partsInGroup = new[]
-                {
-                    new PartContainer<Eyes>
-                    {
-                        part = newPart,
-                    },
-                };
+                group.partsInGroup = group.partsInGroup.Concat(new[] { part }).ToArray();
             }
         }
 
@@ -424,49 +410,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         public void Clear()
         {
-            var blankSprite = SpriteUtilities.CreateBlankSprite(10, 10, Color.clear);
-            blankSprite.name = "Crucible npc sprite placeholder";
-            var blankColorablePart = new AppearancePart.ColorablePart
-            {
-                background = blankSprite,
-                contour = blankSprite,
-                scratches = blankSprite,
-            };
-
-            // Colorable sets seem to always involve 5 parts: 1 base and 4 recolorable.
-            var blankColorablePartSet = new[] { blankColorablePart, blankColorablePart, blankColorablePart, blankColorablePart, blankColorablePart };
-
             var hairStyle = ScriptableObject.CreateInstance<Hairstyle>();
-            hairStyle.back = blankColorablePart;
-            hairStyle.longFront = blankColorablePart;
-            hairStyle.middle = blankColorablePart;
-            hairStyle.shortFront = blankColorablePart;
-
-            var face = ScriptableObject.CreateInstance<Face>();
-            face.hair = blankColorablePartSet;
-            face.skin = blankColorablePartSet;
-
-            var eyes = ScriptableObject.CreateInstance<Eyes>();
-            eyes.left = blankSprite;
-            eyes.right = blankSprite;
+            hairStyle.back = BlankColorablePart;
+            hairStyle.longFront = BlankColorablePart;
+            hairStyle.middle = BlankColorablePart;
+            hairStyle.shortFront = BlankColorablePart;
 
             var appearance = this.npcTemplate.appearance = new AppearanceContainer();
 
             // Set blanks into part groups that default to herbalist art.
-            appearance.eyes.partsInGroup = new[]
-            {
-                new PartContainer<Eyes>
-                {
-                    part = eyes,
-                },
-            };
-            appearance.face.partsInGroup = new[]
-            {
-                new PartContainer<Face>
-                {
-                    part = face,
-                },
-            };
             appearance.hairstyle.partsInGroup = new[]
             {
                 new PartContainer<Hairstyle>
@@ -477,6 +429,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             this.ClearBodies();
             this.ClearHeadShapes();
+            this.ClearFaces();
+            this.ClearEyes();
         }
 
         /// <summary>
@@ -566,7 +520,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         private T RequirePart<T>()
-            where T : NonAppearancePart
+        where T : NonAppearancePart
         {
             var part = this.npcTemplate.baseParts.OfType<T>().FirstOrDefault();
             if (part == null)
@@ -578,18 +532,54 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Defines the appearance of an emotion
+        /// </summary>
+        public class EmotionAppearance
+        {
+            public EmotionAppearance(Emotion emotion, Sprite contour, Sprite background = null, Sprite scratches = null)
+            {
+                this.Emotion = emotion;
+                this.Contour = contour;
+                this.Background = background;
+                this.Scratches = scratches;
+            }
+
+            public Emotion Emotion { get; set; }
+
+            public Sprite Background { get; set; }
+
+            public Sprite Contour { get; set; }
+
+            public Sprite Scratches { get; set; }
+
+            /// <summary>
+            /// Creates a colorable part from this layer.
+            /// </summary>
+            /// <returns>The colorable part.</returns>
+            internal AppearancePart.ColorablePart ToColorablePart()
+            {
+                return new AppearancePart.ColorablePart
+                {
+                    background = this.Background ?? BlankSprite,
+                    contour = this.Contour ?? BlankSprite,
+                    scratches = this.Scratches ?? BlankSprite,
+                };
+            }
+        }
+
+        /// <summary>
         /// Defines a sprite on a specified appearance layer.
         /// </summary>
-        public class AppearanceLayer
+        public class LayerAppearance
         {
             /// <summary>
-            /// Initializes a new instance of the <see cref="AppearanceLayer"/> class.
+            /// Initializes a new instance of the <see cref="LayerAppearance"/> class.
             /// </summary>
             /// <param name="layer">The layer the sprite should be on.</param>
             /// <param name="background">The background sprite to use.</param>
             /// <param name="contour">The contour sprite to use.</param>
             /// <param name="scratches">The scratches sprite to use.</param>
-            public AppearanceLayer(ColorLayer layer, Sprite background, Sprite contour = null, Sprite scratches = null)
+            public LayerAppearance(ColorLayer layer, Sprite background, Sprite contour = null, Sprite scratches = null)
             {
                 this.Layer = layer;
                 this.Background = background;
@@ -617,6 +607,31 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             /// </summary>
             public Sprite Scratches { get; set; }
 
+            public static LayerAppearance Base(Sprite background, Sprite contour = null, Sprite scratches = null)
+            {
+                return new LayerAppearance(ColorLayer.Base, background, contour, scratches);
+            }
+
+            public static LayerAppearance Colorable1(Sprite background, Sprite contour = null, Sprite scratches = null)
+            {
+                return new LayerAppearance(ColorLayer.Colorable1, background, contour, scratches);
+            }
+
+            public static LayerAppearance Colorable2(Sprite background, Sprite contour = null, Sprite scratches = null)
+            {
+                return new LayerAppearance(ColorLayer.Colorable2, background, contour, scratches);
+            }
+
+            public static LayerAppearance Colorable3(Sprite background, Sprite contour = null, Sprite scratches = null)
+            {
+                return new LayerAppearance(ColorLayer.Colorable3, background, contour, scratches);
+            }
+
+            public static LayerAppearance Colorable4(Sprite background, Sprite contour = null, Sprite scratches = null)
+            {
+                return new LayerAppearance(ColorLayer.Colorable4, background, contour, scratches);
+            }
+
             /// <summary>
             /// Creates a colorable part from this layer.
             /// </summary>
@@ -625,9 +640,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 return new AppearancePart.ColorablePart
                 {
-                    background = this.Background,
-                    contour = this.Contour,
-                    scratches = this.Scratches,
+                    background = this.Background ?? BlankSprite,
+                    contour = this.Contour ?? BlankSprite,
+                    scratches = this.Scratches ?? BlankSprite,
                 };
             }
         }
