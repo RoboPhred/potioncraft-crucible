@@ -82,7 +82,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         }
 
         /// <inheritdoc/>
-        protected override async void OnApplyConfiguration(CrucibleCustomerNpcTemplate subject)
+        protected override void OnApplyConfiguration(CrucibleCustomerNpcTemplate subject)
         {
             if (!string.IsNullOrEmpty(this.CopyAppearanceFrom))
             {
@@ -120,39 +120,30 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             if (this.HeadBackground != null)
             {
-                // TODO: Use a more sensible pivot.  Should let the artist specify where the pivot is.
-                subject.Appearance.HeadBackground = SpriteUtilities.FromTexture(this.HeadBackground, new Vector2(0.35f, .3f));
+                // TODO: Let artist choose pivot.
+                subject.Appearance.AddHeadShape(SpriteUtilities.FromTexture(this.HeadBackground, new Vector2(0.35f, .3f)));
             }
 
-            if (this.BodyBackground != null)
+            var blankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear);
+            if (this.BodyBackground != null || this.ArmRightBackground != null)
             {
-                subject.Appearance.BodyBackground = this.BodyBackground;
-            }
-
-            if (this.ArmRightBackground != null)
-            {
-                subject.Appearance.ArmRightBackground = this.ArmRightBackground;
+                subject.Appearance.AddBody(this.BodyBackground ?? blankSprite, blankSprite, this.ArmRightBackground ?? blankSprite);
             }
 
             if (this.Face != null)
             {
-                // TODO: Use a more sensible pivot.  Should let the artist specify where the pivot is.
-                subject.Appearance.FaceContour = SpriteUtilities.FromTexture(this.Face, new Vector2(0.1f, .3f));
+                // TODO: Let artist choose pivot.
+                subject.Appearance.AddFace(SpriteUtilities.FromTexture(this.Face, new Vector2(0.1f, .3f)));
             }
 
-            if (this.EyeLeft != null)
+            if (this.EyeLeft != null || this.EyeRight != null)
             {
-                subject.Appearance.EyeLeft = this.EyeLeft;
-            }
-
-            if (this.EyeRight != null)
-            {
-                subject.Appearance.EyeRight = this.EyeRight;
+                subject.Appearance.AddEyes(this.EyeLeft ?? blankSprite, this.EyeRight ?? blankSprite);
             }
 
             if (this.HairFrontRight != null)
             {
-                subject.Appearance.HairFrontRight = SpriteUtilities.FromTexture(this.HairFrontRight, new Vector2(0.4f, 0.1f));
+                subject.Appearance.AddHairStyle(new[] { CrucibleNpcAppearance.HairAppearance.Right(SpriteUtilities.FromTexture(this.HairFrontRight, new Vector2(0.4f, 0.1f))});
             }
 
             if (this.Visits != null)
