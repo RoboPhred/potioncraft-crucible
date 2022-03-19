@@ -79,16 +79,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             Colorable4,
         }
 
-        public enum Emotion
-        {
-            NegativeReaction = 0,
-            Anger2 = 1,
-            Anger1 = 2,
-            Idle = 3,
-            Happy1 = 4,
-            PositiveReaction = 5,
-        }
-
         /// <summary>
         /// Clear all head shapes from this appearance.
         /// </summary>
@@ -161,7 +151,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         public void ClearBodies()
         {
-            var blankColorablePartSet = new[] { BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart };
+            var blankColorablePartSet = Enumerable.Repeat(BlankColorablePart, 5).ToArray();
 
             var body = ScriptableObject.CreateInstance<Body>();
             body.bodyBase = blankColorablePartSet;
@@ -189,7 +179,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="chance">The chance for this body to be selected.</param>
         public void AddBody(Sprite body, Sprite leftArm, Sprite rightArm, float chance = 1f)
         {
-            this.AddBody(new[] { new LayerAppearance(ColorLayer.Base, body) }, new[] { new LayerAppearance(ColorLayer.Colorable1, leftArm) }, new[] { new LayerAppearance(ColorLayer.Colorable2, rightArm) }, chance);
+            this.AddBody(
+                new[] { LayerAppearance.Base(body) },
+                new[] { LayerAppearance.Base(leftArm) },
+                new[] { LayerAppearance.Base(rightArm) },
+                chance
+            );
         }
 
         /// <summary>
@@ -201,40 +196,29 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="chance">The chance for this body to be selected.</param>
         public void AddBody(LayerAppearance[] bodyLayers, LayerAppearance[] leftArmLayers, LayerAppearance[] rightArmLayers, float chance = 1f)
         {
-            var bodyBaseSet = new AppearancePart.ColorablePart[]
-            {
-                Array.Find(bodyLayers, l => l.Layer == ColorLayer.Base)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(bodyLayers, l => l.Layer == ColorLayer.Colorable1)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(bodyLayers, l => l.Layer == ColorLayer.Colorable2)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(bodyLayers, l => l.Layer == ColorLayer.Colorable3)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(bodyLayers, l => l.Layer == ColorLayer.Colorable4)?.ToColorablePart() ?? BlankColorablePart,
-            };
-
-            var handFrontSet = new AppearancePart.ColorablePart[]
-            {
-                Array.Find(rightArmLayers, l => l.Layer == ColorLayer.Base)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(rightArmLayers, l => l.Layer == ColorLayer.Colorable1)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(rightArmLayers, l => l.Layer == ColorLayer.Colorable2)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(rightArmLayers, l => l.Layer == ColorLayer.Colorable3)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(rightArmLayers, l => l.Layer == ColorLayer.Colorable4)?.ToColorablePart() ?? BlankColorablePart,
-            };
-
-            var handBackSet = new AppearancePart.ColorablePart[]
-            {
-                Array.Find(leftArmLayers, l => l.Layer == ColorLayer.Base)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(leftArmLayers, l => l.Layer == ColorLayer.Colorable1)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(leftArmLayers, l => l.Layer == ColorLayer.Colorable2)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(leftArmLayers, l => l.Layer == ColorLayer.Colorable3)?.ToColorablePart() ?? BlankColorablePart,
-                Array.Find(leftArmLayers, l => l.Layer == ColorLayer.Colorable4)?.ToColorablePart() ?? BlankColorablePart,
-            };
-
             var body = ScriptableObject.CreateInstance<Body>();
-            body.bodyBase = bodyBaseSet;
+
+            body.bodyBase = Enumerable.Repeat(BlankColorablePart, 5).ToArray();
             body.bodyBaseSkin = BlankColorablePart;
-            body.handBack = handBackSet;
+            foreach (var bodyLayer in bodyLayers)
+            {
+                bodyLayer.Set(body.bodyBase);
+            }
+
+            body.handBack = Enumerable.Repeat(BlankColorablePart, 5).ToArray();
             body.handBackSkin = BlankColorablePart;
-            body.handFront = handFrontSet;
+            foreach (var leftArmLayer in leftArmLayers)
+            {
+                leftArmLayer.Set(body.handBack);
+            }
+
+
+            body.handFront = Enumerable.Repeat(BlankColorablePart, 5).ToArray();
             body.handFrontSkin = BlankColorablePart;
+            foreach (var rightArmLayer in rightArmLayers)
+            {
+                rightArmLayer.Set(body.handFront);
+            }
 
             var part = new PartContainer<Body>
             {
@@ -258,7 +242,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public void ClearFaces()
         {
             var face = ScriptableObject.CreateInstance<Face>();
-            var blankEmotions = new[] { BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart };
+            var blankEmotions = Enumerable.Repeat(BlankColorablePart, 6).ToArray();
             face.hair = blankEmotions;
             face.skin = blankEmotions;
 
@@ -273,34 +257,41 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         public void AddFace(Sprite idle, float chance = 1f)
         {
-            this.AddFace(new[] { new EmotionAppearance(Emotion.Idle, idle) }, chance);
+            this.AddFace(new[] { EmotionAppearance.Idle(idle) }, chance);
         }
 
         public void AddFace(Sprite idle, Sprite positiveReaction, Sprite negativeReaction, float chance = 1f)
         {
             this.AddFace(new[]
             {
-                new EmotionAppearance(Emotion.Idle, idle),
-                new EmotionAppearance(Emotion.PositiveReaction, positiveReaction),
-                new EmotionAppearance(Emotion.NegativeReaction, negativeReaction),
+                EmotionAppearance.Idle(idle),
+                EmotionAppearance.PositiveReaction(positiveReaction),
+                EmotionAppearance.NegativeReaction(negativeReaction),
             }, chance);
         }
 
-        public void AddFace(EmotionAppearance[] emotions, float chance = 1f)
+        public async void AddFace(EmotionAppearance[] emotions, float chance = 1f)
         {
             var face = ScriptableObject.CreateInstance<Face>();
-            var idleEmotion = Array.Find(emotions, e => e.Emotion == Emotion.Idle)?.ToColorablePart() ?? BlankColorablePart;
-            face.hair = new[] {
-                Array.Find(emotions, e => e.Emotion == Emotion.NegativeReaction)?.ToColorablePart() ?? idleEmotion,
-                Array.Find(emotions, e => e.Emotion == Emotion.Anger2)?.ToColorablePart() ?? idleEmotion,
-                Array.Find(emotions, e => e.Emotion == Emotion.Anger1)?.ToColorablePart() ?? idleEmotion,
-                idleEmotion,
-                Array.Find(emotions, e => e.Emotion == Emotion.Happy1)?.ToColorablePart() ?? idleEmotion,
-                Array.Find(emotions, e => e.Emotion == Emotion.PositiveReaction)?.ToColorablePart() ?? idleEmotion,
-            };
+            face.hair = Enumerable.Repeat(BlankColorablePart, 6).ToArray();
+            foreach (var emotion in emotions)
+            {
+                emotion.Set(face.hair);
+            }
 
-            var blankEmotions = new[] { BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart, BlankColorablePart };
-            face.skin = blankEmotions;
+            // Set idle to missing entries.
+            var idle = face.hair[3];
+            if (idle.contour.name != BlankSprite.name)
+            {
+                for (var i = 0; i < face.hair.Length; i++)
+                {
+                    if (i != 3 && face.hair[i].contour.name == BlankSprite.name)
+                    {
+                        face.hair[i] = idle;
+                    }
+                }
+            }
+            face.skin = Enumerable.Repeat(BlankColorablePart, 6).ToArray();
 
             var part = new PartContainer<Face>
             {
@@ -531,20 +522,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return part;
         }
 
-        /// <summary>
-        /// Defines the appearance of an emotion
-        /// </summary>
-        public class EmotionAppearance
+        public class AppearanceArraySetter
         {
-            public EmotionAppearance(Emotion emotion, Sprite contour, Sprite background = null, Sprite scratches = null)
+            private readonly int index;
+            internal AppearanceArraySetter(int index)
             {
-                this.Emotion = emotion;
-                this.Contour = contour;
-                this.Background = background;
-                this.Scratches = scratches;
+                this.index = index;
             }
-
-            public Emotion Emotion { get; set; }
 
             public Sprite Background { get; set; }
 
@@ -552,13 +536,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             public Sprite Scratches { get; set; }
 
-            /// <summary>
-            /// Creates a colorable part from this layer.
-            /// </summary>
-            /// <returns>The colorable part.</returns>
-            internal AppearancePart.ColorablePart ToColorablePart()
+            internal void Set(AppearancePart.ColorablePart[] parts)
             {
-                return new AppearancePart.ColorablePart
+                if (parts.Length <= this.index)
+                {
+                    throw new InvalidOperationException("Part array is too small.");
+                }
+
+                parts[this.index] = new AppearancePart.ColorablePart
                 {
                     background = this.Background ?? BlankSprite,
                     contour = this.Contour ?? BlankSprite,
@@ -568,82 +553,104 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Defines the appearance of an emotion
+        /// </summary>
+        public sealed class EmotionAppearance : AppearanceArraySetter
+        {
+            internal EmotionAppearance(int index) : base(index)
+            {
+            }
+
+            public static EmotionAppearance NegativeReaction(Sprite contour, Sprite background = null, Sprite scratches = null)
+            {
+                var emotion = new EmotionAppearance(0);
+                emotion.Background = background;
+                emotion.Contour = contour;
+                emotion.Scratches = scratches;
+                return emotion;
+            }
+
+            public static EmotionAppearance Anger2(Sprite contour, Sprite background = null, Sprite scratches = null)
+            {
+                var emotion = new EmotionAppearance(1);
+                emotion.Background = background;
+                emotion.Contour = contour;
+                emotion.Scratches = scratches;
+                return emotion;
+            }
+
+            public static EmotionAppearance Anger1(Sprite contour, Sprite background = null, Sprite scratches = null)
+            {
+                var emotion = new EmotionAppearance(2);
+                emotion.Background = background;
+                emotion.Contour = contour;
+                emotion.Scratches = scratches;
+                return emotion;
+            }
+
+            public static EmotionAppearance Idle(Sprite contour, Sprite background = null, Sprite scratches = null)
+            {
+                var emotion = new EmotionAppearance(3);
+                emotion.Background = background;
+                emotion.Contour = contour;
+                emotion.Scratches = scratches;
+                return emotion;
+            }
+
+            public static EmotionAppearance Happy1(Sprite contour, Sprite background = null, Sprite scratches = null)
+            {
+                var emotion = new EmotionAppearance(4);
+                emotion.Background = background;
+                emotion.Contour = contour;
+                emotion.Scratches = scratches;
+                return emotion;
+            }
+
+            public static EmotionAppearance PositiveReaction(Sprite contour, Sprite background = null, Sprite scratches = null)
+            {
+                var emotion = new EmotionAppearance(5);
+                emotion.Background = background;
+                emotion.Contour = contour;
+                emotion.Scratches = scratches;
+                return emotion;
+            }
+        }
+
+        /// <summary>
         /// Defines a sprite on a specified appearance layer.
         /// </summary>
-        public class LayerAppearance
+        public class LayerAppearance : AppearanceArraySetter
         {
-            /// <summary>
-            /// Initializes a new instance of the <see cref="LayerAppearance"/> class.
-            /// </summary>
-            /// <param name="layer">The layer the sprite should be on.</param>
-            /// <param name="background">The background sprite to use.</param>
-            /// <param name="contour">The contour sprite to use.</param>
-            /// <param name="scratches">The scratches sprite to use.</param>
-            public LayerAppearance(ColorLayer layer, Sprite background, Sprite contour = null, Sprite scratches = null)
+            internal LayerAppearance(int index, Sprite background, Sprite contour, Sprite scratches) : base(index)
             {
-                this.Layer = layer;
                 this.Background = background;
                 this.Contour = contour;
                 this.Scratches = scratches;
             }
 
-            /// <summary>
-            /// Gets or sets the layer this sprite should be on.
-            /// </summary>
-            public ColorLayer Layer { get; set; }
-
-            /// <summary>
-            /// Gets or sets the background sprite to use.
-            /// </summary>
-            public Sprite Background { get; set; }
-
-            /// <summary>
-            /// Gets or sets the contour sprite to use.
-            /// </summary>
-            public Sprite Contour { get; set; }
-
-            /// <summary>
-            /// Gets or sets the scratches sprite to use.
-            /// </summary>
-            public Sprite Scratches { get; set; }
-
             public static LayerAppearance Base(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new LayerAppearance(ColorLayer.Base, background, contour, scratches);
+                return new LayerAppearance(0, background, contour, scratches);
             }
 
             public static LayerAppearance Colorable1(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new LayerAppearance(ColorLayer.Colorable1, background, contour, scratches);
+                return new LayerAppearance(1, background, contour, scratches);
             }
 
             public static LayerAppearance Colorable2(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new LayerAppearance(ColorLayer.Colorable2, background, contour, scratches);
+                return new LayerAppearance(2, background, contour, scratches);
             }
 
             public static LayerAppearance Colorable3(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new LayerAppearance(ColorLayer.Colorable3, background, contour, scratches);
+                return new LayerAppearance(3, background, contour, scratches);
             }
 
             public static LayerAppearance Colorable4(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new LayerAppearance(ColorLayer.Colorable4, background, contour, scratches);
-            }
-
-            /// <summary>
-            /// Creates a colorable part from this layer.
-            /// </summary>
-            /// <returns>The colorable part.</returns>
-            internal AppearancePart.ColorablePart ToColorablePart()
-            {
-                return new AppearancePart.ColorablePart
-                {
-                    background = this.Background ?? BlankSprite,
-                    contour = this.Contour ?? BlankSprite,
-                    scratches = this.Scratches ?? BlankSprite,
-                };
+                return new LayerAppearance(4, background, contour, scratches);
             }
         }
     }
