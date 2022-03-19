@@ -30,7 +30,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     {
         private static readonly Sprite BlankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear).WithName("Crucible cleared appearance sprite");
 
-        private static readonly AppearancePart.ColorablePart BlankColorablePart = new AppearancePart.ColorablePart
+        private static readonly AppearancePart.ColorablePart BlankColorablePart = new()
         {
             background = BlankSprite,
             contour = BlankSprite,
@@ -183,8 +183,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 new[] { Layer.Base(body) },
                 new[] { Layer.Base(leftArm) },
                 new[] { Layer.Base(rightArm) },
-                chance
-            );
+                chance);
         }
 
         /// <summary>
@@ -212,7 +211,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 leftArmLayer.Set(body.handBack);
             }
 
-
             body.handFront = Enumerable.Repeat(BlankColorablePart, 5).ToArray();
             body.handFrontSkin = BlankColorablePart;
             foreach (var rightArmLayer in rightArmLayers)
@@ -239,6 +237,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        /// <summary>
+        /// Clear all face data for this appearance.
+        /// </summary>
         public void ClearFaces()
         {
             var face = ScriptableObject.CreateInstance<Face>();
@@ -255,21 +256,40 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             };
         }
 
+        /// <summary>
+        /// Add a face to this appearance.
+        /// </summary>
+        /// <param name="idle">The sprite to use for all emotions.</param>
+        /// <param name="chance">The chance for this face to be selected.</param>
         public void AddFace(Sprite idle, float chance = 1f)
         {
             this.AddFace(new[] { Emotion.Idle(idle) }, chance);
         }
 
+        /// <summary>
+        /// Add a face to this appearance.
+        /// </summary>
+        /// <param name="idle">The sprite to use when the npc is idle, angry, or happy.</param>
+        /// <param name="positiveReaction">The face to use when the npc is given a matching potion.</param>
+        /// <param name="negativeReaction">The face to use when the npc is given a potion that does not match.</param>
+        /// <param name="chance">The chance for this face to be selected.</param>
         public void AddFace(Sprite idle, Sprite positiveReaction, Sprite negativeReaction, float chance = 1f)
         {
-            this.AddFace(new[]
-            {
-                Emotion.Idle(idle),
-                Emotion.PositiveReaction(positiveReaction),
-                Emotion.NegativeReaction(negativeReaction),
-            }, chance);
+            this.AddFace(
+                new[]
+                {
+                    Emotion.Idle(idle),
+                    Emotion.PositiveReaction(positiveReaction),
+                    Emotion.NegativeReaction(negativeReaction),
+                },
+                chance);
         }
 
+        /// <summary>
+        /// Add a face to this appearance.
+        /// </summary>
+        /// <param name="emotions">The array of emotion elements to use for this face.</param>
+        /// <param name="chance">The chance for this face to be selected.</param>
         public void AddFace(Emotion[] emotions, float chance = 1f)
         {
             var face = ScriptableObject.CreateInstance<Face>();
@@ -291,6 +311,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     }
                 }
             }
+
             face.skin = Enumerable.Repeat(BlankColorablePart, 6).ToArray();
 
             var part = new PartContainer<Face>
@@ -312,6 +333,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        /// <summary>
+        /// Clear all eyes from this appearance.
+        /// </summary>
         public void ClearEyes()
         {
             var eyes = ScriptableObject.CreateInstance<Eyes>();
@@ -327,15 +351,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             };
         }
 
+        /// <summary>
+        /// Adds eyes to this appearance.
+        /// </summary>
+        /// <param name="leftEye">The sprite to use for the left eye.</param>
+        /// <param name="rightEye">The sprite to use for the right eye.</param>
+        /// <param name="chance">The chance for this eye pair to be selected.</param>
         public void AddEyes(Sprite leftEye, Sprite rightEye, float chance = 1f)
         {
             var eyes = ScriptableObject.CreateInstance<Eyes>();
-            eyes.left = BlankSprite;
-            eyes.right = BlankSprite;
+            eyes.left = leftEye;
+            eyes.right = rightEye;
 
             var part = new PartContainer<Eyes>
             {
                 part = eyes,
+                chanceBtwParts = chance,
             };
 
             var group = this.npcTemplate.appearance.eyes;
@@ -351,6 +382,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        /// <summary>
+        /// Clears all hairstyles from this appearance.
+        /// </summary>
         public void ClearHairStyles()
         {
             var hairStyle = ScriptableObject.CreateInstance<Hairstyle>();
@@ -368,6 +402,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             };
         }
 
+        /// <summary>
+        /// Adds a hairstyle to this npc appearance.
+        /// </summary>
+        /// <param name="hairs">An array of hair parts to add.</param>
+        /// <param name="chance">The chance for this hairstyle to be selected.</param>
         public void AddHairStyle(Hair[] hairs, float chance = 1)
         {
             var hairStyle = ScriptableObject.CreateInstance<Hairstyle>();
@@ -378,6 +417,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 hair.Set(hairArray);
             }
+
             hairStyle.longFront = hairArray[0];
             hairStyle.middle = hairArray[1];
             hairStyle.shortFront = hairArray[2];
@@ -385,7 +425,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var part = new PartContainer<Hairstyle>
             {
-                part = hairStyle
+                part = hairStyle,
+                chanceBtwParts = chance,
             };
 
             var group = this.npcTemplate.appearance.hairstyle;
@@ -514,20 +555,41 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return part;
         }
 
+        /// <summary>
+        /// Utility class to act as a setter for array based appearance data.
+        /// </summary>
         public class AppearanceArraySetter
         {
             private readonly int index;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="AppearanceArraySetter"/> class.
+            /// </summary>
+            /// <param name="index">The index in the appearance data array to set.</param>
             internal AppearanceArraySetter(int index)
             {
                 this.index = index;
             }
 
+            /// <summary>
+            /// Gets or sets the background sprite to use.
+            /// </summary>
             public Sprite Background { get; set; }
 
+            /// <summary>
+            /// Gets or sets the contour sprite to use.
+            /// </summary>
             public Sprite Contour { get; set; }
 
+            /// <summary>
+            /// Gets or sets the scratches sprite to use.
+            /// </summary>
             public Sprite Scratches { get; set; }
 
+            /// <summary>
+            /// Sets the appearance data in the array.
+            /// </summary>
+            /// <param name="parts">The array to set data for.</param>
             internal void Set(AppearancePart.ColorablePart[] parts)
             {
                 if (parts.Length <= this.index)
@@ -545,66 +607,119 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Defines the appearance of an emotion
+        /// Defines the appearance of an emotion.
         /// </summary>
         public sealed class Emotion : AppearanceArraySetter
         {
-            internal Emotion(int index) : base(index)
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Emotion"/> class.
+            /// </summary>
+            /// <param name="index">The index in the appearance array to set sprites for.</param>
+            internal Emotion(int index)
+                : base(index)
             {
             }
 
+            /// <summary>
+            /// Create a negative reaction emotion.
+            /// </summary>
+            /// <param name="contour">The contour sprite of the emotion.</param>
+            /// <param name="background">The background sprite of the emotion.</param>
+            /// <param name="scratches">The scratches sprite of the emotion.</param>
+            /// <returns>An emotion to use in <see cref="CrucibleNpcAppearance.AddFace(Emotion[], float)"/>.</returns>
             public static Emotion NegativeReaction(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new Emotion(0);
-                emotion.Background = background;
-                emotion.Contour = contour;
-                emotion.Scratches = scratches;
-                return emotion;
+                return new Emotion(0)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Create a very angry emotion.
+            /// </summary>
+            /// <param name="contour">The contour sprite of the emotion.</param>
+            /// <param name="background">The background sprite of the emotion.</param>
+            /// <param name="scratches">The scratches sprite of the emotion.</param>
+            /// <returns>An emotion to use in <see cref="CrucibleNpcAppearance.AddFace(Emotion[], float)"/>.</returns>
             public static Emotion Anger2(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new Emotion(1);
-                emotion.Background = background;
-                emotion.Contour = contour;
-                emotion.Scratches = scratches;
-                return emotion;
+                return new Emotion(1)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Create a moderately angry emotion.
+            /// </summary>
+            /// <param name="contour">The contour sprite of the emotion.</param>
+            /// <param name="background">The background sprite of the emotion.</param>
+            /// <param name="scratches">The scratches sprite of the emotion.</param>
+            /// <returns>An emotion to use in <see cref="CrucibleNpcAppearance.AddFace(Emotion[], float)"/>.</returns>
             public static Emotion Anger1(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new Emotion(2);
-                emotion.Background = background;
-                emotion.Contour = contour;
-                emotion.Scratches = scratches;
-                return emotion;
+                return new Emotion(2)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Create an idle emotion.
+            /// </summary>
+            /// <param name="contour">The contour sprite of the emotion.</param>
+            /// <param name="background">The background sprite of the emotion.</param>
+            /// <param name="scratches">The scratches sprite of the emotion.</param>
+            /// <returns>An emotion to use in <see cref="CrucibleNpcAppearance.AddFace(Emotion[], float)"/>.</returns>
             public static Emotion Idle(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new Emotion(3);
-                emotion.Background = background;
-                emotion.Contour = contour;
-                emotion.Scratches = scratches;
-                return emotion;
+                return new Emotion(3)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Create a happy emotion.
+            /// </summary>
+            /// <param name="contour">The contour sprite of the emotion.</param>
+            /// <param name="background">The background sprite of the emotion.</param>
+            /// <param name="scratches">The scratches sprite of the emotion.</param>
+            /// <returns>An emotion to use in <see cref="CrucibleNpcAppearance.AddFace(Emotion[], float)"/>.</returns>
             public static Emotion Happy1(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new Emotion(4);
-                emotion.Background = background;
-                emotion.Contour = contour;
-                emotion.Scratches = scratches;
-                return emotion;
+                return new Emotion(4)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Create a positive reaction emotion.
+            /// </summary>
+            /// <param name="contour">The contour sprite of the emotion.</param>
+            /// <param name="background">The background sprite of the emotion.</param>
+            /// <param name="scratches">The scratches sprite of the emotion.</param>
+            /// <returns>An emotion to use in <see cref="CrucibleNpcAppearance.AddFace(Emotion[], float)"/>.</returns>
             public static Emotion PositiveReaction(Sprite contour, Sprite background = null, Sprite scratches = null)
             {
-                var emotion = new Emotion(5);
-                emotion.Background = background;
-                emotion.Contour = contour;
-                emotion.Scratches = scratches;
-                return emotion;
+                return new Emotion(5)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
         }
 
@@ -613,66 +728,181 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         public class Layer : AppearanceArraySetter
         {
-            internal Layer(int index, Sprite background, Sprite contour, Sprite scratches) : base(index)
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Layer"/> class.
+            /// </summary>
+            /// <param name="index">The index in the appearance array to set.</param>
+            internal Layer(int index)
+                : base(index)
             {
-                this.Background = background;
-                this.Contour = contour;
-                this.Scratches = scratches;
             }
 
+            /// <summary>
+            /// Creates a sprite set for the base uncolored layer.
+            /// </summary>
+            /// <param name="background">The background sprite.</param>
+            /// <param name="contour">The contour sprite.</param>
+            /// <param name="scratches">The scratches sprite.</param>
+            /// <returns>A layer for use in <see cref="CrucibleNpcAppearance.AddBody(Layer[], Layer[], Layer[], float)"/>.</returns>
             public static Layer Base(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Layer(0, background, contour, scratches);
+                return new Layer(0)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Creates a sprite set for the first colorable layer.
+            /// </summary>
+            /// <param name="background">The background sprite.</param>
+            /// <param name="contour">The contour sprite.</param>
+            /// <param name="scratches">The scratches sprite.</param>
+            /// <returns>A layer for use in <see cref="CrucibleNpcAppearance.AddBody(Layer[], Layer[], Layer[], float)"/>.</returns>
             public static Layer Colorable1(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Layer(1, background, contour, scratches);
+                return new Layer(1)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Creates a sprite set for the second colorable layer.
+            /// </summary>
+            /// <param name="background">The background sprite.</param>
+            /// <param name="contour">The contour sprite.</param>
+            /// <param name="scratches">The scratches sprite.</param>
+            /// <returns>A layer for use in <see cref="CrucibleNpcAppearance.AddBody(Layer[], Layer[], Layer[], float)"/>.</returns>
             public static Layer Colorable2(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Layer(2, background, contour, scratches);
+                return new Layer(2)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Creates a sprite set for the third colorable layer.
+            /// </summary>
+            /// <param name="background">The background sprite.</param>
+            /// <param name="contour">The contour sprite.</param>
+            /// <param name="scratches">The scratches sprite.</param>
+            /// <returns>A layer for use in <see cref="CrucibleNpcAppearance.AddBody(Layer[], Layer[], Layer[], float)"/>.</returns>
             public static Layer Colorable3(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Layer(3, background, contour, scratches);
+                return new Layer(3)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Creates a sprite set for the fourth colorable layer.
+            /// </summary>
+            /// <param name="background">The background sprite.</param>
+            /// <param name="contour">The contour sprite.</param>
+            /// <param name="scratches">The scratches sprite.</param>
+            /// <returns>A layer for use in <see cref="CrucibleNpcAppearance.AddBody(Layer[], Layer[], Layer[], float)"/>.</returns>
             public static Layer Colorable4(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Layer(4, background, contour, scratches);
+                return new Layer(4)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
         }
 
+        /// <summary>
+        /// A class for setting hair appearance data.
+        /// </summary>
         public sealed class Hair : AppearanceArraySetter
         {
-            internal Hair(int index, Sprite background, Sprite contour, Sprite scratches) : base(index)
+            /// <summary>
+            /// Initializes a new instance of the <see cref="Hair"/> class.
+            /// </summary>
+            /// <param name="index">The index in the hair array to set.</param>
+            internal Hair(int index)
+                : base(index)
             {
-                this.Background = background;
-                this.Contour = contour;
-                this.Scratches = scratches;
             }
 
+            /// <summary>
+            /// Creates a hair element for the front right hair segment.
+            /// </summary>
+            /// <param name="background">The background sprite.</param>
+            /// <param name="contour">The contour sprite.</param>
+            /// <param name="scratches">The scratches sprite.</param>
+            /// <returns>Hair data for use with <see cref="CrucibleNpcAppearance.AddHairStyle(Hair[], float)"/>.</returns>
             public static Hair Right(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Hair(0, background, contour, scratches);
+                return new Hair(0)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Creates a hair element for the front middle hair segment.
+            /// </summary>
+            /// <param name="background">The background sprite.</param>
+            /// <param name="contour">The contour sprite.</param>
+            /// <param name="scratches">The scratches sprite.</param>
+            /// <returns>Hair data for use with <see cref="CrucibleNpcAppearance.AddHairStyle(Hair[], float)"/>.</returns>
             public static Hair Middle(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Hair(1, background, contour, scratches);
+                return new Hair(1)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Creates a hair element for the front left hair segment.
+            /// </summary>
+            /// <param name="background">The background sprite.</param>
+            /// <param name="contour">The contour sprite.</param>
+            /// <param name="scratches">The scratches sprite.</param>
+            /// <returns>Hair data for use with <see cref="CrucibleNpcAppearance.AddHairStyle(Hair[], float)"/>.</returns>
             public static Hair Left(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Hair(2, background, contour, scratches);
+                return new Hair(2)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
 
+            /// <summary>
+            /// Creates a hair element for the rear hair segment.
+            /// </summary>
+            /// <param name="background">The background sprite.</param>
+            /// <param name="contour">The contour sprite.</param>
+            /// <param name="scratches">The scratches sprite.</param>
+            /// <returns>Hair data for use with <see cref="CrucibleNpcAppearance.AddHairStyle(Hair[], float)"/>.</returns>
             public static Hair Back(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Hair(3, background, contour, scratches);
+                return new Hair(3)
+                {
+                    Background = background,
+                    Contour = contour,
+                    Scratches = scratches,
+                };
             }
         }
     }

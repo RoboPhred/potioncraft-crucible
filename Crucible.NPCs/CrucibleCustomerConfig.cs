@@ -20,7 +20,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
-    using UnityEngine;
     using YamlDotNet.Serialization;
 
     /// <summary>
@@ -70,10 +69,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(CrucibleCustomerNpcTemplate subject)
         {
-            if (this.Appearance != null)
-            {
-                this.Appearance.ApplyAppearance(subject);
-            }
+            this.Appearance?.ApplyAppearance(subject);
 
             if (this.RequestText != null)
             {
