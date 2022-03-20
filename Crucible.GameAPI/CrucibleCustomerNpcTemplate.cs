@@ -155,96 +155,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var gender = ScriptableObject.CreateInstance<Gender>();
             gender.gender = Gender.GenderSet.Female;
 
-            var dialogData = ScriptableObject.CreateInstance<DialogueData>();
+            var dialogueData = GetTestDialogue2();
 
-            var startDialogueNodeData = new StartDialogueNodeData
-            {
-                guid = Guid.NewGuid().ToString(),
-            };
-            dialogData.startDialogue = startDialogueNodeData;
-
-            var potionRequestNodeData = new PotionRequestNodeData
-            {
-                guid = Guid.NewGuid().ToString(),
-                morePort = new AnswerData
-                {
-                    guid = Guid.NewGuid().ToString(),
-                    key = "__morePort__data",
-                    text = "Hell World!  This is a potion request question.",
-                },
-            };
-            CrucibleLocalization.SetLocalizationKey($"__morePort__data", "This is a discussion option!");
-            dialogData.potionRequests.Add(potionRequestNodeData);
-
-            var requestAnswerData = new DialogueNodeData
-            {
-                guid = Guid.NewGuid().ToString(),
-                key = "__requestanswerdata",
-                text = "Hello world!  This is the potion request answer.",
-                answers = new List<AnswerData>
-                {
-                    new AnswerData
-                    {
-                        guid = Guid.NewGuid().ToString(),
-                        key = "__requestanswerdata_answer1",
-                        text = "Hello world!  This is answer data for requestAnswerData and I don't know what its here for.",
-                    },
-                },
-            };
-            CrucibleLocalization.SetLocalizationKey($"__requestanswerdata", "This is an answer!");
-            CrucibleLocalization.SetLocalizationKey($"__requestanswerdata_answer1", "This is the player's response to the answer!");
-            dialogData.dialogues.Add(requestAnswerData);
-
-            var endNodeData = new EndOfDialogueNodeData
-            {
-                guid = Guid.NewGuid().ToString(),
-            };
-            dialogData.endsOfDialogue.Add(endNodeData);
-
-            // start => PostionRequestNodeData
-            dialogData.edges.Add(new EdgeData
-            {
-                output = startDialogueNodeData.guid,
-                input = potionRequestNodeData.guid,
-            });
-
-            // PotionRequestNodeData => End
-            dialogData.edges.Add(new EdgeData
-            {
-                output = potionRequestNodeData.guid,
-                input = endNodeData.guid,
-            });
-
-            // PotionRequestNodeData => dialog
-            dialogData.edges.Add(new EdgeData
-            {
-                output = potionRequestNodeData.guid,
-                input = requestAnswerData.guid,
-            });
-
-            // dialog => PotionRequestNodeData
-            dialogData.edges.Add(new EdgeData
-            {
-                output = requestAnswerData.guid,
-                input = potionRequestNodeData.guid,
-            });
-
-            // Wire up the additional discussion branch
-            // moreInfo => dialog
-            dialogData.edges.Add(new EdgeData
-            {
-                output = potionRequestNodeData.morePort.guid,
-                input = requestAnswerData.guid,
-            });
-
-            // dialog => potion request
-            dialogData.edges.Add(new EdgeData
-            {
-                output = requestAnswerData.answers[0].guid,
-                input = potionRequestNodeData.guid,
-            });
-
-            template.baseParts = new NonAppearancePart[] { quest, prefab, gender, dialogData };
+            template.baseParts = new NonAppearancePart[] { quest, prefab, gender, dialogueData };
 
             template.name = name;
             template.groupsOfContainers = new PartContainerGroup<NonAppearancePart>[0];
@@ -281,6 +194,232 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public bool Equals(CrucibleCustomerNpcTemplate other)
         {
             return this.NpcTemplate == other.NpcTemplate;
+        }
+
+        private static DialogueData GetTestDialogue2()
+        {
+            var dialogueData = ScriptableObject.CreateInstance<DialogueData>();
+
+            var startDialogueNodeData = new StartDialogueNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+            };
+            dialogueData.startDialogue = startDialogueNodeData;
+
+            var introData = new DialogueNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+                key = "__intro",
+                text = string.Empty,
+                answers = new List<AnswerData>
+                {
+                    new AnswerData
+                    {
+                        guid = Guid.NewGuid().ToString(),
+                        key = "__intro_getquest",
+                        text = string.Empty,
+                    },
+                    new AnswerData
+                    {
+                        guid = Guid.NewGuid().ToString(),
+                        key = "__intro_test",
+                        text = string.Empty,
+                    },
+                    new AnswerData
+                    {
+                        guid = Guid.NewGuid().ToString(),
+                        key = "__intro_end",
+                        text = string.Empty,
+                    },
+                },
+            };
+            CrucibleLocalization.SetLocalizationKey("__intro", "Hello, this is a dialogue demo!");
+            CrucibleLocalization.SetLocalizationKey("__intro_getquest", "What do you want to buy?");
+            CrucibleLocalization.SetLocalizationKey("__intro_test", "This is another player choice option.");
+            CrucibleLocalization.SetLocalizationKey("__intro_end", "Goodbye!");
+            dialogueData.dialogues.Add(introData);
+
+            var testData = new DialogueNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+                key = "__test",
+                text = string.Empty,
+                answers = new List<AnswerData>
+                {
+                    new AnswerData
+                    {
+                        guid = Guid.NewGuid().ToString(),
+                        key = "__test_return",
+                        text = string.Empty,
+                    },
+                },
+            };
+            CrucibleLocalization.SetLocalizationKey("__test", "This is another dialogue node.");
+            CrucibleLocalization.SetLocalizationKey("__test_return", "Cool, lets start again.");
+            dialogueData.dialogues.Add(testData);
+
+            var potionRequestNodeData = new PotionRequestNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+                morePort = new AnswerData
+                {
+                    guid = Guid.NewGuid().ToString(),
+                    key = "__backtointro",
+                },
+            };
+            CrucibleLocalization.SetLocalizationKey("__backtointro", "Let's start over");
+            dialogueData.potionRequests.Add(potionRequestNodeData);
+
+            var endNodeData = new EndOfDialogueNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+            };
+            dialogueData.endsOfDialogue.Add(endNodeData);
+
+            // start to intro
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = startDialogueNodeData.guid,
+                input = introData.guid,
+            });
+
+            // intro[0] to quest
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = introData.answers[0].guid,
+                input = potionRequestNodeData.guid,
+            });
+
+            // intro[1] to test
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = introData.answers[1].guid,
+                input = testData.guid,
+            });
+
+            // intro[2] to end
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = introData.answers[2].guid,
+                input = endNodeData.guid,
+            });
+
+            // test[0] to intro
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = testData.answers[0].guid,
+                input = introData.guid,
+            });
+
+            // quest[0] to intro
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = potionRequestNodeData.morePort.guid,
+                input = introData.guid,
+            });
+
+            // quest to end
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = potionRequestNodeData.guid,
+                input = endNodeData.guid,
+            });
+
+            return dialogueData;
+        }
+
+        private static DialogueData GetTestDialogue1()
+        {
+            var dialogueData = ScriptableObject.CreateInstance<DialogueData>();
+
+            var startDialogueNodeData = new StartDialogueNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+            };
+            dialogueData.startDialogue = startDialogueNodeData;
+
+            var potionRequestNodeData = new PotionRequestNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+                morePort = new AnswerData
+                {
+                    guid = Guid.NewGuid().ToString(),
+                    key = "__morePort__data",
+                    text = "Hell World!  This is a potion request question.",
+                },
+            };
+            CrucibleLocalization.SetLocalizationKey($"__morePort__data", "This is a discussion option!");
+            dialogueData.potionRequests.Add(potionRequestNodeData);
+
+            var requestAnswerData = new DialogueNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+                key = "__requestanswerdata",
+                text = "Hello world!  This is the potion request answer.",
+                answers = new List<AnswerData>
+                {
+                    new AnswerData
+                    {
+                        guid = Guid.NewGuid().ToString(),
+                        key = "__requestanswerdata_answer1",
+                        text = "Hello world!  This is answer data for requestAnswerData and I don't know what its here for.",
+                    },
+                },
+            };
+            CrucibleLocalization.SetLocalizationKey($"__requestanswerdata", "This is an answer!");
+            CrucibleLocalization.SetLocalizationKey($"__requestanswerdata_answer1", "This is the player's response to the answer!");
+            dialogueData.dialogues.Add(requestAnswerData);
+
+            var endNodeData = new EndOfDialogueNodeData
+            {
+                guid = Guid.NewGuid().ToString(),
+            };
+            dialogueData.endsOfDialogue.Add(endNodeData);
+
+            // start => PostionRequestNodeData
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = startDialogueNodeData.guid,
+                input = potionRequestNodeData.guid,
+            });
+
+            // PotionRequestNodeData => End
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = potionRequestNodeData.guid,
+                input = endNodeData.guid,
+            });
+
+            // PotionRequestNodeData => dialog
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = potionRequestNodeData.guid,
+                input = requestAnswerData.guid,
+            });
+
+            // dialog => PotionRequestNodeData
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = requestAnswerData.guid,
+                input = potionRequestNodeData.guid,
+            });
+
+            // Wire up the additional discussion branch
+            // moreInfo => dialog
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = potionRequestNodeData.morePort.guid,
+                input = requestAnswerData.guid,
+            });
+
+            // dialog => potion request
+            dialogueData.edges.Add(new EdgeData
+            {
+                output = requestAnswerData.answers[0].guid,
+                input = potionRequestNodeData.guid,
+            });
+
+            return dialogueData;
         }
     }
 }

@@ -227,7 +227,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var group = this.npcTemplate.appearance.body;
 
             // Remove our blank if present.
-            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.bodyBase.Length == 1 && group.partsInGroup[0].part.bodyBase[0].background.name == BlankSprite.name)
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.bodyBase.Length >= 1 && group.partsInGroup[0].part.bodyBase[0].background.name == BlankSprite.name)
             {
                 group.partsInGroup = new[] { part };
             }
