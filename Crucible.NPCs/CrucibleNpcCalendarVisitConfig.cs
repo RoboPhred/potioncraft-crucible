@@ -14,6 +14,8 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
+#if DISABLED_FOR_0_5
+
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
     using System.Linq;
@@ -47,3 +49,5 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         }
     }
 }
+
+#endif

@@ -21,6 +21,7 @@ namespace RoboPhredDev.PotionCraft.Crucible
     using System.IO;
     using System.Linq;
     using BepInEx;
+    using global::PotionCraft.NotificationSystem;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using UnityEngine;
@@ -28,15 +29,10 @@ namespace RoboPhredDev.PotionCraft.Crucible
     /// <summary>
     /// BepInEx plugin for Crucible Config mods.
     /// </summary>
-    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible", "Crucible Modding Framework", "1.1.0.0")]
+    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible", "Crucible Modding Framework", "1.1.1.0")]
     public class CruciblePlugin : BaseUnityPlugin
     {
         private ICollection<CruciblePackageMod> mods;
-
-        public void DebugDumpPath()
-        {
-            DataDumper.DumpCurrentIngredientPath();
-        }
 
         /// <summary>
         /// Called by unity when the plugin loads.
@@ -55,8 +51,6 @@ namespace RoboPhredDev.PotionCraft.Crucible
                 {
                     ActivateMod(mod);
                 }
-
-                DataDumper.DumpData();
             };
 
             CrucibleGameEvents.OnSaveLoaded += (_, e) =>

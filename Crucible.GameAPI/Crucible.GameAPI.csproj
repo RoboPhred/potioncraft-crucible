@@ -50,6 +50,9 @@
       <HintPath>..\externals\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
 
+    <Reference Include="PotionCraft.SceneLoader" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\PotionCraft.SceneLoader.dll</HintPath>
+    </Reference>
     <Reference Include="PotionCraft.Core" CopyToPublishDirectory="Never">
       <HintPath>..\externals\PotionCraft.Core.dll</HintPath>
     </Reference>

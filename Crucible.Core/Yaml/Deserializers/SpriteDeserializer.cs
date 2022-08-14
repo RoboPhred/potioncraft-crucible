@@ -51,7 +51,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
                 throw new Exception("Sprite must specify a texture.");
             }
 
-
             var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), data.Pivot ?? new Vector2(0.5f, 0.5f));
             sprite.name = tex.name;
             value = sprite;
@@ -90,6 +89,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
         internal class SpriteData
         {
             public Texture2D Texture { get; set; }
+
             public Vector2? Pivot { get; set; }
         }
     }

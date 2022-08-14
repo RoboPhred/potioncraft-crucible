@@ -1,4 +1,4 @@
-// <copyright file="RecipeMapObjectAwakeEvent.cs" company="RoboPhredDev">
+// <copyright file="GameInitEvent.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -17,32 +17,38 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
-    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapObject;
+    using global::PotionCraft.ManagersSystem.Game;
+    using global::PotionCraft.SceneLoader;
     using HarmonyLib;
     using UnityEngine;
 
     /// <summary>
-    /// Provides an event to be notified when the <see cref="RecipeMapObject"/> is awakened.
+    /// Provides an event to be notified when the game has finished initialization.
     /// </summary>
-    public static class RecipeMapObjectAwakeEvent
+    public static class GameInitEvent
     {
         private static bool patchApplied = false;
-        private static EventHandler onRecipeMapObjectAwake;
+        private static bool loaded = false;
+        private static EventHandler onLoadEvent;
 
         /// <summary>
         /// Raised when <see cref="RecipeMapObject"/> has finished awakening.
         /// </summary>
-        public static event EventHandler OnRecipeMapObjectAwake
+        public static event EventHandler OnGameInitialized
         {
             add
             {
                 EnsurePatch();
-                onRecipeMapObjectAwake += value;
+                onLoadEvent += value;
+                if (loaded)
+                {
+                    value.Invoke(null, EventArgs.Empty);
+                }
             }
 
             remove
             {
-                onRecipeMapObjectAwake -= value;
+                onLoadEvent -= value;
             }
         }
 
@@ -53,15 +59,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 return;
             }
 
-            var recipeMapObjectAwakeMethodInfo = AccessTools.Method(typeof(RecipeMapObject), "Awake");
-            if (recipeMapObjectAwakeMethodInfo == null)
+            var gameManagerStartMethodInfo = AccessTools.Method(typeof(GameManager), "Start");
+            if (gameManagerStartMethodInfo == null)
             {
-                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to find RecipeMapObject Awake function!");
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to find GameManager Start function!");
             }
             else
             {
-                var postfix = AccessTools.Method(typeof(RecipeMapObjectAwakeEvent), nameof(Postfix));
-                HarmonyInstance.Instance.Patch(recipeMapObjectAwakeMethodInfo, postfix: new HarmonyMethod(postfix));
+                var postfix = AccessTools.Method(typeof(GameInitEvent), nameof(Postfix));
+                HarmonyInstance.Instance.Patch(gameManagerStartMethodInfo, postfix: new HarmonyMethod(postfix));
             }
 
             patchApplied = true;
@@ -69,7 +75,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static void Postfix()
         {
-            onRecipeMapObjectAwake?.Invoke(null, EventArgs.Empty);
+            // We want init to run after the new game state has been stored.
+            ObjectsLoader.AddLast("SaveLoadManager.SaveNewGameState", () => GameInitEvent.OnLoaded());
+            Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Registered game load event.");
+        }
+
+        private static void OnLoaded()
+        {
+            Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Game load event fired.");
+            loaded = true;
+            onLoadEvent?.Invoke(null, EventArgs.Empty);
         }
     }
 }

@@ -34,6 +34,8 @@ namespace RoboPhredDev.PotionCraft.Crucible
             var sb = new StringBuilder();
             while (true)
             {
+                sb.Append(ex.GetType().FullName);
+                sb.Append(" ");
                 sb.AppendLine(ex.Message);
                 if (ex.InnerException == null)
                 {

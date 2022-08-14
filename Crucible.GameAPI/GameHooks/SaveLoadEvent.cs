@@ -139,19 +139,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
         {
             var raiseGameLoadedMethodInfo = AccessTools.Method(typeof(SaveLoadEvent), nameof(RaiseGameLoaded));
 
-            var managersGetMenuMethodInfo = AccessTools.PropertyGetter(typeof(Managers), nameof(Managers.Menu));
+            var loadFileMethodInfo = AccessTools.PropertyGetter(typeof(SaveLoadManager), nameof(SaveLoadManager.LoadFile));
 
             var found = false;
             foreach (var instruction in instructions)
             {
-                if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo methodInfo && methodInfo == managersGetMenuMethodInfo)
+                yield return instruction;
+
+                if (!found && instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo methodInfo && methodInfo == loadFileMethodInfo)
                 {
                     found = true;
+
                     yield return new CodeInstruction(OpCodes.Ldloc_0); // file
                     yield return new CodeInstruction(OpCodes.Call, raiseGameLoadedMethodInfo);
                 }
-
-                yield return instruction;
             }
 
             if (!found)

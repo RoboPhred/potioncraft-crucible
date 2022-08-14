@@ -277,6 +277,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var ingredient = ScriptableObject.CreateInstance<Ingredient>();
             ingredient.name = id;
 
+            var ingredientGO = new GameObject($"Ingredient_{id}");
+            ingredientGO.transform.parent = GameObjectUtilities.CruciblePrefabRoot.transform;
+            ingredientGO.SetActive(false);
+
             var crucibleIngredient = new CrucibleIngredient(ingredient)
             {
                 InventoryIcon = ingredientBase.inventoryIconObject,
@@ -290,11 +294,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 IsTeleportationIngredient = ingredientBase.isTeleportationIngredient,
             };
 
-            ingredient.path = new IngredientPath
-            {
-                path = ingredientBase.path.path.ToList(),
-                grindedPathStartsFrom = ingredientBase.path.grindedPathStartsFrom,
-            };
+            var path = ingredientGO.AddComponent<IngredientPath>();
+            path.path = ingredientBase.path.path.ToList();
+            path.grindedPathStartsFrom = ingredientBase.path.grindedPathStartsFrom;
+            ingredient.path = path;
 
             ingredient.itemStackPrefab = ingredientBase.itemStackPrefab;
 
