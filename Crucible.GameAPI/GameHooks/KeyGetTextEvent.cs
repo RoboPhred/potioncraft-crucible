@@ -17,8 +17,8 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
+    using global::PotionCraft.LocalizationSystem;
     using HarmonyLib;
-    using LocalizationSystem;
     using UnityEngine;
 
     /// <summary>

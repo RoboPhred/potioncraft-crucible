@@ -17,9 +17,10 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
-    using ElementChangerWindow;
+    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow;
+    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow.PotionCustomizationWindow;
+    using global::PotionCraft.ScriptableObjects;
     using HarmonyLib;
-    using PotionCustomizationWindow;
     using UnityEngine;
 
     /// <summary>
@@ -27,9 +28,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public sealed class CruciblePotionSticker
     {
-        private readonly PotionSticker sticker;
+        private readonly Sticker sticker;
 
-        private CruciblePotionSticker(PotionSticker sticker) => this.sticker = sticker;
+        private CruciblePotionSticker(Sticker sticker) => this.sticker = sticker;
 
         /// <summary>
         /// Gets or sets the foreground sprite for the sticker.
@@ -86,19 +87,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>A <see cref="CruciblePotionSticker"/> object for working with the new sticker.</returns>
         public static CruciblePotionSticker CreatePotionSticker(string id)
         {
-            if (PotionSticker.allPotionStickers.Find(x => x.name == id))
+            if (Sticker.allPotionStickers.Find(x => x.name == id))
             {
                 throw new ArgumentException($"A potion sticker with the ID '{id}' already exists.", nameof(id));
             }
 
-            var sticker = ScriptableObject.CreateInstance<PotionSticker>();
+            var sticker = ScriptableObject.CreateInstance<Sticker>();
 
             var blankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear);
             sticker.backgroundSprite = blankSprite;
             sticker.foregroundSprite = blankSprite;
             sticker.backgroundSkinElementSprite = blankSprite;
 
-            PotionSticker.allPotionStickers.Add(sticker);
+            Sticker.allPotionStickers.Add(sticker);
             AddStickerToUI(sticker);
 
             return new CruciblePotionSticker(sticker);
@@ -111,7 +112,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>The sticker, or <c>null</c> if no sticker exists with the given id.</returns>
         public static CruciblePotionSticker GetPotionStickerFromID(string id)
         {
-            var sticker = PotionSticker.allPotionStickers.Find(x => x.name == id);
+            var sticker = Sticker.allPotionStickers.Find(x => x.name == id);
             if (sticker == null)
             {
                 return null;
@@ -120,7 +121,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return new CruciblePotionSticker(sticker);
         }
 
-        private static void AddStickerToUI(PotionSticker sticker)
+        private static void AddStickerToUI(Sticker sticker)
         {
             var skinChangerWindow = GameObject.FindObjectOfType<PotionSkinChangerWindow>();
             if (skinChangerWindow == null)

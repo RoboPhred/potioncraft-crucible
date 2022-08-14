@@ -19,7 +19,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using ObjectBased.RecipeMap.RecipeMapItem.DangerZoneMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.Zones;
+    using RecipeMapZoneEditor;
     using UnityEngine;
 
     /// <summary>
@@ -66,10 +67,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         /// <inheritdoc/>
         public GameObject SpawnEntity(GameObject recipeMap)
         {
-            // TODO: Danger zones are extremely simple.  We should build our own game objects intead of relying on copying others.
-            // We will need to figure out how to grab the artwork for known bone types.
-            // TODO: Support custom artwork and collision shapes.
-            var dangerZone = recipeMap.GetComponentInChildren<DangerZoneMapItem>();
+            var dangerZone = recipeMap.GetComponentsInChildren<RecipeMapZoneContainer>().First(x => x.gameObject.name == "StrongDangerZoneContainer");
 
             if (dangerZone == null)
             {
@@ -103,7 +101,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         private static void PopulatePrefabs()
         {
             capturedPrefabs = new Dictionary<string, GameObject>();
-            var parts = GameObject.FindObjectsOfType<DangerZonePart>();
+            var parts = GameObject.FindObjectsOfType<StrongDangerZonePart>();
             CapturePrefab("Fang1", parts);
             CapturePrefab("Fang2", parts);
             CapturePrefab("Bone1", parts);
@@ -111,7 +109,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
             CapturePrefab("Skull1", parts);
         }
 
-        private static void CapturePrefab(string name, IEnumerable<DangerZonePart> parts)
+        private static void CapturePrefab(string name, IEnumerable<StrongDangerZonePart> parts)
         {
             var part = parts.FirstOrDefault(p => p.name == name);
             if (part == null)

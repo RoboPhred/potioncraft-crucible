@@ -17,7 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
-    using SaveFileSystem;
+    using global::PotionCraft.SaveFileSystem;
 
     /// <summary>
     /// Event arguments for notifying of a load or save operation.

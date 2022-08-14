@@ -18,9 +18,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Collections.Generic;
+    using global::PotionCraft.LocalizationSystem;
+    using global::PotionCraft.ObjectBased.RecipeMap;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionEffectMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionEffectMapItem.Settings;
+    using global::PotionCraft.ScriptableObjects;
     using HarmonyLib;
-    using LocalizationSystem;
-    using ObjectBased.RecipeMap;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
     using UnityEngine;
 

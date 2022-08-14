@@ -19,11 +19,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Npc.Parts;
-    using Npc.Parts.Appearance;
-    using Npc.Parts.Settings;
-    using QuestSystem;
-    using UnityEngine;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.Npc.Parts;
+    using global::PotionCraft.Npc.Parts.Settings;
+    using global::PotionCraft.QuestSystem;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="NpcTemplate"/>s.
@@ -34,50 +33,51 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         static CrucibleNpcTemplate()
         {
-            var groundhogDayTags = new[] { CrucibleNpcTemplateTags.IsGroundhogDayNpc };
+            // FIXME: Tag new templates
+            // var groundhogDayTags = new[] { CrucibleNpcTemplateTags.IsGroundhogDayNpc };
 
-            var herbalistTags = new[] { CrucibleNpcTemplateTags.SellsHerbs, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsHerbalist };
-            NpcTemplateTagsById.Add("HerbalistNpc 1", new HashSet<string>(herbalistTags));
-            NpcTemplateTagsById.Add("HerbalistNpc 2", new HashSet<string>(herbalistTags));
-            NpcTemplateTagsById.Add("HerbalistNpc 3", new HashSet<string>(herbalistTags));
-            NpcTemplateTagsById.Add("HerbalistNpc 4", new HashSet<string>(herbalistTags));
-            NpcTemplateTagsById.Add("HerbalistNpc 5", new HashSet<string>(herbalistTags));
-            NpcTemplateTagsById.Add("HerbalistNpc 6", new HashSet<string>(herbalistTags));
-            NpcTemplateTagsById.Add("HerbalistNpc 7", new HashSet<string>(herbalistTags));
-            NpcTemplateTagsById.Add("HerbalistNpc 8", new HashSet<string>(herbalistTags));
-            NpcTemplateTagsById.Add("Demo2GroundHogDayHerbalistNpc", new HashSet<string>(herbalistTags.Concat(groundhogDayTags)));
+            // var herbalistTags = new[] { CrucibleNpcTemplateTags.SellsHerbs, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsHerbalist };
+            // NpcTemplateTagsById.Add("HerbalistNpc 1", new HashSet<string>(herbalistTags));
+            // NpcTemplateTagsById.Add("HerbalistNpc 2", new HashSet<string>(herbalistTags));
+            // NpcTemplateTagsById.Add("HerbalistNpc 3", new HashSet<string>(herbalistTags));
+            // NpcTemplateTagsById.Add("HerbalistNpc 4", new HashSet<string>(herbalistTags));
+            // NpcTemplateTagsById.Add("HerbalistNpc 5", new HashSet<string>(herbalistTags));
+            // NpcTemplateTagsById.Add("HerbalistNpc 6", new HashSet<string>(herbalistTags));
+            // NpcTemplateTagsById.Add("HerbalistNpc 7", new HashSet<string>(herbalistTags));
+            // NpcTemplateTagsById.Add("HerbalistNpc 8", new HashSet<string>(herbalistTags));
+            // NpcTemplateTagsById.Add("Demo2GroundHogDayHerbalistNpc", new HashSet<string>(herbalistTags.Concat(groundhogDayTags)));
 
-            var mushroomerTags = new[] { CrucibleNpcTemplateTags.SellsMushrooms, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsMushroomer };
-            NpcTemplateTagsById.Add("MushroomerNpc 1", new HashSet<string>(mushroomerTags));
-            NpcTemplateTagsById.Add("MushroomerNpc 2", new HashSet<string>(mushroomerTags));
-            NpcTemplateTagsById.Add("MushroomerNpc 3", new HashSet<string>(mushroomerTags));
-            NpcTemplateTagsById.Add("MushroomerNpc 4", new HashSet<string>(mushroomerTags));
-            NpcTemplateTagsById.Add("MushroomerNpc 5", new HashSet<string>(mushroomerTags));
-            NpcTemplateTagsById.Add("MushroomerNpc 6", new HashSet<string>(mushroomerTags));
-            NpcTemplateTagsById.Add("MushroomerNpc 7", new HashSet<string>(mushroomerTags));
-            NpcTemplateTagsById.Add("Demo2GroundHogDayMushroomerNpc", new HashSet<string>(mushroomerTags.Concat(groundhogDayTags)));
+            // var mushroomerTags = new[] { CrucibleNpcTemplateTags.SellsMushrooms, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsMushroomer };
+            // NpcTemplateTagsById.Add("MushroomerNpc 1", new HashSet<string>(mushroomerTags));
+            // NpcTemplateTagsById.Add("MushroomerNpc 2", new HashSet<string>(mushroomerTags));
+            // NpcTemplateTagsById.Add("MushroomerNpc 3", new HashSet<string>(mushroomerTags));
+            // NpcTemplateTagsById.Add("MushroomerNpc 4", new HashSet<string>(mushroomerTags));
+            // NpcTemplateTagsById.Add("MushroomerNpc 5", new HashSet<string>(mushroomerTags));
+            // NpcTemplateTagsById.Add("MushroomerNpc 6", new HashSet<string>(mushroomerTags));
+            // NpcTemplateTagsById.Add("MushroomerNpc 7", new HashSet<string>(mushroomerTags));
+            // NpcTemplateTagsById.Add("Demo2GroundHogDayMushroomerNpc", new HashSet<string>(mushroomerTags.Concat(groundhogDayTags)));
 
-            var alchemistTags = new[] { CrucibleNpcTemplateTags.SellsAlchemyMachine, CrucibleNpcTemplateTags.IsAlchemist };
-            NpcTemplateTagsById.Add("AlchemistNpc 1", new HashSet<string>(alchemistTags));
-            NpcTemplateTagsById.Add("AlchemistNpc 2", new HashSet<string>(alchemistTags));
-            NpcTemplateTagsById.Add("AlchemistNpc 3", new HashSet<string>(alchemistTags));
-            NpcTemplateTagsById.Add("AlchemistNpc 4", new HashSet<string>(alchemistTags));
-            NpcTemplateTagsById.Add("AlchemistNpc 5", new HashSet<string>(alchemistTags));
-            NpcTemplateTagsById.Add("AlchemistNpc 6", new HashSet<string>(alchemistTags));
-            NpcTemplateTagsById.Add("Playtest2GroundHogDayAlchemistNpc", new HashSet<string>(alchemistTags.Concat(groundhogDayTags)));
+            // var alchemistTags = new[] { CrucibleNpcTemplateTags.SellsAlchemyMachine, CrucibleNpcTemplateTags.IsAlchemist };
+            // NpcTemplateTagsById.Add("AlchemistNpc 1", new HashSet<string>(alchemistTags));
+            // NpcTemplateTagsById.Add("AlchemistNpc 2", new HashSet<string>(alchemistTags));
+            // NpcTemplateTagsById.Add("AlchemistNpc 3", new HashSet<string>(alchemistTags));
+            // NpcTemplateTagsById.Add("AlchemistNpc 4", new HashSet<string>(alchemistTags));
+            // NpcTemplateTagsById.Add("AlchemistNpc 5", new HashSet<string>(alchemistTags));
+            // NpcTemplateTagsById.Add("AlchemistNpc 6", new HashSet<string>(alchemistTags));
+            // NpcTemplateTagsById.Add("Playtest2GroundHogDayAlchemistNpc", new HashSet<string>(alchemistTags.Concat(groundhogDayTags)));
 
-            var dwarfTags = new[] { CrucibleNpcTemplateTags.SellsCrystals, CrucibleNpcTemplateTags.SellsInorganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsDwarfMiner };
-            NpcTemplateTagsById.Add("DwarfMinerNpc 1", new HashSet<string>(dwarfTags));
-            NpcTemplateTagsById.Add("DwarfMinerNpc 2", new HashSet<string>(dwarfTags));
-            NpcTemplateTagsById.Add("DwarfMinerNpc 3", new HashSet<string>(dwarfTags));
-            NpcTemplateTagsById.Add("DwarfMinerNpc 4", new HashSet<string>(dwarfTags));
-            NpcTemplateTagsById.Add("Playtest2GroundHogDayDwarfMinerNpc", new HashSet<string>(dwarfTags.Concat(groundhogDayTags)));
+            // var dwarfTags = new[] { CrucibleNpcTemplateTags.SellsCrystals, CrucibleNpcTemplateTags.SellsInorganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsDwarfMiner };
+            // NpcTemplateTagsById.Add("DwarfMinerNpc 1", new HashSet<string>(dwarfTags));
+            // NpcTemplateTagsById.Add("DwarfMinerNpc 2", new HashSet<string>(dwarfTags));
+            // NpcTemplateTagsById.Add("DwarfMinerNpc 3", new HashSet<string>(dwarfTags));
+            // NpcTemplateTagsById.Add("DwarfMinerNpc 4", new HashSet<string>(dwarfTags));
+            // NpcTemplateTagsById.Add("Playtest2GroundHogDayDwarfMinerNpc", new HashSet<string>(dwarfTags.Concat(groundhogDayTags)));
 
-            var merchantTags = new[] { CrucibleNpcTemplateTags.SellsHerbs, CrucibleNpcTemplateTags.SellsMushrooms, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsInorganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsTravelingMerchant };
-            NpcTemplateTagsById.Add("WanderingMerchantNpc 1", new HashSet<string>(merchantTags));
-            NpcTemplateTagsById.Add("WanderingMerchantNpc 2", new HashSet<string>(merchantTags));
-            NpcTemplateTagsById.Add("Demo2GroundHogDayWanderingMerchantNpc 1", new HashSet<string>(merchantTags.Concat(groundhogDayTags)));
-            NpcTemplateTagsById.Add("Demo2GroundHogDayWanderingMerchantNpc 2", new HashSet<string>(merchantTags.Concat(groundhogDayTags)));
+            // var merchantTags = new[] { CrucibleNpcTemplateTags.SellsHerbs, CrucibleNpcTemplateTags.SellsMushrooms, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsInorganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsTravelingMerchant };
+            // NpcTemplateTagsById.Add("WanderingMerchantNpc 1", new HashSet<string>(merchantTags));
+            // NpcTemplateTagsById.Add("WanderingMerchantNpc 2", new HashSet<string>(merchantTags));
+            // NpcTemplateTagsById.Add("Demo2GroundHogDayWanderingMerchantNpc 1", new HashSet<string>(merchantTags.Concat(groundhogDayTags)));
+            // NpcTemplateTagsById.Add("Demo2GroundHogDayWanderingMerchantNpc 2", new HashSet<string>(merchantTags.Concat(groundhogDayTags)));
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>A <see cref="CrucibleNpcTemplate"/> api object for manipulating the template.</returns>
         public static CrucibleNpcTemplate GetNpcTemplateById(string name)
         {
-            var template = NpcTemplate.allNpcTemplates.Find(x => x.name == name);
+            var template = NpcTemplate.allNpcTemplates.templates.Find(x => x.name == name);
             if (template == null)
             {
                 return null;
@@ -153,7 +153,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>An enumerable of every npc template registered with the game.</returns>
         public static IEnumerable<CrucibleNpcTemplate> GetAllNpcTemplates()
         {
-            return NpcTemplate.allNpcTemplates.Select(x => new CrucibleNpcTemplate(x));
+            return NpcTemplate.allNpcTemplates.templates.Select(x => new CrucibleNpcTemplate(x));
         }
 
         /// <summary>
@@ -166,6 +166,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                           from tag in pair.Value
                           select tag;
             return allTags.Distinct();
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"[CrucibleNpcTemplate {this.ID}]";
         }
 
         /// <inheritdoc/>
@@ -217,6 +223,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return tags.ToArray();
         }
 
+#if DISABLED_FOR_0_5
         /// <summary>
         /// If this NPC Template is a customer, gets the API object for manipulating its customer data.
         /// </summary>
@@ -230,6 +237,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             return new CrucibleCustomerNpcTemplate(this.NpcTemplate);
         }
+#endif
 
         /// <summary>
         /// If this NPC Template is a trader, gets the API object for manipulating its trader data.

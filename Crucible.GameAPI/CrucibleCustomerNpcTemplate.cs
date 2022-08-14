@@ -14,17 +14,19 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
+#if DISABLED_FOR_0_5
+
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using DialogueSystem.Dialogue;
-    using DialogueSystem.Dialogue.Data;
-    using LocalizationSystem;
-    using Npc.Parts;
-    using Npc.Parts.Settings;
-    using QuestSystem;
+    using global::PotionCraft.DialogueSystem.Dialogue;
+    using global::PotionCraft.DialogueSystem.Dialogue.Data;
+    using global::PotionCraft.LocalizationSystem;
+    using global::PotionCraft.Npc.Parts;
+    using global::PotionCraft.Npc.Parts.Settings;
+    using global::PotionCraft.QuestSystem;
     using UnityEngine;
 
     /// <summary>
@@ -84,7 +86,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>A <see cref="CrucibleNpcTemplate"/> api object for manipulating the template.</returns>
         public static CrucibleCustomerNpcTemplate GetCustomerNpcTemplateById(string id)
         {
-            var template = NpcTemplate.allNpcTemplates.Find(x => x.name == id);
+            var template = NpcTemplate.allNpcTemplates.templates.Find(x => x.name == id);
             if (template == null)
             {
                 return null;
@@ -132,8 +134,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             // TODO: How do prefabs differ?
-            var prefab = ScriptableObject.CreateInstance<Prefab>();
-            var parentPrefab = copyFrom.baseParts.OfType<Prefab>().FirstOrDefault();
+            var prefab = ScriptableObject.CreateInstance<NpcPrefab>();
+            var parentPrefab = copyFrom.baseParts.OfType<NpcPrefab>().FirstOrDefault();
             if (parentPrefab == null)
             {
                 throw new Exception("Copy target had no prefab!");
@@ -163,7 +165,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             template.groupsOfContainers = new PartContainerGroup<NonAppearancePart>[0];
             template.appearance = new AppearanceContainer();
 
-            NpcTemplate.allNpcTemplates.Add(template);
+            NpcTemplate.allNpcTemplates.templates.Add(template);
 
             CrucibleLocalization.SetLocalizationKey($"quest_text_{name}", "I am a new quest!");
 
@@ -423,3 +425,5 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
     }
 }
+
+#endif

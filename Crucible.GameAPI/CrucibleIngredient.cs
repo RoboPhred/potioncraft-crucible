@@ -19,14 +19,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.LocalizationSystem;
+    using global::PotionCraft.ObjectBased.InteractiveItem.SoundControllers;
+    using global::PotionCraft.ObjectBased.RecipeMap.Path;
+    using global::PotionCraft.ObjectBased.Stack;
+    using global::PotionCraft.ObjectBased.Stack.StackItem;
+    using global::PotionCraft.ScriptableObjects;
+    using global::PotionCraft.ScriptableObjects.Ingredient;
+    using global::PotionCraft.Utils.BezierCurves;
+    using global::PotionCraft.Utils.SortingOrderSetter;
     using HarmonyLib;
-    using LocalizationSystem;
-    using ObjectBased.Stack;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
-    using SoundSystem.SoundControllers;
     using UnityEngine;
-    using Utils.BezierCurves;
-    using Utils.SortingOrderSetter;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="Ingredient"/>s.
@@ -264,7 +268,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 throw new ArgumentException($"An ingredient with the given id of \"{id}\" already exists.");
             }
 
-            var ingredientBase = Managers.Ingredient.ingredients.Find(x => x.name == copyFromId);
+            var ingredientBase = Ingredient.allIngredients.Find(x => x.name == copyFromId);
             if (ingredientBase == null)
             {
                 throw new ArgumentException($"Cannot find ingredient \"{copyFromId}\" to copy settings from.");
@@ -316,7 +320,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             ingredient.OnAwake();
 
-            Managers.Ingredient.ingredients.Add(ingredient);
+            Ingredient.allIngredients.Add(ingredient);
 
             return crucibleIngredient;
         }
@@ -328,7 +332,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>The ingredient if found, or null if no ingredient exists by the given id.</returns>
         public static CrucibleIngredient GetIngredientById(string id)
         {
-            var ingredient = Managers.Ingredient.ingredients.Find(x => x.name == id);
+            var ingredient = Ingredient.allIngredients.Find(x => x.name == id);
             if (ingredient == null)
             {
                 return null;
@@ -343,7 +347,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>An enumerable of all ingredients.</returns>
         public static IEnumerable<CrucibleIngredient> GetAllIngredients()
         {
-            return Managers.Ingredient.ingredients.Select(x => new CrucibleIngredient(x));
+            return Ingredient.allIngredients.Select(x => new CrucibleIngredient(x));
         }
 
         /// <summary>
@@ -397,7 +401,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var stack = prefab.AddComponent<Stack>();
             stack.inventoryItem = this.InventoryItem;
             var stackTraverse = Traverse.Create(stack);
-            stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new SoundController(stack, this.Ingredient.soundPreset);
+            stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new global::PotionCraft.ObjectBased.Stack.SoundController(stack, this.Ingredient.soundPreset);
             stackTraverse.Field<float>("assemblingSpeed").Value = 3;
 
             var visualEffects = prefab.AddComponent<StackVisualEffects>();

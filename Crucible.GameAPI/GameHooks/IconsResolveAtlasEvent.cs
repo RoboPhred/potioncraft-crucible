@@ -19,7 +19,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using System;
     using System.Collections.Generic;
     using System.Reflection.Emit;
-    using Books.RecipeBook;
+    using global::PotionCraft.ManagersSystem.TMP;
+    using global::PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
+    using global::PotionCraft.ScriptableObjects;
+    using global::PotionCraft.Settings;
     using HarmonyLib;
     using UnityEngine;
 
@@ -99,7 +102,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             }
 
             // Use default.
-            return Managers.TmpAtlas.settings.IconsAtlasName;
+            return Settings<TMPManagerSettings>.Asset.IconsAtlasName;
         }
 
         private static IEnumerable<CodeInstruction> TranspilePotionGetLocalizedEffectsList(IEnumerable<CodeInstruction> instructions)

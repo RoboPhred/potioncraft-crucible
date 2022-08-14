@@ -18,9 +18,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Linq;
-    using Npc.Parts;
-    using Npc.Parts.Appearance;
-    using Npc.Parts.Settings;
+    using global::PotionCraft.Npc.Parts;
+    using global::PotionCraft.Npc.Parts.Appearance;
+    using global::PotionCraft.Npc.Parts.Settings;
     using UnityEngine;
 
     /// <summary>
@@ -390,7 +390,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var hairStyle = ScriptableObject.CreateInstance<Hairstyle>();
             hairStyle.back = BlankColorablePart;
             hairStyle.longFront = BlankColorablePart;
-            hairStyle.middle = BlankColorablePart;
             hairStyle.shortFront = BlankColorablePart;
 
             this.npcTemplate.appearance.hairstyle.partsInGroup = new[]
@@ -419,9 +418,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             hairStyle.longFront = hairArray[0];
-            hairStyle.middle = hairArray[1];
-            hairStyle.shortFront = hairArray[2];
-            hairStyle.back = hairArray[3];
+            hairStyle.shortFront = hairArray[1];
+            hairStyle.back = hairArray[2];
 
             var part = new PartContainer<Hairstyle>
             {
@@ -481,8 +479,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public void CopyFrom(CrucibleNpcAppearance sourceAppearance)
         {
             // There's lots of data encoded on the prefab :(
-            var prefab = this.RequirePart<Prefab>();
-            var sourcePrefab = sourceAppearance.RequirePart<Prefab>();
+            var prefab = this.RequirePart<NpcPrefab>();
+            var sourcePrefab = sourceAppearance.RequirePart<NpcPrefab>();
 
             var sourceTemplate = sourceAppearance.npcTemplate;
 
@@ -855,23 +853,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             /// <summary>
-            /// Creates a hair element for the front middle hair segment.
-            /// </summary>
-            /// <param name="background">The background sprite.</param>
-            /// <param name="contour">The contour sprite.</param>
-            /// <param name="scratches">The scratches sprite.</param>
-            /// <returns>Hair data for use with <see cref="CrucibleNpcAppearance.AddHairStyle(Hair[], float)"/>.</returns>
-            public static Hair Middle(Sprite background, Sprite contour = null, Sprite scratches = null)
-            {
-                return new Hair(1)
-                {
-                    Background = background,
-                    Contour = contour,
-                    Scratches = scratches,
-                };
-            }
-
-            /// <summary>
             /// Creates a hair element for the front left hair segment.
             /// </summary>
             /// <param name="background">The background sprite.</param>
@@ -880,7 +861,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             /// <returns>Hair data for use with <see cref="CrucibleNpcAppearance.AddHairStyle(Hair[], float)"/>.</returns>
             public static Hair Left(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Hair(2)
+                return new Hair(1)
                 {
                     Background = background,
                     Contour = contour,
@@ -897,7 +878,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             /// <returns>Hair data for use with <see cref="CrucibleNpcAppearance.AddHairStyle(Hair[], float)"/>.</returns>
             public static Hair Back(Sprite background, Sprite contour = null, Sprite scratches = null)
             {
-                return new Hair(3)
+                return new Hair(2)
                 {
                     Background = background,
                     Contour = contour,

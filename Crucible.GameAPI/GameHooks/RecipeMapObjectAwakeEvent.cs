@@ -17,6 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapObject;
     using HarmonyLib;
     using UnityEngine;
 

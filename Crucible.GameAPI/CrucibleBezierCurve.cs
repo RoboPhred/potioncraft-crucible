@@ -16,8 +16,8 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
+    using global::PotionCraft.Utils.BezierCurves;
     using UnityEngine;
-    using Utils.BezierCurves;
 
     /// <summary>
     /// Represents a path segment in the form of a cubic bezier curve.

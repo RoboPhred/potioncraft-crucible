@@ -17,8 +17,10 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
 {
     using System;
+    using global::PotionCraft.ObjectBased.RecipeMap;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionEffectMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionEffectMapItem.Settings;
     using HarmonyLib;
-    using ObjectBased.RecipeMap;
     using UnityEngine;
 
     /// <summary>

@@ -19,9 +19,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Npc.Parts;
-    using Npc.Parts.Settings;
-    using ObjectBased.Deliveries;
+    using global::PotionCraft.Npc.Parts;
+    using global::PotionCraft.Npc.Parts.Settings;
+    using global::PotionCraft.ObjectBased.Deliveries;
 
     /// <summary>
     /// Represents an NPC Template that contains trader data.

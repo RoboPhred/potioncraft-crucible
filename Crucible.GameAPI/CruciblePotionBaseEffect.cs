@@ -17,6 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionEffectMapItem;
 
     /// <summary>
     /// Provides access to a potion effect on a potion base.

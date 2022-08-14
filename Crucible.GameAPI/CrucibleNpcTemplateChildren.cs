@@ -20,7 +20,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using Npc.Parts;
+    using global::PotionCraft.Npc.Parts;
 
     /// <summary>
     /// Provides simplified access to the children of a CrucibleNpcTemplate.

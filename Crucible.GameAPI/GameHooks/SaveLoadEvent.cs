@@ -20,8 +20,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using System.Collections.Generic;
     using System.Reflection;
     using System.Reflection.Emit;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ManagersSystem.SaveLoad;
+    using global::PotionCraft.NotificationSystem;
+    using global::PotionCraft.SaveFileSystem;
     using HarmonyLib;
-    using SaveFileSystem;
     using UnityEngine;
 
     /// <summary>

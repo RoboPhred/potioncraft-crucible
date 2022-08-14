@@ -17,7 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
-    using ObjectBased.UIElements.Tooltip;
+    using global::PotionCraft.ObjectBased.UIElements.Tooltip;
 
     /// <summary>
     /// Event arguments for requesting a tooltip for a given subject.

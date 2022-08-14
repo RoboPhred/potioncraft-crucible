@@ -20,7 +20,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using QuestSystem;
+    using global::PotionCraft.QuestSystem;
+    using global::PotionCraft.ScriptableObjects;
 
     /// <summary>
     /// Wraps a <see cref="Quest"/> and provides access to get or modify its required effects.

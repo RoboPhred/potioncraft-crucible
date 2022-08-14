@@ -33,6 +33,11 @@ namespace RoboPhredDev.PotionCraft.Crucible
     {
         private ICollection<CruciblePackageMod> mods;
 
+        public void DebugDumpPath()
+        {
+            DataDumper.DumpCurrentIngredientPath();
+        }
+
         /// <summary>
         /// Called by unity when the plugin loads.
         /// </summary>
@@ -50,6 +55,8 @@ namespace RoboPhredDev.PotionCraft.Crucible
                 {
                     ActivateMod(mod);
                 }
+
+                DataDumper.DumpData();
             };
 
             CrucibleGameEvents.OnSaveLoaded += (_, e) =>

@@ -19,9 +19,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using SaveFileSystem;
+    using global::PotionCraft.SaveFileSystem;
+    using global::PotionCraft.Utils;
     using UnityEngine;
-    using Utils;
     using YamlDotNet.Serialization;
     using YamlDotNet.Serialization.NamingConventions;
 

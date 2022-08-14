@@ -18,6 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.LocalizationSystem;
 
     /// <summary>
     /// Represents a string that can be localized to different languages.
@@ -73,7 +74,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>The localized text.</returns>
         public string GetText()
         {
-            var locale = LocalizationSystem.LocalizationSystem.CurrentLocale.ToString().ToLowerInvariant();
+            var locale = LocalizationManager.CurrentLocale.ToString().ToLowerInvariant();
             if (this.localizedStrings.TryGetValue(locale, out var value))
             {
                 return value;

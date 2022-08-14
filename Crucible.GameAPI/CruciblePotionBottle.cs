@@ -19,9 +19,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using ElementChangerWindow;
+    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow;
+    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow.PotionCustomizationWindow;
+    using global::PotionCraft.ScriptableObjects;
     using HarmonyLib;
-    using PotionCustomizationWindow;
     using UnityEngine;
 
     /// <summary>
@@ -29,7 +30,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public sealed class CruciblePotionBottle
     {
-        private CruciblePotionBottle(PotionBottle potionBottle)
+        private CruciblePotionBottle(Bottle potionBottle)
         {
             this.PotionBottle = potionBottle;
         }
@@ -37,7 +38,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Gets the base game <see cref="PotionBottle"/> wrapped by this api object.
         /// </summary>
-        public PotionBottle PotionBottle { get; }
+        public Bottle PotionBottle { get; }
 
         /// <summary>
         /// Gets or sets the icon to use for this bottle in the bottle menu.
@@ -351,14 +352,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>The api object for the created potion bottle.</returns>
         public static CruciblePotionBottle CreatePotionBottle(string id)
         {
-            if (PotionBottle.allPotionBottles.Any(x => x.name == id))
+            if (Bottle.allPotionBottles.Any(x => x.name == id))
             {
                 throw new ArgumentException($"A potion bottle with the id {id} already exists.", nameof(id));
             }
 
-            var bottle = ScriptableObject.CreateInstance<PotionBottle>();
+            var bottle = ScriptableObject.CreateInstance<Bottle>();
             var blankSprite = SpriteUtilities.CreateBlankSprite(200, 200, Color.clear);
-            bottle.bunchOfLiquidSprites = new PotionBottle.BunchOfLiquidSprites
+            bottle.bunchOfLiquidSprites = new Bottle.BunchOfLiquidSprites
             {
                 backgroundColorMain = blankSprite,
 
@@ -377,7 +378,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 backgroundColor5Of5 = blankSprite,
             };
 
-            bottle.potionItemPrefab = GameObject.Instantiate(PotionBottle.allPotionBottles[0].potionItemPrefab, Vector3.zero, Quaternion.identity, GameObjectUtilities.CruciblePrefabRoot.transform);
+            bottle.potionItemPrefab = GameObject.Instantiate(Bottle.allPotionBottles[0].potionItemPrefab, Vector3.zero, Quaternion.identity, GameObjectUtilities.CruciblePrefabRoot.transform);
             bottle.PrefabPotionItem.visualObject.corkRenderer.sprite = blankSprite;
             bottle.PrefabPotionItem.visualObject.bottleSpriteMask.sprite = blankSprite;
             bottle.PrefabPotionItem.visualObject.bottleShadowsRenderer.sprite = blankSprite;
@@ -386,7 +387,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             bottle.backgroundSkinElementSprite = SpriteUtilities.CreateBlankSprite(50, 50, Color.red);
 
-            PotionBottle.allPotionBottles.Add(bottle);
+            Bottle.allPotionBottles.Add(bottle);
 
             // Add the bottle to the bottle chooser UI.
             var skinChangerWindow = GameObject.FindObjectOfType<PotionSkinChangerWindow>();
@@ -407,7 +408,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>The potion bottle with the given id, or <c>null</c> if no matching potion bottle was found.</returns>
         public static CruciblePotionBottle GetPotionBottleById(string id)
         {
-            var bottle = PotionBottle.allPotionBottles.Find(x => x.name == id);
+            var bottle = Bottle.allPotionBottles.Find(x => x.name == id);
             if (bottle == null)
             {
                 return null;

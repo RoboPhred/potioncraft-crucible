@@ -122,11 +122,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
         public class HeadShapeConfig
         {
-            public float Chance = 1f;
+            public float Chance { get; set; } = 1f;
 
             public Sprite Mask { get; set; }
+
             public Sprite Background { get; set; }
+
             public Sprite Contour { get; set; }
+
             public Sprite Scratches { get; set; }
 
             public void Apply(CrucibleNpcTemplate npc)
@@ -137,10 +140,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
         public class BodyConfig
         {
-            public float Chance = 1f;
+            public float Chance { get; set; } = 1f;
 
             public Sprite Torso { get; set; }
+
             public Sprite LeftArm { get; set; }
+
             public Sprite RightArm { get; set; }
 
             public void Apply(CrucibleNpcTemplate npc)
@@ -151,14 +156,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
         public class FaceConfig
         {
-            public float Chance = 1f;
+            public float Chance { get; set; } = 1f;
 
             public Sprite PositiveReaction { get; set; }
+
             public Sprite NegativeReaction { get; set; }
 
             public Sprite Idle { get; set; }
 
             public Sprite Anger1 { get; set; }
+
             public Sprite Anger2 { get; set; }
 
             public Sprite Happy1 { get; set; }
@@ -170,22 +177,27 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 {
                     emotions.Add(CrucibleNpcAppearance.Emotion.PositiveReaction(this.PositiveReaction));
                 }
+
                 if (this.NegativeReaction)
                 {
                     emotions.Add(CrucibleNpcAppearance.Emotion.NegativeReaction(this.NegativeReaction));
                 }
+
                 if (this.Idle)
                 {
                     emotions.Add(CrucibleNpcAppearance.Emotion.Idle(this.Idle));
                 }
+
                 if (this.Anger1)
                 {
                     emotions.Add(CrucibleNpcAppearance.Emotion.Anger1(this.Anger1));
                 }
+
                 if (this.Anger2)
                 {
                     emotions.Add(CrucibleNpcAppearance.Emotion.Anger2(this.Anger2));
                 }
+
                 if (this.Happy1)
                 {
                     emotions.Add(CrucibleNpcAppearance.Emotion.Happy1(this.Happy1));
@@ -197,9 +209,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
         public class EyesConfig
         {
-            public float Chance = 1f;
+            public float Chance { get; set; } = 1f;
 
             public Sprite LeftEye { get; set; }
+
             public Sprite RightEye { get; set; }
 
             public void Apply(CrucibleNpcTemplate npc)
@@ -210,11 +223,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
         public class HairStyleConfig
         {
-            public float Chance = 1f;
+            public float Chance { get; set; } = 1f;
 
             public Sprite FrontLeft { get; set; }
-            public Sprite FrontMiddle { get; set; }
+
             public Sprite FrontRight { get; set; }
+
             public Sprite Back { get; set; }
 
             public void Apply(CrucibleNpcTemplate npc)
@@ -226,10 +240,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                     hairs.Add(CrucibleNpcAppearance.Hair.Left(this.FrontLeft));
                 }
 
-                if (this.FrontMiddle != null)
-                {
-                    hairs.Add(CrucibleNpcAppearance.Hair.Middle(this.FrontMiddle));
-                }
 
                 if (this.FrontRight != null)
                 {

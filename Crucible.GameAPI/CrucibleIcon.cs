@@ -18,10 +18,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Collections;
-    using System.Linq;
-    using ElementChangerWindow;
+    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow;
+    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow.PotionCustomizationWindow;
+    using global::PotionCraft.ScriptableObjects;
     using HarmonyLib;
-    using PotionCustomizationWindow;
     using UnityEngine;
 
     /// <summary>

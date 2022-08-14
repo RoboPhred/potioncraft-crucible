@@ -19,10 +19,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.LocalizationSystem;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ManagersSystem.RecipeMap;
+    using global::PotionCraft.ObjectBased.RecipeMap;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionBaseMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionEffectMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.Settings;
+    using global::PotionCraft.ScriptableObjects;
+    using global::PotionCraft.ScriptableObjects.TradableUpgrades;
+    using global::PotionCraft.Settings;
     using HarmonyLib;
-    using LocalizationSystem;
-    using ObjectBased.RecipeMap;
-    using ObjectOptimizationSystem;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
     using UnityEngine;
 
@@ -336,10 +343,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 throw new ArgumentException($"A base with id \"{id}\" already exists.", nameof(id));
             }
 
-            var waterBase = Array.Find(Managers.RecipeMap.potionBasesSettings.potionBases, x => x.name == "Water");
+            var waterBase = Array.Find(Settings<RecipeMapManagerPotionBasesSettings>.Asset.potionBases, x => x.name == "Water");
 
             var newBase = ScriptableObject.CreateInstance<PotionBase>();
-            Managers.RecipeMap.potionBasesSettings.potionBases = Managers.RecipeMap.potionBasesSettings.potionBases.Concat(new[] { newBase }).ToArray();
+            Settings<RecipeMapManagerPotionBasesSettings>.Asset.potionBases = Settings<RecipeMapManagerPotionBasesSettings>.Asset.potionBases.Concat(new[] { newBase }).ToArray();
 
             newBase.name = id;
             newBase.mapPrefab = GetBlankMapPrefab();
@@ -363,7 +370,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var mapState = new MapState
             {
                 index = index,
-                zoom = Managers.RecipeMap.settings.zoomSettings.defaultZoom,
+                zoom = Settings<RecipeMapManagerSettings>.Asset.zoomSettings.defaultZoom,
                 potionBase = newBase,
             };
             MapLoader.loadedMaps.Add(mapState);
@@ -383,8 +390,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 mapState.UpdateMapBounds();
 
                 Managers.RecipeMap.fogOfWar.InitializeMap(index);
-
-                RegisterMapStatePhysics(mapState);
             }
             finally
             {
@@ -503,46 +508,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return blankMapPrefab;
         }
 
-        /// <summary>
-        /// Initialize the map physics optimizer data.
-        /// </summary>
-        /// <seealso cref="RecipeMapPhysicsOptimizer.Initialize"/>
-        /// <param name="mapState">The map state to initialize physics data for.</param>
-        private static void RegisterMapStatePhysics(MapState mapState)
-        {
-            var physicsOptimizerTraverse = Traverse.Create(typeof(RecipeMapPhysicsOptimizer));
-
-            // Note: If we (or potioncraft itself) ever support varying map sizes, this logic will need to be reset if crucible changes the size.
-            Vector2 vector2 = 0.5f * mapState.mapBgRect.size;
-            Rect rect = Rect.MinMaxRect(-vector2.x, -vector2.y, vector2.x, vector2.y);
-
-            physicsOptimizerTraverse.Field<Dictionary<MapState, Rect>>("gridRectDictionary").Value.Add(mapState, rect);
-
-            var defaultCellWidth = physicsOptimizerTraverse.Field<float>("defaultCellWidth").Value;
-            var defaultCellHeight = physicsOptimizerTraverse.Field<float>("defaultCellHeight").Value;
-            var cellsX = Mathf.CeilToInt(rect.width / defaultCellWidth);
-            var cellsY = Mathf.CeilToInt(rect.height / defaultCellHeight);
-            physicsOptimizerTraverse.Field<Dictionary<MapState, int>>("columnsCountDictionary").Value.Add(mapState, cellsX);
-            physicsOptimizerTraverse.Field<Dictionary<MapState, int>>("rowsCountDictionary").Value.Add(mapState, cellsY);
-            physicsOptimizerTraverse.Field<Dictionary<MapState, float>>("cellWidthDictionary").Value.Add(mapState, rect.width / cellsX);
-            physicsOptimizerTraverse.Field<Dictionary<MapState, float>>("cellHeightDictionary").Value.Add(mapState, rect.height / cellsY);
-
-            var objectOptimizerTargetSetArray = new HashSet<IRecipeMapObjectOptimizerTarget>[cellsY][];
-            for (int cellY = 0; cellY < cellsY; ++cellY)
-            {
-                objectOptimizerTargetSetArray[cellY] = new HashSet<IRecipeMapObjectOptimizerTarget>[cellsX];
-                for (int cellX = 0; cellX < cellsX; ++cellX)
-                {
-                    objectOptimizerTargetSetArray[cellY][cellX] = new HashSet<IRecipeMapObjectOptimizerTarget>();
-                }
-            }
-
-            physicsOptimizerTraverse.Field<Dictionary<MapState, HashSet<IRecipeMapObjectOptimizerTarget>[][]>>("gridDictionary").Value.Add(mapState, objectOptimizerTargetSetArray);
-
-            physicsOptimizerTraverse.Field<Dictionary<MapState, HashSet<IRecipeMapObjectOptimizerTarget>>>("optimizerTargetsDictionary").Value.Add(mapState, new HashSet<IRecipeMapObjectOptimizerTarget>());
-            physicsOptimizerTraverse.Field<Dictionary<MapState, HashSet<IRecipeMapObjectOptimizerTarget>>>("disabledOptimizerTargetsDictionary").Value.Add(mapState, new HashSet<IRecipeMapObjectOptimizerTarget>());
-        }
-
         private static void SetPotionBaseIcon(PotionBase potionBase, Texture2D texture)
         {
             if (spriteAtlas == null)
@@ -576,7 +541,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             try
             {
                 // ClearFogAroundIndicator can't be used, as the game save might have a potion in progress
-                Managers.RecipeMap.fogOfWar.FogShow(
+                Managers.RecipeMap.fogOfWar.FogShowInRadius(
                     Vector2.zero,
                     Managers.RecipeMap.fogOfWar.settings.visibilityRadiusAroundIndicator + Managers.RecipeMap.fogOfWar.exploringRadiusAddendum,
                     false);

@@ -19,7 +19,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using ObjectBased.RecipeMap.RecipeMapItem.VortexMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.VortexMapItem;
     using UnityEngine;
 
     /// <summary>
