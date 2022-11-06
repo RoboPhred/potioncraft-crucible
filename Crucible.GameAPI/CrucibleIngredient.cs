@@ -19,7 +19,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.Assemblies.GamepadNavigation;
     using global::PotionCraft.LocalizationSystem;
+    using global::PotionCraft.ObjectBased;
     using global::PotionCraft.ObjectBased.InteractiveItem.SoundControllers;
     using global::PotionCraft.ObjectBased.RecipeMap.Path;
     using global::PotionCraft.ObjectBased.Stack;
@@ -32,6 +34,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.BackwardsCompatibility;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
     using UnityEngine;
+    using UnityEngine.Rendering;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="Ingredient"/>s.
@@ -437,6 +440,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // It seems to remove itself automatically, as this component does not exist when inspecting the game object later.
             prefab.AddComponent<SortingOrderSetter>();
 
+            var slotObject = new GameObject
+            {
+                name = "Slot Object",
+            };
+            slotObject.transform.parent = prefab.transform;
+            slotObject.AddComponent<Slot>();
+            slotObject.AddComponent<ItemFromInventorySectionFinder>();
+
             foreach (var rootItem in rootItems)
             {
                 var stackItemGO = this.CreateStackItem(rootItem);
@@ -636,6 +647,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ifs.colliderOuter = colliderOuter;
             ifs.colliderInner = colliderInner;
             ifs.NextStagePrefabs = crucibleStackItem.GrindChildren.Select(x => this.CreateStackItem(x, depth + 1)).ToArray();
+
+            var sortGroup = stackItem.AddComponent<SortingGroup>();
 
             return stackItem;
         }

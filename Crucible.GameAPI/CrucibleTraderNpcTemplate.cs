@@ -22,6 +22,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Settings;
     using global::PotionCraft.ObjectBased.Deliveries;
+    using UnityEngine;
 
     /// <summary>
     /// Represents an NPC Template that contains trader data.
@@ -42,9 +43,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets the base game Quest for this customer.
+        /// Gets the list of TraderSettings for this template organized by closeness.
         /// </summary>
-        public TraderSettings TraderSettings => this.NpcTemplate.baseParts.OfType<TraderSettings>().FirstOrDefault();
+        public Dictionary<int, TraderSettings> TraderSettings => this.GetTraderSettings();
 
         /// <summary>
         /// If this npc is a trader, adds an item to this template's trader inventory.
@@ -58,30 +59,52 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="maxCount">The maximum amount of the item to stock.</param>
         public void AddTradeItem(CrucibleInventoryItem item, float chance = 1, int minCount = 1, int maxCount = 1)
         {
-            var settings = this.TraderSettings;
+            var allSettings = this.TraderSettings;
+            var validSettings = allSettings.Where(s => s.Key >= item.ClosenessRequirement)
+                                           .Select(s => s.Value)
+                                           .Where(s => s != null);
 
-            var crucibleCategory = settings.deliveriesCategories.Find(x => x.name == "Crucible");
-            if (crucibleCategory == null)
+            foreach(var settings in validSettings)
             {
-                crucibleCategory = new Category
+                var crucibleCategory = settings.deliveriesCategories.Find(x => x.name == "Crucible");
+                if (crucibleCategory == null)
                 {
-                    name = "Crucible",
-                    deliveries = new List<Delivery>(),
-                };
-                settings.deliveriesCategories.Add(crucibleCategory);
+                    crucibleCategory = new Category
+                    {
+                        name = "Crucible",
+                        deliveries = new List<Delivery>(),
+                    };
+                    settings.deliveriesCategories.Add(crucibleCategory);
+                }
+
+                // We could probably precreate the delivery outside the loop and re-use it,
+                // but the game does not reuse them, so let's play it safe.
+                crucibleCategory.deliveries.Add(new Delivery
+                {
+                    item = item.InventoryItem,
+                    appearingChance = chance,
+                    minCount = minCount,
+                    maxCount = maxCount,
+                    applyDiscounts = true,
+                    applyExtraCharge = true,
+                });
+            }
+        }
+
+        private Dictionary<int, TraderSettings> GetTraderSettings()
+        {
+            var settings = new Dictionary<int, TraderSettings>();
+            for (var i = 0; i < this.NpcTemplate.closenessParts.Count; i++)
+            {
+                settings[i] = this.NpcTemplate.closenessParts[i].parts.OfType<TraderSettings>().FirstOrDefault();
             }
 
-            // We could probably precreate the delivery outside the loop and re-use it,
-            // but the game does not reuse them, so let's play it safe.
-            crucibleCategory.deliveries.Add(new Delivery
+            if (settings.All(s => s.Value == null))
             {
-                item = item.InventoryItem,
-                appearingChance = chance,
-                minCount = minCount,
-                maxCount = maxCount,
-                applyDiscounts = true,
-                applyExtraCharge = true,
-            });
+                return null;
+            }
+
+            return settings;
         }
     }
 }

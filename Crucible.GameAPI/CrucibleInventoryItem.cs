@@ -81,6 +81,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets or sets the required closeness level for this item to appear in a trader's inventory.
+        /// </summary>
+        public int ClosenessRequirement { get; set; }
+
+        /// <summary>
         /// Gets the game item being controlled by this api wrapper.
         /// </summary>
         internal InventoryItem InventoryItem { get; }

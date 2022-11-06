@@ -547,6 +547,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var part = this.npcTemplate.baseParts.OfType<T>().FirstOrDefault();
             if (part == null)
             {
+                // TODO Depending on the intended use case of this method npcTemplate.closenessParts may also need be checked.
                 throw new InvalidOperationException($"NPC template {this.npcTemplate.name} does not have a {typeof(T).Name} part.");
             }
 
