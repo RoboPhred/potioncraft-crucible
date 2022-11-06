@@ -29,6 +29,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using global::PotionCraft.Utils.BezierCurves;
     using global::PotionCraft.Utils.SortingOrderSetter;
     using HarmonyLib;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI.BackwardsCompatibility;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
     using UnityEngine;
 
@@ -271,7 +272,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var ingredientBase = Ingredient.allIngredients.Find(x => x.name == copyFromId);
             if (ingredientBase == null)
             {
-                throw new ArgumentException($"Cannot find ingredient \"{copyFromId}\" to copy settings from.");
+                ingredientBase = GetBaseIngredientForOldId(copyFromId);
+                if (ingredientBase == null)
+                {
+                    throw new ArgumentException($"Cannot find ingredient \"{copyFromId}\" to copy settings from.");
+                }
             }
 
             var ingredient = ScriptableObject.CreateInstance<Ingredient>();
@@ -351,6 +356,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public static IEnumerable<CrucibleIngredient> GetAllIngredients()
         {
             return Ingredient.allIngredients.Select(x => new CrucibleIngredient(x));
+        }
+
+        /// <summary>
+        /// Gets the corresponding current version ingredient for an old id.
+        /// </summary>
+        /// <param name="oldId">The out of date id.</param>
+        /// <returns>The corresponding current version ingredient.</returns>
+        public static CrucibleIngredient GetIngredientForOldId(string oldId)
+        {
+            var ingredient = GetBaseIngredientForOldId(oldId);
+            if (ingredient == null)
+            {
+                return null;
+            }
+
+            return new CrucibleIngredient(ingredient);
         }
 
         /// <summary>
@@ -459,6 +480,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             this.Ingredient.path.path = list;
+        }
+
+        private static Ingredient GetBaseIngredientForOldId(string oldId)
+        {
+            if (!OldIngredientIdConvert.IngredientConvertDict.TryGetValue(oldId, out string newId))
+            {
+                return null;
+            }
+
+            return Ingredient.allIngredients.Find(x => x.name == oldId);
         }
 
         private static void SetIngredientIcon(Ingredient ingredient, Texture2D texture)
