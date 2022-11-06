@@ -14,7 +14,6 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-#if DISABLED_FOR_0_5
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
@@ -43,11 +42,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
             }
 
             // TODO: Allow adding to start / middle / end / before npc / after npc
-            CrucibleDayManager.BackfillDaysTo(this.Day);
-            var count = CrucibleDayManager.GetNpcTemplatesForDay(this.Day).Count();
-            CrucibleDayManager.InsertNpcTemplateToDay(this.Day, count, npcTemplate);
+            //CrucibleDayManager.BackfillDaysTo(this.Day);
+            //var count = CrucibleDayManager.GetNpcTemplatesForDay(this.Day).Count();
+            //CrucibleDayManager.InsertNpcTemplateToDay(this.Day, count, npcTemplate);
         }
     }
 }
 
-#endif

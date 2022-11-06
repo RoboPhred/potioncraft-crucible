@@ -224,7 +224,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return tags.ToArray();
         }
 
-#if DISABLED_FOR_0_5
         /// <summary>
         /// If this NPC Template is a customer, gets the API object for manipulating its customer data.
         /// </summary>
@@ -238,7 +237,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             return new CrucibleCustomerNpcTemplate(this.NpcTemplate);
         }
-#endif
 
         /// <summary>
         /// If this NPC Template is a trader, gets the API object for manipulating its trader data.
