@@ -34,31 +34,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         static CrucibleNpcTemplate()
         {
-            // FIXME: Tag new templates
-            var groundhogDayTags = new[] { CrucibleNpcTemplateTags.IsGroundhogDayNpc };
-
+            // TODO: Groundhog day templates no longer exist in the templates list. All Groundhog day traders in Potion Craft v0.5.0 do not use the new closeness system and appear to be non-funtional.
             var herbalistTags = new[] { CrucibleNpcTemplateTags.SellsHerbs, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsHerbalist };
             NpcTemplateTagsById.Add("Herbalist", new HashSet<string>(herbalistTags));
 
-            // NpcTemplateTagsById.Add("Demo2GroundHogDayHerbalistNpc", new HashSet<string>(herbalistTags.Concat(groundhogDayTags)));
             var mushroomerTags = new[] { CrucibleNpcTemplateTags.SellsMushrooms, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsMushroomer };
             NpcTemplateTagsById.Add("Mushroomer", new HashSet<string>(mushroomerTags));
 
-            // NpcTemplateTagsById.Add("Demo2GroundHogDayMushroomerNpc", new HashSet<string>(mushroomerTags.Concat(groundhogDayTags)));
             var alchemistTags = new[] { CrucibleNpcTemplateTags.SellsAlchemyMachine, CrucibleNpcTemplateTags.IsAlchemist };
             NpcTemplateTagsById.Add("Alchemist", new HashSet<string>(alchemistTags));
 
-
-            // NpcTemplateTagsById.Add("Playtest2GroundHogDayAlchemistNpc", new HashSet<string>(alchemistTags.Concat(groundhogDayTags)));
             var dwarfTags = new[] { CrucibleNpcTemplateTags.SellsCrystals, CrucibleNpcTemplateTags.SellsInorganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsDwarfMiner };
             NpcTemplateTagsById.Add("Dwarf", new HashSet<string>(dwarfTags));
 
-            // NpcTemplateTagsById.Add("Playtest2GroundHogDayDwarfMinerNpc", new HashSet<string>(dwarfTags.Concat(groundhogDayTags)));
             var merchantTags = new[] { CrucibleNpcTemplateTags.SellsHerbs, CrucibleNpcTemplateTags.SellsMushrooms, CrucibleNpcTemplateTags.SellsOrganic, CrucibleNpcTemplateTags.SellsInorganic, CrucibleNpcTemplateTags.SellsIngredients, CrucibleNpcTemplateTags.IsTravelingMerchant };
             NpcTemplateTagsById.Add("WMerchant", new HashSet<string>(merchantTags));
-
-            // NpcTemplateTagsById.Add("Demo2GroundHogDayWanderingMerchantNpc 1", new HashSet<string>(merchantTags.Concat(groundhogDayTags)));
-            // NpcTemplateTagsById.Add("Demo2GroundHogDayWanderingMerchantNpc 2", new HashSet<string>(merchantTags.Concat(groundhogDayTags)));
         }
 
         /// <summary>
