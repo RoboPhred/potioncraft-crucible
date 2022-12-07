@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="../stylecop.json"/>
+    <AdditionalFiles Include="../stylecop.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +20,9 @@
     </Reference>
     <Reference Include="0Harmony" CopyToPublishDirectory="Never">
       <HintPath>..\externals\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="PotionCraft.GamepadNavigation">
+      <HintPath>..\externals\PotionCraft.GamepadNavigation.dll</HintPath>
     </Reference>
 
     <Reference Include="UnityEngine" CopyToPublishDirectory="Never">

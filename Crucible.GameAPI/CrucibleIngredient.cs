@@ -19,7 +19,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.Assemblies.GamepadNavigation;
     using global::PotionCraft.LocalizationSystem;
+    using global::PotionCraft.ObjectBased;
     using global::PotionCraft.ObjectBased.InteractiveItem.SoundControllers;
     using global::PotionCraft.ObjectBased.RecipeMap.Path;
     using global::PotionCraft.ObjectBased.Stack;
@@ -29,8 +31,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using global::PotionCraft.Utils.BezierCurves;
     using global::PotionCraft.Utils.SortingOrderSetter;
     using HarmonyLib;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI.BackwardsCompatibility;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
     using UnityEngine;
+    using UnityEngine.Rendering;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="Ingredient"/>s.
@@ -271,7 +275,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var ingredientBase = Ingredient.allIngredients.Find(x => x.name == copyFromId);
             if (ingredientBase == null)
             {
-                throw new ArgumentException($"Cannot find ingredient \"{copyFromId}\" to copy settings from.");
+                ingredientBase = GetBaseIngredientForOldId(copyFromId);
+                if (ingredientBase == null)
+                {
+                    throw new ArgumentException($"Cannot find ingredient \"{copyFromId}\" to copy settings from.");
+                }
             }
 
             var ingredient = ScriptableObject.CreateInstance<Ingredient>();
@@ -354,6 +362,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets the corresponding current version ingredient for an old id.
+        /// </summary>
+        /// <param name="oldId">The out of date id.</param>
+        /// <returns>The corresponding current version ingredient.</returns>
+        public static CrucibleIngredient GetIngredientForOldId(string oldId)
+        {
+            var ingredient = GetBaseIngredientForOldId(oldId);
+            if (ingredient == null)
+            {
+                return null;
+            }
+
+            return new CrucibleIngredient(ingredient);
+        }
+
+        /// <summary>
         /// Sets the localized name of this ingredient.
         /// </summary>
         /// <param name="name">The localized name to use for this ingredient.</param>
@@ -416,6 +440,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // It seems to remove itself automatically, as this component does not exist when inspecting the game object later.
             prefab.AddComponent<SortingOrderSetter>();
 
+            var slotObject = new GameObject
+            {
+                name = "Slot Object",
+            };
+            slotObject.transform.parent = prefab.transform;
+            slotObject.AddComponent<Slot>();
+            slotObject.AddComponent<ItemFromInventorySectionFinder>();
+
             foreach (var rootItem in rootItems)
             {
                 var stackItemGO = this.CreateStackItem(rootItem);
@@ -459,6 +491,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             this.Ingredient.path.path = list;
+        }
+
+        private static Ingredient GetBaseIngredientForOldId(string oldId)
+        {
+            if (!OldIngredientIdConvert.IngredientConvertDict.TryGetValue(oldId, out string newId))
+            {
+                return null;
+            }
+
+            return Ingredient.allIngredients.Find(x => x.name == oldId);
         }
 
         private static void SetIngredientIcon(Ingredient ingredient, Texture2D texture)
@@ -605,6 +647,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ifs.colliderOuter = colliderOuter;
             ifs.colliderInner = colliderInner;
             ifs.NextStagePrefabs = crucibleStackItem.GrindChildren.Select(x => this.CreateStackItem(x, depth + 1)).ToArray();
+
+            var sortGroup = stackItem.AddComponent<SortingGroup>();
 
             return stackItem;
         }

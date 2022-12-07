@@ -139,7 +139,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
         {
             var raiseGameLoadedMethodInfo = AccessTools.Method(typeof(SaveLoadEvent), nameof(RaiseGameLoaded));
 
-            var loadFileMethodInfo = AccessTools.PropertyGetter(typeof(SaveLoadManager), nameof(SaveLoadManager.LoadFile));
+            var loadFileMethodInfo = AccessTools.Method(typeof(SaveLoadManager), nameof(SaveLoadManager.LoadFile));
 
             var found = false;
             foreach (var instruction in instructions)

@@ -14,7 +14,6 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-#if DISABLED_FOR_0_5
 
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
@@ -27,6 +26,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Settings;
     using global::PotionCraft.QuestSystem;
+    using global::PotionCraft.ScriptableObjects;
     using UnityEngine;
 
     /// <summary>
@@ -120,14 +120,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var template = ScriptableObject.CreateInstance<NpcTemplate>();
 
-            template.spawnChance = 1f;
+            //template.spawnChance = 1f;
 
             var quest = ScriptableObject.CreateInstance<Quest>();
             quest.name = name;
             quest.karmaReward = 0;
             quest.desiredEffects = new PotionEffect[0];
 
-            var copyFrom = NpcTemplate.allNpcTemplates.Find(x => x.name == "HerbalistNpc 1");
+            var copyFrom = NpcTemplate.allNpcTemplates.templates.Find(x => x.name == "HerbalistNpc 1");
             if (copyFrom == null)
             {
                 throw new Exception("Could not load dummy template to copy from.");
@@ -162,7 +162,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             template.baseParts = new NonAppearancePart[] { quest, prefab, gender, dialogueData };
 
             template.name = name;
-            template.groupsOfContainers = new PartContainerGroup<NonAppearancePart>[0];
             template.appearance = new AppearanceContainer();
 
             NpcTemplate.allNpcTemplates.templates.Add(template);
@@ -426,4 +425,3 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     }
 }
 
-#endif
