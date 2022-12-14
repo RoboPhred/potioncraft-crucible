@@ -30,7 +30,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     {
         private static readonly Sprite BlankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear).WithName("Crucible cleared appearance sprite");
 
-        private static readonly AppearancePart.ColorablePart BlankColorablePart = new()
+        private static readonly ColorablePart BlankColorablePart = new()
         {
             background = BlankSprite,
             contour = BlankSprite,
@@ -120,7 +120,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             var skullShape = ScriptableObject.CreateInstance<SkullShape>();
             skullShape.mask = mask;
-            skullShape.shape = new AppearancePart.ColorablePart
+            skullShape.shape = new ColorablePart
             {
                 background = background,
                 contour = contour,
@@ -484,7 +484,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var sourceTemplate = sourceAppearance.npcTemplate;
 
-            prefab.prefab = sourcePrefab.prefab;
+            // TOOD Fahlgorithm not sure if this is still a thing
+            // prefab.prefab = sourcePrefab.prefab;
             prefab.clothesColorPalette1 = sourcePrefab.clothesColorPalette1;
             prefab.clothesColorPalette2 = sourcePrefab.clothesColorPalette2;
             prefab.clothesColorPalette3 = sourcePrefab.clothesColorPalette3;
@@ -589,14 +590,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             /// Sets the appearance data in the array.
             /// </summary>
             /// <param name="parts">The array to set data for.</param>
-            internal void Set(AppearancePart.ColorablePart[] parts)
+            internal void Set(ColorablePart[] parts)
             {
                 if (parts.Length <= this.index)
                 {
                     throw new InvalidOperationException("Part array is too small.");
                 }
 
-                parts[this.index] = new AppearancePart.ColorablePart
+                parts[this.index] = new ColorablePart
                 {
                     background = this.Background ?? BlankSprite,
                     contour = this.Contour ?? BlankSprite,

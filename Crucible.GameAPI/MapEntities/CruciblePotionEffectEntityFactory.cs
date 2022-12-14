@@ -14,6 +14,8 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
+#if CRUCIBLE_BASES
+
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
 {
     using System;
@@ -84,7 +86,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
             go.name = $"Crucible PotionEffect {this.PotionEffect.ID}";
             var mapItem = go.GetComponent<PotionEffectMapItem>();
 
-            mapItem.effect = this.PotionEffect.PotionEffect;
+            mapItem.Effect = this.PotionEffect.PotionEffect;
             mapItem.Status = PotionEffectStatus.Unknown;
 
             Traverse.Create(mapItem).Field<PotionEffectSettings>("settings").Value = settings;
@@ -104,7 +106,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
                 return potionEffectPrefab;
             }
 
-            foreach (var mapState in MapLoader.loadedMaps)
+            foreach (var mapState in MapStatesManager.MapStates)
             {
                 var mapItem = mapState.transform.gameObject.GetComponentInChildren<PotionEffectMapItem>();
                 if (mapItem == null)
@@ -128,3 +130,5 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         }
     }
 }
+
+#endif

@@ -25,7 +25,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using global::PotionCraft.ObjectBased.Mortar;
     using global::PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
     using global::PotionCraft.ObjectBased.UIElements.PotionCraftPanel;
-    using global::PotionCraft.ScriptableObjects;
+    using global::PotionCraft.ScriptableObjects.Potion;
     using global::PotionCraft.Settings;
     using HarmonyLib;
     using UnityEngine;
@@ -106,7 +106,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             return GetAtlasForUsedComponent(component);
         }
 
-        private static string GetAtlasForUsedComponent(Potion.UsedComponent component)
+        private static string GetAtlasForUsedComponent(PotionUsedComponent component)
         {
             return GetAtlasForScriptableObject(component.componentObject);
         }
@@ -156,7 +156,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             var found = false;
             foreach (var instruction in instructions)
             {
-                if (!found && instruction.opcode == OpCodes.Ldloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 5 && localBuilder.LocalType == typeof(Potion.UsedComponent))
+                if (!found && instruction.opcode == OpCodes.Ldloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 5 && localBuilder.LocalType == typeof(PotionUsedComponent))
                 {
                     // We should now be right before the if statement checking if the current potion is in stock
                     found = true;
@@ -186,7 +186,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
         {
             var getAtlasForPotionUsedComponentIndex = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(GetAtlasForPotionUsedComponentIndex));
             var usedComponentsField = AccessTools.Field(typeof(Potion), nameof(Potion.usedComponents));
-            var componentObjectField = AccessTools.Field(typeof(Potion.UsedComponent), nameof(Potion.UsedComponent.componentObject));
+            var componentObjectField = AccessTools.Field(typeof(PotionUsedComponent), nameof(PotionUsedComponent.componentObject));
             var found = false;
             foreach (var instruction in instructions)
             {

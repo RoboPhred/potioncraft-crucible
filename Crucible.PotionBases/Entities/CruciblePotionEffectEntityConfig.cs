@@ -14,6 +14,8 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
+#if CRUCIBLE_BASES
+
 namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
 {
     using System;
@@ -102,3 +104,5 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities
         }
     }
 }
+
+#endif

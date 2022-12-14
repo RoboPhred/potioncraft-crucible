@@ -145,7 +145,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // var npcPrefab = UnityEngine.Object.Instantiate(parentPrefab.prefab);
             // npcPrefab.transform.parent = GameObjectUtilities.CruciblePrefabRoot;
 
-            prefab.prefab = parentPrefab.prefab;
+            // TODO Fahlgorithm not sure if this is still a thing
+            // prefab.prefab = parentPrefab.prefab;
             prefab.clothesColorPalette1 = parentPrefab.clothesColorPalette1;
             prefab.clothesColorPalette2 = parentPrefab.clothesColorPalette2;
             prefab.clothesColorPalette3 = parentPrefab.clothesColorPalette3;
