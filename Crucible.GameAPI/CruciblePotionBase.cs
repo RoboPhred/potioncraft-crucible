@@ -14,6 +14,8 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
+#if CRUCIBLE_BASES
+
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
@@ -366,20 +368,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             newBase.mapItemSprite = waterBase.mapItemSprite;
             newBase.recipeMapIconSprite = waterBase.recipeMapIconSprite;
 
-            var index = MapLoader.loadedMaps.Count;
+            var index = MapStatesManager.MapStates.Length;
             var mapState = new MapState
             {
                 index = index,
                 zoom = Settings<RecipeMapManagerSettings>.Asset.zoomSettings.defaultZoom,
                 potionBase = newBase,
             };
-            MapLoader.loadedMaps.Add(mapState);
+            var newMapStates = MapStatesManager.MapStates.Concat(new[] { mapState }).ToArray();
+            var mapStatesField = typeof(MapStatesManager).GetField("_mapStates");
+            mapStatesField.SetValue(null, newMapStates);
 
             var oldCurrentMap = Managers.RecipeMap.currentMap;
             Managers.RecipeMap.currentMap = mapState;
             try
             {
-                mapState.transform = Traverse.Create(typeof(MapLoader)).Method("InstantiateMap", new[] { typeof(int) }).GetValue<Transform>(index);
+                mapState.transform = Traverse.Create(typeof(MapStatesManager)).Method("InstantiateMap", new[] { typeof(int) }).GetValue<Transform>(index);
                 mapState.transform.gameObject.name = $"Crucible RecipeMap {id}";
                 mapState.transform.GetComponent<RecipeMapPrefabController>().mapState = mapState;
 
@@ -553,3 +557,5 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
     }
 }
+
+#endif

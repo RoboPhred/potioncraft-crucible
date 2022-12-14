@@ -491,6 +491,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             this.Ingredient.path.path = list;
+            this.Ingredient.path.CalculateEvenlySpacedPoints();
+
+            // This will calculate element potentials for the ingredient based on path
+            // It appears that normally this is done as a build task and so there exists no calls to this method in code
+            // TODO is there a way to cache this to a prefab similarly to how it is being done in game?
+            Traverse.Create(this.Ingredient).Method("CalculatePotentials", new[] { typeof(IngredientPath) }).GetValue(this.Ingredient.path);
         }
 
         private static Ingredient GetBaseIngredientForOldId(string oldId)

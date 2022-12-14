@@ -22,6 +22,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using global::PotionCraft.ManagersSystem.TMP;
     using global::PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
     using global::PotionCraft.ScriptableObjects;
+    using global::PotionCraft.ScriptableObjects.Potion;
     using global::PotionCraft.Settings;
     using HarmonyLib;
     using UnityEngine;

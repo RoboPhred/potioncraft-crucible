@@ -396,12 +396,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         private static void TryResolveSettingsFromMap(PotionEffect effect)
         {
-            foreach (var mapState in MapLoader.loadedMaps)
+            foreach (var mapState in MapStatesManager.MapStates)
             {
                 var mapObject = mapState.transform.gameObject;
                 foreach (var potionEffectItem in mapObject.GetComponentsInChildren<PotionEffectMapItem>())
                 {
-                    if (potionEffectItem.effect != effect)
+                    if (potionEffectItem.Effect != effect)
                     {
                         continue;
                     }
@@ -419,7 +419,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             // FIXME: We might capture a custom potion effect here, which might have customized
             // bottle sprites.  We should restrict our search to base game effects.
-            foreach (var mapState in MapLoader.loadedMaps)
+            foreach (var mapState in MapStatesManager.MapStates)
             {
                 var mapObject = mapState.transform.gameObject;
                 var mapItem = mapObject.GetComponentInChildren<PotionEffectMapItem>();
