@@ -1,4 +1,4 @@
-// <copyright file="CrucibleCustomersConfigRoot.cs" company="RoboPhredDev">
+// <copyright file="CrucibleQuestRequirementConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,39 +14,24 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
-    /// The configuration root for ingredients.
+    /// Configuration specifying an addional quest requirement.
     /// </summary>
-    [CruciblePackageConfigRoot]
-    public class CrucibleCustomersConfigRoot : CruciblePackageConfigRoot
+    [DuckTypeCandidate(typeof(CrucibleAdditionalEffectsQuestRequirementConfig))]
+    [DuckTypeCandidate(typeof(CrucibleMainIngredientQuestRequirementConfig))]
+    [DuckTypeCandidate(typeof(CrucibleMaxIngredientsQuestRequirementConfig))]
+    [DuckTypeCandidate(typeof(CrucibleNeedIngredientQuestRequirementConfig))]
+    [DuckTypeCandidate(typeof(CrucibleNoIngredientQuestRequirementConfig))]
+    [DuckTypeCandidate(typeof(CrucibleStrongPotionQuestRequirementConfig))]
+    [DuckTypeCandidate(typeof(CrucibleWeakPotionQuestRequirementConfig))]
+    public class CrucibleQuestRequirementConfig : CruciblePackageConfigNode
     {
-        /// <summary>
-        /// Gets or sets the list of ingredients.
-        /// </summary>
-        public List<CrucibleCustomerConfig> Customers { get; set; } = new();
-
-        /// <summary>
-        /// Gets or sets the list of ingredients.
-        /// </summary>
-        public List<CrucibleTraderConfig> Traders { get; set; } = new();
-
-        /// <summary>
-        /// Gets or sets the list of ingredients.
-        /// </summary>
-        public List<CrucibleFactionConfig> Factions { get; set; } = new();
-
-        /// <inheritdoc/>
-        public override void ApplyConfiguration()
-        {
-            this.Customers.ForEach(x => x.ApplyConfiguration());
-            this.Traders.ForEach(x => x.ApplyConfiguration());
-        }
     }
 }
-

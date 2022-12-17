@@ -26,6 +26,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     /// </summary>
     [DuckTypeCandidate(typeof(CrucibleInventoryItemSoldByNpcTemplateConfig))]
     [DuckTypeCandidate(typeof(CrucibleInventoryItemSoldByNpcTagConfig))]
+    [DuckTypeCandidate(typeof(CrucibleInventoryItemSoldByNpcStaticConfig))]
     public abstract class CrucibleInventoryItemSoldByConfig : CruciblePackageConfigNode
     {
         /// <summary>

@@ -120,8 +120,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var template = ScriptableObject.CreateInstance<NpcTemplate>();
 
-            //template.spawnChance = 1f;
-
+            // TODO add this new template to the copied from faction or create a new faction copy
+            // template.spawnChance = 1f;
             var quest = ScriptableObject.CreateInstance<Quest>();
             quest.name = name;
             quest.karmaReward = 0;

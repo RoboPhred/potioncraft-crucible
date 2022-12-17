@@ -19,6 +19,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.Core.ValueContainers;
+    using global::PotionCraft.DialogueSystem.Dialogue;
+    using global::PotionCraft.DialogueSystem.Dialogue.Data;
+    using global::PotionCraft.Npc.MonoBehaviourScripts;
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Settings;
     using global::PotionCraft.ObjectBased.Deliveries;
@@ -46,6 +50,242 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Gets the list of TraderSettings for this template organized by closeness.
         /// </summary>
         public Dictionary<int, TraderSettings> TraderSettings => this.GetTraderSettings();
+
+        public int UnlockAtChapter
+        {
+            get => this.NpcTemplate.unlockAtChapter;
+            set => this.NpcTemplate.unlockAtChapter = value;
+        }
+
+        public int DayTimeForSpawn
+        {
+            get => this.NpcTemplate.dayTimeForSpawn;
+            set => this.NpcTemplate.dayTimeForSpawn = value;
+        }
+
+        public string VisualMood
+        {
+            get => this.NpcTemplate.visualMood.ToString();
+            set
+            {
+                if (!Enum.TryParse(value, out NpcVisualMoodInspector parsed))
+                {
+                    return;
+                }
+
+                this.NpcTemplate.visualMood = parsed;
+            }
+        }
+
+        public (int, int) DaysOfCooldown
+        {
+            get => (this.NpcTemplate.daysOfCooldown.min, this.NpcTemplate.daysOfCooldown.max);
+            set => this.NpcTemplate.daysOfCooldown = new MinMaxInt(value.Item1, value.Item2);
+        }
+
+        public (int, int) KarmaForSpawn
+        {
+            get => (this.NpcTemplate.karmaForSpawn.min, this.NpcTemplate.karmaForSpawn.max);
+            set
+            {
+                if (value.Item1 < -100 || value.Item2 > 100)
+                {
+                    throw new ArgumentException("Karma values must range from -100 to 100. Unable to set KarmaForSpawn");
+                }
+
+                if (value.Item1 > value.Item2)
+                {
+                    throw new ArgumentException("Minimum karma to spawn must be less than maximum karma to spawn. Unable to set KarmaForSpawn");
+                }
+
+                this.NpcTemplate.karmaForSpawn = new MinMaxInt(value.Item1, value.Item2);
+            }
+        }
+
+        public int Gold
+        {
+            get => this.GetTraderSettings().FirstOrDefault().Value?.gold ?? 1000;
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException("Gold cannot be less than zero. Unable to set Gold for custom trader.");
+                }
+
+                this.GetTraderSettings().Values.ToList().ForEach(v => v.gold = value);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new blank NPC template.
+        /// </summary>
+        /// <param name="name">The name of the template.</param>
+        /// <param name="copyAppearanceFrom">The NPC template to copy the appearance from.</param>
+        /// <returns>A new blank NPC template.</returns>
+        public static CrucibleTraderNpcTemplate CreateTraderNpcTemplate(string name, string copyAppearanceFrom = null)
+        {
+            CrucibleNpcTemplate copyFromTemplate = null;
+            if (!string.IsNullOrEmpty(copyAppearanceFrom))
+            {
+                copyFromTemplate = GetNpcTemplateById(copyAppearanceFrom);
+                if (copyFromTemplate == null || !copyFromTemplate.IsTrader)
+                {
+                    throw new ArgumentException($"Could not find Trader NPC template with id \"{copyAppearanceFrom}\" to copy appearance from.", nameof(copyAppearanceFrom));
+                }
+            }
+
+            var template = ScriptableObject.CreateInstance<NpcTemplate>();
+
+            template.name = name;
+
+            var copyFrom = copyFromTemplate.NpcTemplate;
+
+            template.closenessLevelUpIcon = copyFrom.closenessLevelUpIcon;
+            template.showDontComeAgainOption = copyFrom.showDontComeAgainOption;
+            template.maxClosenessForChapters = copyFrom.maxClosenessForChapters.ToList();
+            template.unlockAtChapter = copyFrom.unlockAtChapter;
+            template.dayTimeForSpawn = copyFrom.dayTimeForSpawn;
+            template.visualMood = copyFrom.visualMood;
+            template.daysOfCooldown = copyFrom.daysOfCooldown;
+            template.karmaForSpawn = copyFrom.karmaForSpawn;
+
+            // TODO: How do prefabs differ?
+            var prefab = ScriptableObject.CreateInstance<NpcPrefab>();
+            var parentPrefab = copyFrom.baseParts.OfType<NpcPrefab>().FirstOrDefault();
+            if (parentPrefab == null)
+            {
+                throw new Exception("Copy target had no prefab!");
+            }
+
+            // Used in getting potion reactions
+            var gender = ScriptableObject.CreateInstance<Gender>();
+            var parentGender = copyFrom.baseParts.OfType<Gender>().FirstOrDefault();
+            if (parentGender == null)
+            {
+                throw new Exception("Copy target had no Gender part!");
+            }
+
+            gender.gender = parentGender.gender;
+
+            var animationOnHaggle = ScriptableObject.CreateInstance<AnimationOnHaggle>();
+            var parentAnimationOnHaggle = copyFrom.baseParts.OfType<AnimationOnHaggle>().FirstOrDefault();
+            if (parentAnimationOnHaggle == null)
+            {
+                throw new Exception("Copy target had no AnimationOnHaggle part!");
+            }
+
+            animationOnHaggle.positionShift = parentAnimationOnHaggle.positionShift;
+            animationOnHaggle.rotationShift = parentAnimationOnHaggle.rotationShift;
+            animationOnHaggle.animationTime = parentAnimationOnHaggle.animationTime;
+            animationOnHaggle.ease = parentAnimationOnHaggle.ease;
+
+            var haggleStaticSettings = ScriptableObject.CreateInstance<HaggleStaticSettings>();
+            var parentHaggleStaticSettings = copyFrom.baseParts.OfType<HaggleStaticSettings>().FirstOrDefault();
+            if (parentHaggleStaticSettings == null)
+            {
+                throw new Exception("Copy target had no HaggleStaticSettings part!");
+            }
+
+            haggleStaticSettings.veryEasyTheme = parentHaggleStaticSettings.veryEasyTheme;
+            haggleStaticSettings.easyTheme = parentHaggleStaticSettings.easyTheme;
+            haggleStaticSettings.mediumTheme = parentHaggleStaticSettings.mediumTheme;
+            haggleStaticSettings.hardTheme = parentHaggleStaticSettings.hardTheme;
+            haggleStaticSettings.veryHardTheme = parentHaggleStaticSettings.veryHardTheme;
+
+            var queueSpace = ScriptableObject.CreateInstance<QueueSpace>();
+            var parentQueueSpace = copyFrom.baseParts.OfType<QueueSpace>().FirstOrDefault();
+            if (parentQueueSpace == null)
+            {
+                throw new Exception("Copy target had no QueueSpace part!");
+            }
+
+            queueSpace.spawnAfterPause = parentQueueSpace.spawnAfterPause;
+            queueSpace.pauseAfterSpawn = parentQueueSpace.pauseAfterSpawn;
+
+            template.baseParts = new NonAppearancePart[] { prefab, animationOnHaggle, haggleStaticSettings, queueSpace, gender };
+
+            // Copy closeness parts for each level of closeness
+            foreach (var closenessPart in copyFrom.closenessParts)
+            {
+                var parentDialogueData = copyFrom.baseParts.OfType<DialogueData>().FirstOrDefault();
+                if (parentDialogueData == null)
+                {
+                    throw new Exception("Copy target had no DialogueData part!");
+                }
+
+                var dialogueData = new CrucibleDialogueData(parentDialogueData).Clone();
+
+                var traderSettings = ScriptableObject.CreateInstance<TraderSettings>();
+                var parentTraderSettings = copyFrom.baseParts.OfType<TraderSettings>().FirstOrDefault();
+                if (parentTraderSettings == null)
+                {
+                    throw new Exception("Copy target had no TraderSettings part!");
+                }
+
+                traderSettings.canTrade = parentTraderSettings.canTrade;
+                traderSettings.gold = parentTraderSettings.gold;
+                traderSettings.deliveriesCategories = parentTraderSettings.deliveriesCategories.Select(CopyDeliveryCategory).ToList();
+
+                template.closenessParts.Add(new NonAppearanceClosenessPartsList
+                {
+                    parts = new List<NonAppearancePart> { dialogueData.DialogueData, traderSettings },
+                });
+            }
+
+            template.appearance = new AppearanceContainer();
+            var crucibleTemplate = new CrucibleTraderNpcTemplate(template);
+            crucibleTemplate.Appearance.CopyFrom(copyFromTemplate);
+
+            NpcTemplate.allNpcTemplates.templates.Add(template);
+
+            return crucibleTemplate;
+        }
+
+        private static Category CopyDeliveryCategory(Category source)
+        {
+            return new Category
+            {
+                name = source.name,
+                deliveries = source.deliveries.Select(CopyDelivery).ToList(),
+            };
+        }
+
+        private static Delivery CopyDelivery(Delivery source)
+        {
+            return new Delivery
+            {
+                name = source.name,
+                appearingChance = source.appearingChance,
+                minCount = source.minCount,
+                maxCount = source.maxCount,
+                applyDiscounts = source.applyDiscounts,
+                applyExtraCharge = source.applyExtraCharge,
+                item = source.item,
+            };
+        }
+
+        /// <summary>
+        /// Gets the NPC Template by the given name.
+        /// </summary>
+        /// <param name="id">The name of the npc template to fetch.</param>
+        /// <returns>A <see cref="CrucibleNpcTemplate"/> api object for manipulating the template.</returns>
+        public static CrucibleTraderNpcTemplate GetTraderNpcTemplateById(string id)
+        {
+            var template = NpcTemplate.allNpcTemplates.templates.Find(x => x.name == id);
+            if (template == null)
+            {
+                return null;
+            }
+
+            var traderTemplate = new CrucibleTraderNpcTemplate(template);
+
+            if (!traderTemplate.IsTrader)
+            {
+                return null;
+            }
+
+            return traderTemplate;
+        }
 
         /// <summary>
         /// If this npc is a trader, adds an item to this template's trader inventory.

@@ -27,19 +27,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     /// <summary>
     /// Defines the configuration for a customer.
     /// </summary>
-    public class CrucibleCustomerConfig : CruciblePackageConfigSubjectNode<CrucibleCustomerNpcTemplate>
+    public class CrucibleCustomerConfig : CrucibleNPCConfig<CrucibleCustomerNpcTemplate>
     {
-        /// <summary>
-        /// Gets or sets the ID of this ingredient.
-        /// </summary>
-        [YamlMember(Alias = "id")]
-        public string ID { get; set; }
-
-        /// <summary>
-        /// Gets or sets the appearance configuration for this npc.
-        /// </summary>
-        public CrucibleNpcAppearanceConfig Appearance { get; set; }
-
         /// <summary>
         /// Gets or sets the request this npc makes of the alchemist.
         /// </summary>
@@ -54,6 +43,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// Gets or sets the collection of appearances that this npc will make.
         /// </summary>
         public OneOrMany<CrucibleNpcCalendarVisitConfig> Visits { get; set; }
+
+        /// <summary>
+        /// Gets or sets the faction that this customer npc will belong to (optional).
+        /// </summary>
+        public string FactionName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the faction class that this customer npc will belong to (optional).
+        /// </summary>
+        public string FactionClassName { get; set; }
 
         /// <inheritdoc/>
         public override string ToString()
@@ -71,7 +70,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(CrucibleCustomerNpcTemplate subject)
         {
-            this.Appearance?.ApplyAppearance(subject);
+            base.OnApplyConfiguration(subject);
 
             if (this.RequestText != null)
             {
