@@ -16,6 +16,7 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
+    using System.Linq;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
@@ -29,10 +30,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         where T : CrucibleNpcTemplate
     {
         /// <summary>
-        /// Gets or sets the ID of this ingredient.
+        /// Gets or sets the ID of this NPC.
         /// </summary>
         [YamlMember(Alias = "id")]
         public string ID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the template to copy this NPC from.
+        /// </summary>
+        public string CopyFrom { get; set; }
 
         /// <summary>
         /// Gets or sets the appearance configuration for this npc.
@@ -44,6 +50,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// </summary>
         public OneOrMany<CrucibleNPCQuestConfig> Quests { get; set; } = new OneOrMany<CrucibleNPCQuestConfig>();
 
+        /// <summary>
+        /// Gets or sets the list of dialogues for this NPC.
+        /// </summary>
+        public OneOrMany<CrucibleNPCDialogueConfig> Dialogue { get; set; } = new OneOrMany<CrucibleNPCDialogueConfig>();
+
+        /// <summary>
+        /// Gets or sets the tags associated with this NPC.
+        /// This allows ingredient mods to easily target this NPC if it is a trader without needing to know the template name.
+        /// </summary>
+        public OneOrMany<string> Tags { get; set; }
+
         /// <inheritdoc/>
         public override string ToString()
         {
@@ -54,6 +71,40 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         protected override void OnApplyConfiguration(T subject)
         {
             this.Appearance?.ApplyAppearance(subject);
+
+            // Apply quests
+            foreach(var quest in this.Quests)
+            {
+                quest.ApplyConfiguration(subject);
+            }
+
+            // Apply dialogues
+            var orderedDialogues = this.Dialogue.OrderByDescending(d => d.ClosnessRequirement).ToList();
+            var appliedDialogues = 0;
+            for (var closeness = 0; closeness < subject.MaximumCloseness; closeness++)
+            {
+                var dialogueToApply = orderedDialogues.FirstOrDefault(d => d.ClosnessRequirement <= closeness);
+                if (dialogueToApply == null)
+                {
+                    continue;
+                }
+
+                subject.ApplyDialogueForClosenessLevel(closeness, dialogueToApply.Dialogue);
+                appliedDialogues++;
+            }
+
+            if (appliedDialogues < this.Dialogue.Count)
+            {
+                CrucibleLog.Log("Some dialogues were not applied to NPC due to issues with specified closeness requirements.");
+            }
+
+            if (this.Tags != null)
+            {
+                foreach (var tag in this.Tags)
+                {
+                    subject.AddTag(tag);
+                }
+            }
         }
     }
 }

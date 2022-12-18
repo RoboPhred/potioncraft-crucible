@@ -90,6 +90,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         internal InventoryItem InventoryItem { get; }
 
+        /// <summary>
+        /// Gets the inventory item with the specified name.
+        /// </summary>
+        /// <param name="inventoryItemName">The inventory item name to look up.</param>
+        /// <returns>The inventory item with the specified name.</returns>
+        public static CrucibleInventoryItem GetByName(string inventoryItemName)
+        {
+            return new CrucibleInventoryItem(InventoryItem.GetByName(inventoryItemName));
+        }
+
         /// <inheritdoc/>
         CrucibleInventoryItem ICrucibleInventoryItemProvider.GetInventoryItem()
         {

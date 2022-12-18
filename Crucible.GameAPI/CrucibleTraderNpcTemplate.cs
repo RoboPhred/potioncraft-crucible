@@ -22,10 +22,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using global::PotionCraft.Core.ValueContainers;
     using global::PotionCraft.DialogueSystem.Dialogue;
     using global::PotionCraft.DialogueSystem.Dialogue.Data;
+    using global::PotionCraft.ManagersSystem;
     using global::PotionCraft.Npc.MonoBehaviourScripts;
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Settings;
     using global::PotionCraft.ObjectBased.Deliveries;
+    using global::PotionCraft.ObjectBased.Haggle;
+    using HarmonyLib;
     using UnityEngine;
 
     /// <summary>
@@ -54,13 +57,29 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public int UnlockAtChapter
         {
             get => this.NpcTemplate.unlockAtChapter;
-            set => this.NpcTemplate.unlockAtChapter = value;
+            set
+            {
+                if (value < 1 || value > 10)
+                {
+                    throw new ArgumentException("Chapter values must range from 1 to 10. Unable to set UnlockAtChapter");
+                }
+
+                this.NpcTemplate.unlockAtChapter = value;
+            }
         }
 
         public int DayTimeForSpawn
         {
             get => this.NpcTemplate.dayTimeForSpawn;
-            set => this.NpcTemplate.dayTimeForSpawn = value;
+            set
+            {
+                if (value < 0 || value > 100)
+                {
+                    throw new ArgumentException("Day time values must range from 0 to 100. Unable to set DayTimeForSpawn");
+                }
+
+                this.NpcTemplate.dayTimeForSpawn = value;
+            }
         }
 
         public string VisualMood
@@ -70,7 +89,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 if (!Enum.TryParse(value, out NpcVisualMoodInspector parsed))
                 {
-                    return;
+                    var availableMoods = Enum.GetNames(typeof(NpcVisualMoodInspector));
+                    var availableMoodsS = availableMoods.Length > 1 ? availableMoods.Aggregate((m1, m2) => $"{m1}, {m2}") : availableMoods.FirstOrDefault();
+                    throw new ArgumentException($"Visual mood value is not in the list of possible visual moods. Available visual moods are: {availableMoodsS}");
                 }
 
                 this.NpcTemplate.visualMood = parsed;
@@ -113,6 +134,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 }
 
                 this.GetTraderSettings().Values.ToList().ForEach(v => v.gold = value);
+            }
+        }
+
+        public string Gender
+        {
+            get => this.RequireBasePart<Gender>().gender.ToString();
+            set
+            {
+                if (!Enum.TryParse(value, out Gender.GenderSet parsed))
+                {
+                    var availableGenders = Enum.GetNames(typeof(Gender.GenderSet));
+                    var availableGendersS = availableGenders.Length > 1 ? availableGenders.Aggregate((m1, m2) => $"{m1}, {m2}") : availableGenders.FirstOrDefault();
+                    throw new ArgumentException($"Gender value is not in the list of possible genders. Available genders are: {availableGendersS}");
+                }
+
+                this.RequireBasePart<Gender>().gender = parsed;
             }
         }
 
@@ -236,32 +273,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var crucibleTemplate = new CrucibleTraderNpcTemplate(template);
             crucibleTemplate.Appearance.CopyFrom(copyFromTemplate);
 
+            // Add trader to list of all templates
             NpcTemplate.allNpcTemplates.templates.Add(template);
 
+            // Add trader to the extra traders virtual queue so it can actually spawn like any other trader
+            var traderQueue = Managers.Npc.globalSettings.extraTradersVirtualQueue;
+            var traderPool = Traverse.Create(traderQueue).Field<List<string>>("temporaryPool").Value;
+            traderPool.Add(template.name);
+
             return crucibleTemplate;
-        }
-
-        private static Category CopyDeliveryCategory(Category source)
-        {
-            return new Category
-            {
-                name = source.name,
-                deliveries = source.deliveries.Select(CopyDelivery).ToList(),
-            };
-        }
-
-        private static Delivery CopyDelivery(Delivery source)
-        {
-            return new Delivery
-            {
-                name = source.name,
-                appearingChance = source.appearingChance,
-                minCount = source.minCount,
-                maxCount = source.maxCount,
-                applyDiscounts = source.applyDiscounts,
-                applyExtraCharge = source.applyExtraCharge,
-                item = source.item,
-            };
         }
 
         /// <summary>
@@ -329,6 +349,72 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     applyExtraCharge = true,
                 });
             }
+        }
+
+        /// <summary>
+        /// Sets the haggle themes for this trader.
+        /// </summary>
+        /// <param name="veryEasyTheme">the haggle theme name for very easy haggling.</param>
+        /// <param name="easyTheme">the haggle theme name for easy haggling.</param>
+        /// <param name="mediumTheme">the haggle theme name for medium haggling.</param>
+        /// <param name="hardTheme">the haggle theme name for hard haggling.</param>
+        /// <param name="veryHardTheme">the haggle theme name for very hard haggling.</param>
+        public void SetHagglingThemes(string veryEasyTheme, string easyTheme, string mediumTheme, string hardTheme, string veryHardTheme)
+        {
+            var haggleStaticSettings = this.RequireBasePart<HaggleStaticSettings>();
+
+            if (!string.IsNullOrEmpty(veryEasyTheme))
+            {
+                haggleStaticSettings.veryEasyTheme = GetHaggleTheme(veryEasyTheme);
+            }
+
+            if (!string.IsNullOrEmpty(veryEasyTheme))
+            {
+                haggleStaticSettings.easyTheme = GetHaggleTheme(easyTheme);
+            }
+
+            if (!string.IsNullOrEmpty(veryEasyTheme))
+            {
+                haggleStaticSettings.mediumTheme = GetHaggleTheme(mediumTheme);
+            }
+
+            if (!string.IsNullOrEmpty(veryEasyTheme))
+            {
+                haggleStaticSettings.hardTheme = GetHaggleTheme(hardTheme);
+            }
+
+            if (!string.IsNullOrEmpty(veryEasyTheme))
+            {
+                haggleStaticSettings.veryHardTheme = GetHaggleTheme(veryHardTheme);
+            }
+        }
+
+        private static Theme GetHaggleTheme(string themeId)
+        {
+            return Theme.GetByName(themeId);
+        }
+
+        private static Category CopyDeliveryCategory(Category source)
+        {
+            return new Category
+            {
+                name = source.name,
+                deliveries = source.deliveries.Select(CopyDelivery).ToList(),
+            };
+        }
+
+        private static Delivery CopyDelivery(Delivery source)
+        {
+            return new Delivery
+            {
+                name = source.name,
+                appearingChance = source.appearingChance,
+                minCount = source.minCount,
+                maxCount = source.maxCount,
+                applyDiscounts = source.applyDiscounts,
+                applyExtraCharge = source.applyExtraCharge,
+                item = source.item,
+            };
         }
 
         private Dictionary<int, TraderSettings> GetTraderSettings()

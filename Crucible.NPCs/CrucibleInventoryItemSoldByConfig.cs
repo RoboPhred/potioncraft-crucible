@@ -48,7 +48,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// Applies the configuration to the given inventory item.
         /// </summary>
         /// <param name="inventoryItem">The inventory item to apply the configuration to.</param>
-        public void OnApplyConfiguration(CrucibleInventoryItem inventoryItem)
+        public virtual void OnApplyConfiguration(CrucibleInventoryItem inventoryItem)
         {
             foreach (var trader in this.GetTraders())
             {

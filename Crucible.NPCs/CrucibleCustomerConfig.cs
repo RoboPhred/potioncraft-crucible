@@ -64,7 +64,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         protected override CrucibleCustomerNpcTemplate GetSubject()
         {
             var id = this.PackageMod.Namespace + "." + this.ID;
-            return CrucibleCustomerNpcTemplate.GetCustomerNpcTemplateById(id) ?? CrucibleCustomerNpcTemplate.CreateCustomerNpcTemplate(id);
+            return CrucibleCustomerNpcTemplate.GetCustomerNpcTemplateById(id) ?? CrucibleCustomerNpcTemplate.CreateCustomerNpcTemplate(id, this.CopyFrom);
         }
 
         /// <inheritdoc/>

@@ -19,6 +19,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.DialogueSystem.Dialogue;
     using global::PotionCraft.ManagersSystem;
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Settings;
@@ -85,6 +86,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Gets a value indicating whether this template is a customer.
         /// </summary>
         public bool IsCustomer => this.NpcTemplate.baseParts.Any(x => x is Quest);
+
+        /// <summary>
+        /// Gets the closeness parts list for this NPC.
+        /// </summary>
+        public List<NonAppearanceClosenessPartsList> ClosenessParts => this.NpcTemplate.closenessParts;
+
+        /// <summary>
+        /// Gets the maximum level of closeness for this NPC.
+        /// </summary>
+        public int MaximumCloseness => this.NpcTemplate.closenessParts.Count;
 
         /// <summary>
         /// Gets the appearance controller for this npc.
@@ -232,11 +243,35 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Applies a given CrucibleDialogueNode to this npc for a given closeness level.
+        /// </summary>
+        /// <param name="closenessLevel">The closeness level the given dialogue should appear at.</param>
+        /// <param name="startingDialogue">The dialogue which should appear at the given closeness level.</param>
+        public void ApplyDialogueForClosenessLevel(int closenessLevel, CrucibleDialogueData.CrucibleDialogueNode startingDialogue)
+        {
+            if (this.ClosenessParts.Count <= closenessLevel)
+            {
+                throw new ArgumentException($"Given closenessLevel is too large. Maximum closeness for this NPC is: {this.ClosenessParts.Count}");
+            }
+
+            var closenessPart = this.ClosenessParts[closenessLevel];
+            var dialogueData = CrucibleDialogueData.CreateDialogueData(startingDialogue);
+            var dialogueIndex = closenessPart.parts.FindIndex(p => p is DialogueData);
+            if (dialogueIndex == -1)
+            {
+                closenessPart.parts.Add(dialogueData.DialogueData);
+                return;
+            }
+
+            closenessPart.parts[dialogueIndex] = dialogueData.DialogueData;
+        }
+
+        /// <summary>
         /// Gets the non appearance part of the specified type, or throw.
         /// </summary>
         /// <typeparam name="T">The type of the part to get.</typeparam>
         /// <returns>The requested part.</returns>
-        protected T RequirePart<T>()
+        protected T RequireBasePart<T>()
             where T : NonAppearancePart
         {
             var part = this.NpcTemplate.baseParts.OfType<T>().FirstOrDefault();

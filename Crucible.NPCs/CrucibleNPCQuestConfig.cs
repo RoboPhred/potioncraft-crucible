@@ -16,6 +16,7 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
+    using System;
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
@@ -75,5 +76,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// Gets or sets the optional requirements for the quest.
         /// </summary>
         public List<CrucibleQuestRequirementConfig> OptionalRequirements { get; set; } = new List<CrucibleQuestRequirementConfig>();
+
+        /// <summary>
+        /// Applies configuration to the NPC subject.
+        /// </summary>
+        /// <typeparam name="T">The type of the NPC.</typeparam>
+        /// <param name="subject">The NPC to apply configuration to.</param>
+        public void ApplyConfiguration<T>(T subject)
+            where T : CrucibleNpcTemplate
+        {
+            throw new NotImplementedException();
+        }
     }
 }

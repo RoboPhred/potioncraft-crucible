@@ -25,6 +25,27 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     /// </summary>
     public class CrucibleInventoryItemSoldByNpcStaticConfig : CrucibleInventoryItemSoldByConfig
     {
+        /// <summary>
+        /// Gets or sets the name of the inventory item which should be sold by this trader.
+        /// </summary>
+        public string InventoryItemName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the closeness requirement for this item to be sold by this trader.
+        /// </summary>
+        public int ClosenessRequirement { get; set; }
+
+        /// <summary>
+        /// Applies all required configuration for this <see cref="CrucibleInventoryItemSoldByNpcStaticConfig"/>.
+        /// </summary>
+        /// <param name="subject">The trader template to apply this <see cref="CrucibleInventoryItemSoldByNpcStaticConfig"/> to.</param>
+        public void OnApplyConfiguration(CrucibleTraderNpcTemplate subject)
+        {
+            var inventoryItem = CrucibleInventoryItem.GetByName(this.InventoryItemName);
+            inventoryItem.ClosenessRequirement = this.ClosenessRequirement;
+            subject.AddTradeItem(inventoryItem, this.ChanceToAppear, this.MinCount, this.MaxCount);
+        }
+
         /// <inheritdoc/>
         protected override IEnumerable<CrucibleTraderNpcTemplate> GetTraders()
         {

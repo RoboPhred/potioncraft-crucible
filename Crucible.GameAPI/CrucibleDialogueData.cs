@@ -54,7 +54,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         /// <param name="startingDialogue">The starting dialogue node which links to all other dialogue options.</param>
         /// <returns>A <see cref="CrucibleDialogueData"/> based on the provided CruiclbeDialogNode.</returns>
-        public CrucibleDialogueData CreateDialogueDataForTrader(CrucibleDialogNode startingDialogue)
+        public static CrucibleDialogueData CreateDialogueData(CrucibleDialogueNode startingDialogue)
         {
             var dialogue = new CrucibleDialogueData();
 
@@ -186,13 +186,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         /// <summary>
         /// Defines a single node of an NPC's dialogue.
+        /// Currently there is no way to create a dialogue tree from a Potion Craft <see cref="DialogueData"/>.
+        /// These structs are used only to construct Potion Craft <see cref="DialogueData"/>.
         /// </summary>
-        public struct CrucibleDialogNode : IEqualityComparer<CrucibleDialogNode>
+        public struct CrucibleDialogueNode : IEqualityComparer<CrucibleDialogueNode>
         {
             /// <summary>
             /// Gets the default value for any node which should be treated like a null value for a class.
             /// </summary>
-            public static CrucibleDialogNode Empty { get; } = new CrucibleDialogNode { };
+            public static CrucibleDialogueNode Empty { get; } = new CrucibleDialogueNode { };
 
             /// <summary>
             /// Gets or sets the NPC's dialogue text for this node. 
@@ -205,13 +207,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             public List<CrucibleAnswerNode> Answers { get; set; } = new List<CrucibleAnswerNode>();
 
             /// <inheritdoc/>
-            public bool Equals(CrucibleDialogNode x, CrucibleDialogNode y)
+            public bool Equals(CrucibleDialogueNode x, CrucibleDialogueNode y)
             {
                 return x.Dialogue.Equals(y.Dialogue);
             }
 
             /// <inheritdoc/>
-            public int GetHashCode(CrucibleDialogNode obj)
+            public int GetHashCode(CrucibleDialogueNode obj)
             {
                 return obj.Dialogue.GetHashCode();
             }
@@ -233,9 +235,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             public LocalizedString AnswerText { get; set; }
 
             /// <summary>
-            /// Gets or sets the next node which would be loaded if this answer is selected. If this is equalt to CrucibleDialogNode.Empty this answer is treated as the end of the conversation and will end the trader interaction.
+            /// Gets or sets the next node which would be loaded if this answer is selected. If this is equalt to CrucibleDialogNode.Empty this answer is treated as either the end of the conversation or as an answer which should return to the starting node.
             /// </summary>
-            public CrucibleDialogNode NextNode { get; set; } = CrucibleDialogNode.Empty;
+            public CrucibleDialogueNode NextNode { get; set; } = CrucibleDialogueNode.Empty;
 
             /// <summary>
             /// Gets or sets a value indicating whether or not this node is a trader's closeness quest node. This value should be true for every answer which is a part of the quest dialog series.
@@ -246,6 +248,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             /// Gets or sets a value indicating whether or not this node is the answer which opens the trader's trade screen. There should only be a single one of these nodes in the dialog system.
             /// </summary>
             public bool IsTradeNode { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether or not this node is the answer which ends interaction with the trader. There should only be a single one of these nodes in the dialog system.
+            /// </summary>
+            public bool IsConversationEndNode { get; set; }
         }
     }
 }
