@@ -41,9 +41,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 return;
             }
 
-            CrucibleDayManager.BackfillDaysTo(this.Day);
-            var count = CrucibleDayManager.GetNpcTemplatesForDay(this.Day).Count();
-            CrucibleDayManager.InsertNpcTemplateToDay(this.Day, count, npcTemplate);
+            //CrucibleDayManager.BackfillDaysTo(this.Day);
+            //var count = CrucibleDayManager.GetNpcTemplatesForDay(this.Day).Count();
+            //CrucibleDayManager.InsertNpcTemplateToDay(this.Day, count, npcTemplate);
         }
     }
 }
