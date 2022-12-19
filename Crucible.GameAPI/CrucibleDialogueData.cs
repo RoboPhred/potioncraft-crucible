@@ -16,6 +16,7 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using global::PotionCraft.DialogueSystem.Dialogue;
@@ -52,17 +53,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Creates a <see cref="CrucibleDialogueData"/> based on the provided CruiclbeDialogNode.
         /// </summary>
+        /// <param name="localizationKey">The localization key specific to this dialogue's parent subject..</param>
         /// <param name="startingDialogue">The starting dialogue node which links to all other dialogue options.</param>
         /// <returns>A <see cref="CrucibleDialogueData"/> based on the provided CruiclbeDialogNode.</returns>
-        public static CrucibleDialogueData CreateDialogueData(CrucibleDialogueNode startingDialogue)
+        public static CrucibleDialogueData CreateDialogueData(string localizationKey, CrucibleDialogueNode startingDialogue)
         {
             var dialogue = new CrucibleDialogueData();
 
+            var localizationKeyUniqueId = 0;
+
             // Naviate through the provided dialogue nodes constructing a list of nodes and edges
+            dialogue.DialogueData.startDialogue = GetNode<StartDialogueNodeData>(localizationKey, ref localizationKeyUniqueId, startingDialogue);
 
             return dialogue;
         }
-
 
         /// <summary>
         /// Creates a deep copy of this <see cref="CrucibleDialogueData"/> including the underlying raw Potion Craft <see cref="DialogueData"/>.
@@ -95,6 +99,34 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             dialogueData.textProperties = this.DialogueData.textProperties.Select(textProperty => textProperty.Clone()).ToList();
 
             return new CrucibleDialogueData(dialogueData);
+        }
+
+        private static T GetNode<T>(string localizationKey, ref int localizationKeyUniqueId, CrucibleDialogueNode node)
+            where T : NodeData
+        {
+            var nodeData = default(T);
+
+            // Populate basic node data
+            nodeData.guid = Guid.NewGuid().ToString();
+
+            // Switch on node type to populate data specific to this node type
+            switch (nodeData)
+            {
+                case StartDialogueNodeData startingNodeData:
+                    // TODO is there anything special we need to do for the starting node?
+                    break;
+                case DialogueNodeData castSource:
+                    // Localize node strings
+                    var localizationkey = $"{localizationKey}_dialogue_{localizationKeyUniqueId}";
+                    CrucibleLocalization.SetLocalizationKey(localizationkey, node.Dialogue);
+                    (nodeData as DialogueNodeData).key = localizationkey;
+
+                    // Increment the unique id so the next dialogue node has a new localization key
+                    localizationKeyUniqueId++;
+                    break;
+            }
+
+            return nodeData;
         }
 
         private static T CopyNode<T>(T source)

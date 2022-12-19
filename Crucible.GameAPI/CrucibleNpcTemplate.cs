@@ -422,6 +422,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="startingDialogue">The dialogue which should appear at the given closeness level.</param>
         public void ApplyDialogueForClosenessLevel(int closenessLevel, CrucibleDialogueData.CrucibleDialogueNode startingDialogue)
         {
+            if (startingDialogue.Equals(CrucibleDialogueData.CrucibleDialogueNode.Empty))
+            {
+                return;
+            }
+
             if (this.ClosenessParts.Count <= closenessLevel)
             {
                 throw new ArgumentException($"Given closenessLevel is too large. Maximum closeness for this NPC is: {this.ClosenessParts.Count}");

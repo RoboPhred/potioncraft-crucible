@@ -24,9 +24,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     public class CrucibleCustomerConfig : CrucibleNPCConfig<CrucibleCustomerNpcTemplate>
     {
         /// <summary>
-        /// Gets or sets the collection of appearances that this npc will make and/or their chance of spawning normally.
+        /// Gets or sets the chance of this npc spawning.
         /// </summary>
-        public CrucibleNPCVisitInfoConfig VisitInfo { get; set; }
+        public float ChanceToAppear { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum number of days between NPC visits.
+        /// </summary>
+        public int MinimumDaysOfCooldown { get; set; } = -1;
+
+        /// <summary>
+        /// Gets or sets the minimum number of days between NPC visits.
+        /// </summary>
+        public int MaximumDaysOfCooldown { get; set; } = -1;
 
         /// <inheritdoc/>
         public override string ToString()
@@ -46,7 +56,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         protected override void OnApplyConfiguration(CrucibleCustomerNpcTemplate subject)
         {
             base.OnApplyConfiguration(subject);
-            this.VisitInfo.ApplyConfiguration(subject);
+
+            if (this.ChanceToAppear > 0)
+            {
+                subject.SpawnChance = this.ChanceToAppear;
+            }
+
+            if (this.MinimumDaysOfCooldown > 0 && this.MaximumDaysOfCooldown > 0)
+            {
+                if (this.MinimumDaysOfCooldown > this.MaximumDaysOfCooldown)
+                {
+                    throw new ArgumentException("MinimumDaysOfCooldown must be less than or equal to MaximumDaysOfCooldown!").
+                }
+
+                subject.DaysOfCooldown = (this.MinimumDaysOfCooldown, this.MaximumDaysOfCooldown);
+            }
         }
     }
 }
