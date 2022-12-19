@@ -16,6 +16,7 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
+    using System;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
@@ -48,11 +49,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// Gets or sets the array of items this trader has access to sell by default.
         /// </summary>
         public OneOrMany<CrucibleInventoryItemSoldByNpcStaticConfig> Items { get; set; }
-
-        /// <summary>
-        /// Gets or sets the day time for trader spawn. 0 is at the start of the day and 100 is at the end of the day.
-        /// </summary>
-        public int DayTimeForSpawn { get; set; } = int.MaxValue;
 
         /// <summary>
         /// Gets or sets the visual mood of the faction ("Bad", "Normal", "Good").
@@ -101,11 +97,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
             if (this.UnlockAtChapter > 0)
             {
                 subject.UnlockAtChapter = this.UnlockAtChapter;
-            }
-
-            if (this.DayTimeForSpawn != int.MaxValue)
-            {
-                subject.DayTimeForSpawn = this.DayTimeForSpawn;
             }
 
             if (!string.IsNullOrEmpty(this.VisualMood))

@@ -14,7 +14,6 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
     using System.Collections.Generic;
@@ -27,19 +26,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     public class CrucibleCustomersConfigRoot : CruciblePackageConfigRoot
     {
         /// <summary>
-        /// Gets or sets the list of ingredients.
+        /// Gets or sets the list of customers.
         /// </summary>
         public List<CrucibleCustomerConfig> Customers { get; set; } = new();
 
         /// <summary>
-        /// Gets or sets the list of ingredients.
+        /// Gets or sets the list of traders.
         /// </summary>
         public List<CrucibleTraderConfig> Traders { get; set; } = new();
 
         /// <summary>
         /// Gets or sets the list of ingredients.
         /// </summary>
-        public List<CrucibleFactionConfig> Factions { get; set; } = new();
+        // public List<CrucibleFactionConfig> Factions { get; set; } = new();
 
         /// <inheritdoc/>
         public override void ApplyConfiguration()
@@ -49,4 +48,3 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         }
     }
 }
-

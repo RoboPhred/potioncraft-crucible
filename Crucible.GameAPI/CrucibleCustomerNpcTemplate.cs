@@ -20,13 +20,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.Core.ValueContainers;
     using global::PotionCraft.DialogueSystem.Dialogue;
     using global::PotionCraft.DialogueSystem.Dialogue.Data;
     using global::PotionCraft.LocalizationSystem;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ManagersSystem.Npc;
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Settings;
     using global::PotionCraft.QuestSystem;
     using global::PotionCraft.ScriptableObjects;
+    using global::PotionCraft.Settings;
     using UnityEngine;
 
     /// <summary>
@@ -60,6 +64,49 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             set
             {
                 CrucibleLocalization.SetLocalizationKey($"#quest_text_{this.Quest.name}", value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the chance of this npc to appear.
+        /// </summary>
+        public float SpawnChance
+        {
+            get
+            {
+                if (Settings<NpcManagerSettings>.Asset.plotNpc.TryGetValue(this.NpcTemplate, out var spawnChance))
+                {
+                    return spawnChance;
+                }
+
+                throw new Exception("Unable to get spawn chance for plot npc because npc has not been added to the plot npc dictionary.");
+            }
+
+            set
+            {
+                if (value < 0 || value > 100) //TODO is this actually the upper limit?
+                {
+                    throw new ArgumentException("SpawnChance values must range from 0 to 100. Unable to set SpawnChance");
+                }
+
+                Settings<NpcManagerSettings>.Asset.plotNpc[this.NpcTemplate] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum number of days between NPC visits.
+        /// </summary>
+        public (int, int) DaysOfCooldown
+        {
+            get => (this.NpcTemplate.daysOfCooldown.min, this.NpcTemplate.daysOfCooldown.max);
+            set
+            {
+                if (value.Item1 < 0)
+                {
+                    throw new ArgumentException("DaysOfCooldown values must be greater than 0.");
+                }
+
+                this.NpcTemplate.daysOfCooldown = new MinMaxInt(value.Item1, value.Item2);
             }
         }
 
@@ -112,75 +159,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             if (!string.IsNullOrEmpty(copyAppearanceFrom))
             {
                 copyFromTemplate = GetNpcTemplateById(copyAppearanceFrom);
-                if (copyFromTemplate == null)
+                if (copyFromTemplate == null || copyFromTemplate.IsTrader)
                 {
-                    throw new ArgumentException($"Could not find NPC template with id \"{copyAppearanceFrom}\" to copy appearance from.", nameof(copyAppearanceFrom));
+                    throw new ArgumentException($"Could not find Customer NPC template with id \"{copyAppearanceFrom}\" to copy appearance from.", nameof(copyAppearanceFrom));
                 }
             }
 
-            var template = ScriptableObject.CreateInstance<NpcTemplate>();
+            var baseTemplate = CreateNpcTemplate(name, copyFromTemplate);
+            var template = new CrucibleCustomerNpcTemplate(baseTemplate);
 
-            // TODO add this new template to the copied from faction or create a new faction copy
-            // template.spawnChance = 1f;
-            var quest = ScriptableObject.CreateInstance<Quest>();
-            quest.name = name;
-            quest.karmaReward = 0;
-            quest.desiredEffects = new PotionEffect[0];
+            template.Appearance.CopyFrom(copyFromTemplate);
 
-            var copyFrom = NpcTemplate.allNpcTemplates.templates.Find(x => x.name == "HerbalistNpc 1");
-            if (copyFrom == null)
-            {
-                throw new Exception("Could not load dummy template to copy from.");
-            }
+            // Add template to plot npc list with a default spawn rate.
+            var npcSettings = Settings<NpcManagerSettings>.Asset;
+            npcSettings.plotNpc[baseTemplate] = npcSettings.plotNpcSpawnChance; //TODO does this line up with other plot npcs??
 
-            // TODO: How do prefabs differ?
-            var prefab = ScriptableObject.CreateInstance<NpcPrefab>();
-            var parentPrefab = copyFrom.baseParts.OfType<NpcPrefab>().FirstOrDefault();
-            if (parentPrefab == null)
-            {
-                throw new Exception("Copy target had no prefab!");
-            }
-
-            // FIXME: Create our own prefab.  Need to disable our prefab but re-enable when npc spawns
-            // var npcPrefab = UnityEngine.Object.Instantiate(parentPrefab.prefab);
-            // npcPrefab.transform.parent = GameObjectUtilities.CruciblePrefabRoot;
-
-            // TODO Fahlgorithm not sure if this is still a thing
-            // prefab.prefab = parentPrefab.prefab;
-            prefab.clothesColorPalette1 = parentPrefab.clothesColorPalette1;
-            prefab.clothesColorPalette2 = parentPrefab.clothesColorPalette2;
-            prefab.clothesColorPalette3 = parentPrefab.clothesColorPalette3;
-            prefab.clothesColorPalette4 = parentPrefab.clothesColorPalette4;
-
-            // Path NonAppearancePart seems to be unused.  It is not present on the herbalist NPC
-
-            // Used in getting potion reactions
-            var gender = ScriptableObject.CreateInstance<Gender>();
-            gender.gender = Gender.GenderSet.Female;
-
-            var dialogueData = GetTestDialogue2();
-
-            template.baseParts = new NonAppearancePart[] { quest, prefab, gender, dialogueData };
-
-            template.name = name;
-            template.appearance = new AppearanceContainer();
-
-            NpcTemplate.allNpcTemplates.templates.Add(template);
-
-            CrucibleLocalization.SetLocalizationKey($"quest_text_{name}", "I am a new quest!");
-
-            var crucibleTemplate = new CrucibleCustomerNpcTemplate(template);
-
-            if (copyFromTemplate != null)
-            {
-                crucibleTemplate.Appearance.CopyFrom(copyFromTemplate);
-            }
-            else
-            {
-                crucibleTemplate.Appearance.Clear();
-            }
-
-            return crucibleTemplate;
+            return template;
         }
 
         /// <summary>

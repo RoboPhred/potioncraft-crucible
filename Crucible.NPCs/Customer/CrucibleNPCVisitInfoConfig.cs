@@ -1,4 +1,4 @@
-// <copyright file="CrucibleFactionConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleInventoryItemSoldByConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
+    using System;
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
@@ -24,38 +25,48 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     /// <summary>
     /// Configuration specifying data on a faction.
     /// </summary>
-    public class CrucibleFactionConfig : CruciblePackageConfigRoot
+    public class CrucibleNPCVisitInfoConfig : CruciblePackageConfigNode
     {
-        // TODO  factionClasses, spawnChanceOneShotNpc, randomSpawnOneShotNpc, oneShotNpc
+        /// <summary>
+        /// Gets or sets the chance of this npc spawning.
+        /// </summary>
+        public float ChanceToAppear { get; set; }
 
         /// <summary>
-        /// Gets or sets the spawn chance configuration for this faction.
+        /// Gets or sets the collection of appearances that this npc will make.
         /// </summary>
-        public List<CrucibleSpawnChanceConfig> SpawnChance { get; set; } = new List<CrucibleSpawnChanceConfig> { new CrucibleRangeSpawnChanceConfig() };
+        public OneOrMany<CrucibleNpcCalendarVisitConfig> VisitDays { get; set; }
 
         /// <summary>
-        /// Gets or sets the minimum chapter this faction can spawn at.
+        /// Gets or sets the minimum number of days between NPC visits.
         /// </summary>
-        public int MinChapter { get; set; } = 1;
+        public int MinimumDaysOfCooldown { get; set; } = -1;
 
         /// <summary>
-        /// Gets or sets the maximum chapter this faction can spawn at.
+        /// Gets or sets the minimum number of days between NPC visits.
         /// </summary>
-        public int MaxChapter { get; set; } = 10;
+        public int MaximumDaysOfCooldown { get; set; }
 
         /// <summary>
-        /// Gets or sets the visual mood of the faction ("Bad", "Normal", "Good").
+        /// Apply the configuration to the subject.
         /// </summary>
-        public string VisualMood { get; set; } = "Normal";
-
-        /// <summary>
-        /// Gets or sets the spawn chance configuration for this faction.
-        /// </summary>
-        public List<CrucibleEffectChanceConfig> QuestEffectChances { get; set; } = new List<CrucibleEffectChanceConfig>();
-
-        public override void ApplyConfiguration()
+        /// <param name="subject">The subject to apply configuration to.</param>
+        public void ApplyConfiguration(CrucibleCustomerNpcTemplate subject)
         {
-            throw new System.NotImplementedException();
+            if (this.ChanceToAppear > 0)
+            {
+                subject.SpawnChance = this.ChanceToAppear;
+            }
+
+            if (this.MinimumDaysOfCooldown > 0)
+            {
+                subject.DaysOfCooldown = (this.MinimumDaysOfCooldown, this.MaximumDaysOfCooldown);
+            }
+
+            foreach (var visit in this.VisitDays)
+            {
+                visit.AddToDay(subject);
+            }
         }
     }
 }

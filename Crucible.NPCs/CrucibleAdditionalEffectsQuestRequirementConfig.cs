@@ -16,19 +16,22 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System.Collections.Generic;
-    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
-    using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
     /// Configuration specifying an addional quest requirement.
     /// </summary>
-    public class CrucibleAdditionalEffectsQuestRequirementConfig : CruciblePackageConfigNode
+    public class CrucibleAdditionalEffectsQuestRequirementConfig : CrucibleQuestRequirementConfig
     {
         /// <summary>
         /// Gets or sets a value indicating whether gets or sets whether or not this is an additional effect quest requirement.
         /// </summary>
         public bool AdditionalEffect { get; set; } = true;
+
+        /// <inheritdoc/>
+        public override CrucibleQuestRequirement GetSubject()
+        {
+            return CrucibleQuestRequirement.GetByName("AdditionalEffects");
+        }
     }
 }

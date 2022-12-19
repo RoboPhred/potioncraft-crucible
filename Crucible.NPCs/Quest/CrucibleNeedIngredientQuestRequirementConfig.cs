@@ -1,4 +1,4 @@
-// <copyright file="CrucibleNpcCalendarVisitConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleNeedIngredientQuestRequirementConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,37 +14,30 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System.Linq;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
 
     /// <summary>
-    /// Configuration for specifying on what day an npc appears.
+    /// Configuration specifying an addional quest requirement.
     /// </summary>
-    public class CrucibleNpcCalendarVisitConfig
+    public class CrucibleNeedIngredientQuestRequirementConfig : CrucibleQuestRequirementConfig
     {
         /// <summary>
-        /// Gets or sets the day this npc will appear on.
+        /// Gets or sets the ingredient ID which is needed for this quest requirement.
         /// </summary>
-        public int Day { get; set; }
+        public string NeedAtleastOneIngredient { get; set; }
 
-        /// <summary>
-        /// Adds the given npc template to this day.
-        /// </summary>
-        /// <param name="npcTemplate">The npc template to add to the configured day.</param>
-        public void AddToDay(CrucibleNpcTemplate npcTemplate)
+        /// <inheritdoc/>
+        public override CrucibleQuestRequirement GetSubject()
         {
-            if (this.Day == 0)
-            {
-                return;
-            }
+            return CrucibleQuestRequirement.GetByName("NeedOneParticularIngredient");
+        }
 
-            CrucibleDayManager.BackfillDaysTo(this.Day);
-            var count = CrucibleDayManager.GetNpcTemplatesForDay(this.Day).Count();
-            CrucibleDayManager.InsertNpcTemplateToDay(this.Day, count, npcTemplate);
+        /// <inheritdoc/>
+        public override void ApplyConfiguration(CrucibleQuestRequirement reqSubject)
+        {
+            reqSubject.RequirementIngredient = this.NeedAtleastOneIngredient;
         }
     }
 }
-

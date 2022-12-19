@@ -1,4 +1,4 @@
-// <copyright file="CrucibleNoIngredientQuestRequirementConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleWeakPotionQuestRequirementConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,19 +16,22 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System.Collections.Generic;
-    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
-    using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
     /// Configuration specifying an addional quest requirement.
     /// </summary>
-    public class CrucibleNoIngredientQuestRequirementConfig : CruciblePackageConfigNode
+    public class CrucibleWeakPotionQuestRequirementConfig : CrucibleQuestRequirementConfig
     {
         /// <summary>
-        /// Gets or sets the ingredient ID which cannot be included for this quest requirement.
+        /// Gets or sets a value indicating whether or not this is an only weak potions quest requirement.
         /// </summary>
-        public string IngredientNotAllowed { get; set; }
+        public bool OnlyWeakPotions { get; set; } = true;
+
+        /// <inheritdoc/>
+        public override CrucibleQuestRequirement GetSubject()
+        {
+            return CrucibleQuestRequirement.GetByName("OnlyWeakPotions");
+        }
     }
 }

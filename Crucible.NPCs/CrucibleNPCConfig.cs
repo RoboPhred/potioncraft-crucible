@@ -16,6 +16,7 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
+    using System;
     using System.Linq;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
@@ -46,20 +47,25 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public CrucibleNpcAppearanceConfig Appearance { get; set; }
 
         /// <summary>
-        /// Gets or sets the list of quests for this NPC.
-        /// </summary>
-        public OneOrMany<CrucibleNPCQuestConfig> Quests { get; set; } = new OneOrMany<CrucibleNPCQuestConfig>();
-
-        /// <summary>
         /// Gets or sets the list of dialogues for this NPC.
         /// </summary>
         public OneOrMany<CrucibleNPCDialogueConfig> Dialogue { get; set; } = new OneOrMany<CrucibleNPCDialogueConfig>();
+
+        /// <summary>
+        /// Gets or sets the list of closeness quests for this NPC.
+        /// </summary>
+        public OneOrMany<CrucibleNPCClosenessQuestConfig> Quests { get; set; } = new OneOrMany<CrucibleNPCClosenessQuestConfig>();
 
         /// <summary>
         /// Gets or sets the tags associated with this NPC.
         /// This allows ingredient mods to easily target this NPC if it is a trader without needing to know the template name.
         /// </summary>
         public OneOrMany<string> Tags { get; set; }
+
+        /// <summary>
+        /// Gets or sets the day time for npc to spawn. 0 is at the start of the day and 100 is at the end of the day.
+        /// </summary>
+        public int DayTimeForSpawn { get; set; } = int.MaxValue;
 
         /// <inheritdoc/>
         public override string ToString()
@@ -70,12 +76,35 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(T subject)
         {
+            if (this.DayTimeForSpawn != int.MaxValue)
+            {
+                subject.DayTimeForSpawn = this.DayTimeForSpawn;
+            }
+
             this.Appearance?.ApplyAppearance(subject);
 
             // Apply quests
-            foreach(var quest in this.Quests)
+            subject.PrepareClosenessQuestsForNewQuests();
+            var targetQuestList = subject.ClosenessQuests;
+            foreach (var quest in this.Quests)
             {
-                quest.ApplyConfiguration(subject);
+                if (quest.ClosenessLevel < 0)
+                {
+                    throw new ArgumentException($"Quest ClosenessLevel must be greater than zero!");
+                }
+
+                if (quest.ClosenessLevel >= targetQuestList.Count)
+                {
+                    throw new ArgumentException($"Given quest ClosenessLevel is larger than the maximum closeness for this trader ({targetQuestList.Count})");
+                }
+
+                var currentTarget = targetQuestList[quest.ClosenessLevel];
+                if (currentTarget.IsNull)
+                {
+                    currentTarget.GenerateEmptyQuest();
+                }
+
+                quest.ApplyConfiguration(currentTarget);
             }
 
             // Apply dialogues

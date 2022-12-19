@@ -1,4 +1,4 @@
-// <copyright file="CrucibleNeedIngredientQuestRequirementConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleMaxIngredientsQuestRequirementConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,19 +16,28 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System.Collections.Generic;
-    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
+    using System;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
-    using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
     /// Configuration specifying an addional quest requirement.
     /// </summary>
-    public class CrucibleNeedIngredientQuestRequirementConfig : CruciblePackageConfigNode
+    public class CrucibleMaxIngredientsQuestRequirementConfig : CrucibleQuestRequirementConfig
     {
         /// <summary>
-        /// Gets or sets the ingredient ID which is needed for this quest requirement.
+        /// Gets or sets the maximum number of ingredients allowed for this quest requirement. This should be a value between 1 and 3.
         /// </summary>
-        public string NeedAtleastOneIngredient { get; set; }
+        public int MaximumIngredients { get; set; } = 3;
+
+        /// <inheritdoc/>
+        public override CrucibleQuestRequirement GetSubject()
+        {
+            if (this.MaximumIngredients < 0 || this.MaximumIngredients > 3)
+            {
+                throw new ArgumentException("Maximum ingredient quest requirement must be greater than 0 and less than 3.");
+            }
+
+            return CrucibleQuestRequirement.GetByName($"MaxIngredients{this.MaximumIngredients}");
+        }
     }
 }

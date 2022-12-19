@@ -18,6 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
@@ -27,16 +28,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     /// </summary>
     public class CrucibleNPCQuestConfig : CruciblePackageConfigNode
     {
-        /// <summary>
-        /// Gets or sets the id of the quest. This should be unique among all quests.
-        /// </summary>
-        public string QuestID { get; set; }
-
-        /// <summary>
-        /// Gets or sets the main quest text.
-        /// </summary>
-        public LocalizedString QuestText { get; set; }
-
         /// <summary>
         /// Gets or sets the karma reward for the quest. This can be negative or positive.
         /// </summary>
@@ -65,7 +56,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <summary>
         /// Gets or sets the mandatory requirements for the quest.
         /// </summary>
-        public List<CrucibleQuestRequirementConfig> MandatoryRequirements { get; set; } = new List<CrucibleQuestRequirementConfig>();
+        public OneOrMany<CrucibleQuestRequirementConfig> MandatoryRequirements { get; set; } = new OneOrMany<CrucibleQuestRequirementConfig>();
 
         /// <summary>
         /// Gets or sets a value indicating whether gets or sets whether or not random requirements will be generated for the optional requirements list.
@@ -75,17 +66,34 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <summary>
         /// Gets or sets the optional requirements for the quest.
         /// </summary>
-        public List<CrucibleQuestRequirementConfig> OptionalRequirements { get; set; } = new List<CrucibleQuestRequirementConfig>();
+        public OneOrMany<CrucibleQuestRequirementConfig> OptionalRequirements { get; set; } = new OneOrMany<CrucibleQuestRequirementConfig>();
 
         /// <summary>
         /// Applies configuration to the NPC subject.
         /// </summary>
         /// <typeparam name="T">The type of the NPC.</typeparam>
         /// <param name="subject">The NPC to apply configuration to.</param>
-        public void ApplyConfiguration<T>(T subject)
-            where T : CrucibleNpcTemplate
+        public void ApplyConfiguration(CrucibleQuest subject)
         {
-            throw new NotImplementedException();
+            subject.KarmaReward = this.KarmaReward;
+            subject.DesiredEffects = this.DesiredEffects.ToList();
+            subject.MinMaxChapters = (this.MinimumChapter, this.MaximumChapter);
+
+            subject.GenerateRandomMandatoryRequirements = this.GenerateRandomMandatoryRequirements;
+            foreach(var mandatoryRequirement in this.MandatoryRequirements)
+            {
+                var reqSubject = mandatoryRequirement.GetSubject();
+                subject.AddMandatoryRequirement(reqSubject);
+                mandatoryRequirement.ApplyConfiguration(reqSubject);
+            }
+
+            subject.GenerateRandomOptionalRequirements = this.GenerateRandomOptionalRequirements;
+            foreach (var optionalRequirement in this.OptionalRequirements)
+            {
+                var reqSubject = optionalRequirement.GetSubject();
+                subject.AddOptionalRequirement(reqSubject);
+                optionalRequirement.ApplyConfiguration(reqSubject);
+            }
         }
     }
 }

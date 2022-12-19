@@ -16,19 +16,28 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System.Collections.Generic;
-    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
-    using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
     /// Configuration specifying an addional quest requirement.
     /// </summary>
-    public class CrucibleMainIngredientQuestRequirementConfig : CruciblePackageConfigNode
+    public class CrucibleMainIngredientQuestRequirementConfig : CrucibleQuestRequirementConfig
     {
         /// <summary>
         /// Gets or sets the ingredient ID of the main ingredient requirement for this quest requirement.
         /// </summary>
         public string MainIngredient { get; set; }
+
+        /// <inheritdoc/>
+        public override CrucibleQuestRequirement GetSubject()
+        {
+            return CrucibleQuestRequirement.GetByName("MainIngredient");
+        }
+
+        /// <inheritdoc/>
+        public override void ApplyConfiguration(CrucibleQuestRequirement reqSubject)
+        {
+            reqSubject.RequirementIngredient = this.MainIngredient;
+        }
     }
 }

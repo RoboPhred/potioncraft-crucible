@@ -1,4 +1,4 @@
-// <copyright file="CrucibleWeakPotionQuestRequirementConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleNPCClosenessQuestConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,19 +16,20 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
+    using System;
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
-    /// Configuration specifying an addional quest requirement.
+    /// Configuration specifying the chance a quest with a specific effect request will be chosen.
     /// </summary>
-    public class CrucibleWeakPotionQuestRequirementConfig : CruciblePackageConfigNode
+    public class CrucibleNPCClosenessQuestConfig : CrucibleNPCQuestConfig
     {
         /// <summary>
-        /// Gets or sets a value indicating whether or not this is an only weak potions quest requirement.
+        /// Gets or sets the closeness level this quest will appear at.
         /// </summary>
-        public bool OnlyWeakPotions { get; set; } = true;
+        public int ClosenessLevel { get; set; }
     }
 }

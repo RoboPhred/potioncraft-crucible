@@ -21,7 +21,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System.Linq;
     using global::PotionCraft.Core.ValueContainers;
     using global::PotionCraft.DialogueSystem.Dialogue;
-    using global::PotionCraft.DialogueSystem.Dialogue.Data;
     using global::PotionCraft.ManagersSystem;
     using global::PotionCraft.Npc.MonoBehaviourScripts;
     using global::PotionCraft.Npc.Parts;
@@ -54,6 +53,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         public Dictionary<int, TraderSettings> TraderSettings => this.GetTraderSettings();
 
+        /// <summary>
+        /// Gets or sets the chapter at which this npc unlocks.
+        /// </summary>
         public int UnlockAtChapter
         {
             get => this.NpcTemplate.unlockAtChapter;
@@ -68,20 +70,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
-        public int DayTimeForSpawn
-        {
-            get => this.NpcTemplate.dayTimeForSpawn;
-            set
-            {
-                if (value < 0 || value > 100)
-                {
-                    throw new ArgumentException("Day time values must range from 0 to 100. Unable to set DayTimeForSpawn");
-                }
-
-                this.NpcTemplate.dayTimeForSpawn = value;
-            }
-        }
-
+        /// <summary>
+        /// Gets or sets the visual mood of the trader.
+        /// </summary>
         public string VisualMood
         {
             get => this.NpcTemplate.visualMood.ToString();
@@ -98,12 +89,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        /// <summary>
+        /// Gets or sets the minimum and maximum days of cooldown between visits.
+        /// </summary>
         public (int, int) DaysOfCooldown
         {
             get => (this.NpcTemplate.daysOfCooldown.min, this.NpcTemplate.daysOfCooldown.max);
             set => this.NpcTemplate.daysOfCooldown = new MinMaxInt(value.Item1, value.Item2);
         }
 
+        /// <summary>
+        /// Gets or sets the minimum and maximum karma range that this trader will spawn in.
+        /// </summary>
         public (int, int) KarmaForSpawn
         {
             get => (this.NpcTemplate.karmaForSpawn.min, this.NpcTemplate.karmaForSpawn.max);
@@ -123,6 +120,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        /// <summary>
+        /// Gets or sets the starting gold of the trader.
+        /// </summary>
         public int Gold
         {
             get => this.GetTraderSettings().FirstOrDefault().Value?.gold ?? 1000;
@@ -137,6 +137,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        /// <summary>
+        /// Gets or sets the gender of the trader. This is used to pick between reactions.
+        /// </summary>
         public string Gender
         {
             get => this.RequireBasePart<Gender>().gender.ToString();
@@ -171,117 +174,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 }
             }
 
-            var template = ScriptableObject.CreateInstance<NpcTemplate>();
+            var baseTemplate = CreateNpcTemplate(name, copyFromTemplate);
+            var template = new CrucibleTraderNpcTemplate(baseTemplate);
+            template.NpcTemplate.closenessLevelUpIcon = copyFromTemplate.NpcTemplate.closenessLevelUpIcon;
+            template.NpcTemplate.dayTimeForSpawn = copyFromTemplate.NpcTemplate.dayTimeForSpawn;
 
-            template.name = name;
-
-            var copyFrom = copyFromTemplate.NpcTemplate;
-
-            template.closenessLevelUpIcon = copyFrom.closenessLevelUpIcon;
-            template.showDontComeAgainOption = copyFrom.showDontComeAgainOption;
-            template.maxClosenessForChapters = copyFrom.maxClosenessForChapters.ToList();
-            template.unlockAtChapter = copyFrom.unlockAtChapter;
-            template.dayTimeForSpawn = copyFrom.dayTimeForSpawn;
-            template.visualMood = copyFrom.visualMood;
-            template.daysOfCooldown = copyFrom.daysOfCooldown;
-            template.karmaForSpawn = copyFrom.karmaForSpawn;
-
-            // TODO: How do prefabs differ?
-            var prefab = ScriptableObject.CreateInstance<NpcPrefab>();
-            var parentPrefab = copyFrom.baseParts.OfType<NpcPrefab>().FirstOrDefault();
-            if (parentPrefab == null)
-            {
-                throw new Exception("Copy target had no prefab!");
-            }
-
-            // Used in getting potion reactions
-            var gender = ScriptableObject.CreateInstance<Gender>();
-            var parentGender = copyFrom.baseParts.OfType<Gender>().FirstOrDefault();
-            if (parentGender == null)
-            {
-                throw new Exception("Copy target had no Gender part!");
-            }
-
-            gender.gender = parentGender.gender;
-
-            var animationOnHaggle = ScriptableObject.CreateInstance<AnimationOnHaggle>();
-            var parentAnimationOnHaggle = copyFrom.baseParts.OfType<AnimationOnHaggle>().FirstOrDefault();
-            if (parentAnimationOnHaggle == null)
-            {
-                throw new Exception("Copy target had no AnimationOnHaggle part!");
-            }
-
-            animationOnHaggle.positionShift = parentAnimationOnHaggle.positionShift;
-            animationOnHaggle.rotationShift = parentAnimationOnHaggle.rotationShift;
-            animationOnHaggle.animationTime = parentAnimationOnHaggle.animationTime;
-            animationOnHaggle.ease = parentAnimationOnHaggle.ease;
-
-            var haggleStaticSettings = ScriptableObject.CreateInstance<HaggleStaticSettings>();
-            var parentHaggleStaticSettings = copyFrom.baseParts.OfType<HaggleStaticSettings>().FirstOrDefault();
-            if (parentHaggleStaticSettings == null)
-            {
-                throw new Exception("Copy target had no HaggleStaticSettings part!");
-            }
-
-            haggleStaticSettings.veryEasyTheme = parentHaggleStaticSettings.veryEasyTheme;
-            haggleStaticSettings.easyTheme = parentHaggleStaticSettings.easyTheme;
-            haggleStaticSettings.mediumTheme = parentHaggleStaticSettings.mediumTheme;
-            haggleStaticSettings.hardTheme = parentHaggleStaticSettings.hardTheme;
-            haggleStaticSettings.veryHardTheme = parentHaggleStaticSettings.veryHardTheme;
-
-            var queueSpace = ScriptableObject.CreateInstance<QueueSpace>();
-            var parentQueueSpace = copyFrom.baseParts.OfType<QueueSpace>().FirstOrDefault();
-            if (parentQueueSpace == null)
-            {
-                throw new Exception("Copy target had no QueueSpace part!");
-            }
-
-            queueSpace.spawnAfterPause = parentQueueSpace.spawnAfterPause;
-            queueSpace.pauseAfterSpawn = parentQueueSpace.pauseAfterSpawn;
-
-            template.baseParts = new NonAppearancePart[] { prefab, animationOnHaggle, haggleStaticSettings, queueSpace, gender };
-
-            // Copy closeness parts for each level of closeness
-            foreach (var closenessPart in copyFrom.closenessParts)
-            {
-                var parentDialogueData = copyFrom.baseParts.OfType<DialogueData>().FirstOrDefault();
-                if (parentDialogueData == null)
-                {
-                    throw new Exception("Copy target had no DialogueData part!");
-                }
-
-                var dialogueData = new CrucibleDialogueData(parentDialogueData).Clone();
-
-                var traderSettings = ScriptableObject.CreateInstance<TraderSettings>();
-                var parentTraderSettings = copyFrom.baseParts.OfType<TraderSettings>().FirstOrDefault();
-                if (parentTraderSettings == null)
-                {
-                    throw new Exception("Copy target had no TraderSettings part!");
-                }
-
-                traderSettings.canTrade = parentTraderSettings.canTrade;
-                traderSettings.gold = parentTraderSettings.gold;
-                traderSettings.deliveriesCategories = parentTraderSettings.deliveriesCategories.Select(CopyDeliveryCategory).ToList();
-
-                template.closenessParts.Add(new NonAppearanceClosenessPartsList
-                {
-                    parts = new List<NonAppearancePart> { dialogueData.DialogueData, traderSettings },
-                });
-            }
-
-            template.appearance = new AppearanceContainer();
-            var crucibleTemplate = new CrucibleTraderNpcTemplate(template);
-            crucibleTemplate.Appearance.CopyFrom(copyFromTemplate);
-
-            // Add trader to list of all templates
-            NpcTemplate.allNpcTemplates.templates.Add(template);
+            template.Appearance.CopyFrom(copyFromTemplate);
 
             // Add trader to the extra traders virtual queue so it can actually spawn like any other trader
             var traderQueue = Managers.Npc.globalSettings.extraTradersVirtualQueue;
             var traderPool = Traverse.Create(traderQueue).Field<List<string>>("temporaryPool").Value;
-            traderPool.Add(template.name);
+            traderPool.Add(template.NpcTemplate.name);
 
-            return crucibleTemplate;
+            return template;
         }
 
         /// <summary>
@@ -392,29 +297,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         private static Theme GetHaggleTheme(string themeId)
         {
             return Theme.GetByName(themeId);
-        }
-
-        private static Category CopyDeliveryCategory(Category source)
-        {
-            return new Category
-            {
-                name = source.name,
-                deliveries = source.deliveries.Select(CopyDelivery).ToList(),
-            };
-        }
-
-        private static Delivery CopyDelivery(Delivery source)
-        {
-            return new Delivery
-            {
-                name = source.name,
-                appearingChance = source.appearingChance,
-                minCount = source.minCount,
-                maxCount = source.maxCount,
-                applyDiscounts = source.applyDiscounts,
-                applyExtraCharge = source.applyExtraCharge,
-                item = source.item,
-            };
         }
 
         private Dictionary<int, TraderSettings> GetTraderSettings()

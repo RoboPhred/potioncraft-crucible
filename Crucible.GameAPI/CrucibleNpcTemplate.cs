@@ -23,6 +23,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using global::PotionCraft.ManagersSystem;
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Settings;
+    using global::PotionCraft.ObjectBased.Deliveries;
     using global::PotionCraft.QuestSystem;
     using UnityEngine;
 
@@ -67,6 +68,23 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public NpcTemplate NpcTemplate { get; }
 
         /// <summary>
+        /// Gets or sets the time of day that this npc spawns.
+        /// </summary>
+        public int DayTimeForSpawn
+        {
+            get => this.NpcTemplate.dayTimeForSpawn;
+            set
+            {
+                if (value < 0 || value > 100)
+                {
+                    throw new ArgumentException("Day time values must range from 0 to 100. Unable to set DayTimeForSpawn");
+                }
+
+                this.NpcTemplate.dayTimeForSpawn = value;
+            }
+        }
+
+        /// <summary>
         /// Gets the ID of this npc template.
         /// </summary>
         public string ID
@@ -96,6 +114,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Gets the maximum level of closeness for this NPC.
         /// </summary>
         public int MaximumCloseness => this.NpcTemplate.closenessParts.Count;
+
+        /// <summary>
+        /// Gets the closeness parts list for this NPC.
+        /// </summary>
+        public List<CrucibleQuest> ClosenessQuests => this.NpcTemplate.uniqueClosenessQuests.Select(q => new CrucibleQuest(q)).ToList();
 
         /// <summary>
         /// Gets the appearance controller for this npc.
@@ -148,6 +171,156 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                           from tag in pair.Value
                           select tag;
             return allTags.Distinct();
+        }
+
+        /// <summary>
+        /// Clears the existing closeness quest list and ensures the list is populated with the correct number of entries.
+        /// </summary>
+        public void PrepareClosenessQuestsForNewQuests()
+        {
+            for (var i = 0; i < this.MaximumCloseness; i++)
+            {
+                if (i == this.NpcTemplate.uniqueClosenessQuests.Count)
+                {
+                    this.NpcTemplate.uniqueClosenessQuests.Add(null);
+                    continue;
+                }
+
+                this.NpcTemplate.uniqueClosenessQuests[i] = null;
+            }
+        }
+
+        /// <summary>
+        /// Creates a new blank NPC template based on another template.
+        /// </summary>
+        /// <param name="name">The name of the template.</param>
+        /// <param name="copyAppearanceFrom">The NPC template to copy the appearance from.</param>
+        /// <returns>A new blank NPC template.</returns>
+        protected static NpcTemplate CreateNpcTemplate(string name, CrucibleNpcTemplate copyAppearanceFrom)
+        {
+            var template = ScriptableObject.CreateInstance<NpcTemplate>();
+            template.name = name;
+
+            var copyFrom = copyAppearanceFrom.NpcTemplate;
+
+            template.showDontComeAgainOption = copyFrom.showDontComeAgainOption;
+            template.maxClosenessForChapters = copyFrom.maxClosenessForChapters.ToList();
+            template.unlockAtChapter = copyFrom.unlockAtChapter;
+            template.visualMood = copyFrom.visualMood;
+            template.daysOfCooldown = copyFrom.daysOfCooldown;
+            template.karmaForSpawn = copyFrom.karmaForSpawn;
+
+            // TODO: How do prefabs differ?
+            var prefab = ScriptableObject.CreateInstance<NpcPrefab>();
+            var parentPrefab = copyFrom.baseParts.OfType<NpcPrefab>().FirstOrDefault();
+            if (parentPrefab == null)
+            {
+                throw new Exception("Copy target had no prefab!");
+            }
+
+            // Used in getting potion reactions
+            var gender = ScriptableObject.CreateInstance<Gender>();
+            var parentGender = copyFrom.baseParts.OfType<Gender>().FirstOrDefault();
+            if (parentGender == null)
+            {
+                throw new Exception("Copy target had no Gender part!");
+            }
+
+            gender.gender = parentGender.gender;
+
+            var animationOnHaggle = ScriptableObject.CreateInstance<AnimationOnHaggle>();
+            var parentAnimationOnHaggle = copyFrom.baseParts.OfType<AnimationOnHaggle>().FirstOrDefault();
+            if (parentAnimationOnHaggle == null)
+            {
+                throw new Exception("Copy target had no AnimationOnHaggle part!");
+            }
+
+            animationOnHaggle.positionShift = parentAnimationOnHaggle.positionShift;
+            animationOnHaggle.rotationShift = parentAnimationOnHaggle.rotationShift;
+            animationOnHaggle.animationTime = parentAnimationOnHaggle.animationTime;
+            animationOnHaggle.ease = parentAnimationOnHaggle.ease;
+
+            var haggleStaticSettings = ScriptableObject.CreateInstance<HaggleStaticSettings>();
+            var parentHaggleStaticSettings = copyFrom.baseParts.OfType<HaggleStaticSettings>().FirstOrDefault();
+            if (parentHaggleStaticSettings == null)
+            {
+                throw new Exception("Copy target had no HaggleStaticSettings part!");
+            }
+
+            haggleStaticSettings.veryEasyTheme = parentHaggleStaticSettings.veryEasyTheme;
+            haggleStaticSettings.easyTheme = parentHaggleStaticSettings.easyTheme;
+            haggleStaticSettings.mediumTheme = parentHaggleStaticSettings.mediumTheme;
+            haggleStaticSettings.hardTheme = parentHaggleStaticSettings.hardTheme;
+            haggleStaticSettings.veryHardTheme = parentHaggleStaticSettings.veryHardTheme;
+
+            var queueSpace = ScriptableObject.CreateInstance<QueueSpace>();
+            var parentQueueSpace = copyFrom.baseParts.OfType<QueueSpace>().FirstOrDefault();
+            if (parentQueueSpace == null)
+            {
+                throw new Exception("Copy target had no QueueSpace part!");
+            }
+
+            queueSpace.spawnAfterPause = parentQueueSpace.spawnAfterPause;
+            queueSpace.pauseAfterSpawn = parentQueueSpace.pauseAfterSpawn;
+
+            template.baseParts = new NonAppearancePart[] { prefab, animationOnHaggle, haggleStaticSettings, queueSpace, gender };
+
+            // Copy closeness parts for each level of closeness
+            foreach (var closenessPart in copyFrom.closenessParts)
+            {
+                var parentDialogueData = copyFrom.baseParts.OfType<DialogueData>().FirstOrDefault();
+                if (parentDialogueData == null)
+                {
+                    throw new Exception("Copy target had no DialogueData part!");
+                }
+
+                var dialogueData = new CrucibleDialogueData(parentDialogueData).Clone();
+
+                var traderSettings = ScriptableObject.CreateInstance<TraderSettings>();
+                var parentTraderSettings = copyFrom.baseParts.OfType<TraderSettings>().FirstOrDefault();
+                if (parentTraderSettings == null)
+                {
+                    continue;
+                }
+
+                traderSettings.canTrade = parentTraderSettings.canTrade;
+                traderSettings.gold = parentTraderSettings.gold;
+                traderSettings.deliveriesCategories = parentTraderSettings.deliveriesCategories.Select(CopyDeliveryCategory).ToList();
+
+                template.closenessParts.Add(new NonAppearanceClosenessPartsList
+                {
+                    parts = new List<NonAppearancePart> { dialogueData.DialogueData, traderSettings },
+                });
+            }
+
+            template.appearance = new AppearanceContainer();
+
+            // Add trader to list of all templates
+            NpcTemplate.allNpcTemplates.templates.Add(template);
+            return template;
+        }
+
+        private static Category CopyDeliveryCategory(Category source)
+        {
+            return new Category
+            {
+                name = source.name,
+                deliveries = source.deliveries.Select(CopyDelivery).ToList(),
+            };
+        }
+
+        private static Delivery CopyDelivery(Delivery source)
+        {
+            return new Delivery
+            {
+                name = source.name,
+                appearingChance = source.appearingChance,
+                minCount = source.minCount,
+                maxCount = source.maxCount,
+                applyDiscounts = source.applyDiscounts,
+                applyExtraCharge = source.applyExtraCharge,
+                item = source.item,
+            };
         }
 
         /// <inheritdoc/>

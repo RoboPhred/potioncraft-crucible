@@ -16,7 +16,6 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
@@ -31,7 +30,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     [DuckTypeCandidate(typeof(CrucibleNoIngredientQuestRequirementConfig))]
     [DuckTypeCandidate(typeof(CrucibleStrongPotionQuestRequirementConfig))]
     [DuckTypeCandidate(typeof(CrucibleWeakPotionQuestRequirementConfig))]
-    public class CrucibleQuestRequirementConfig : CruciblePackageConfigNode
+    public abstract class CrucibleQuestRequirementConfig : CruciblePackageConfigNode
     {
+        /// <summary>
+        /// Gets the subject corresponding to the type of requirement.
+        /// </summary>
+        /// <returns>The subject corresponding to the type of requirement.</returns>
+        public abstract CrucibleQuestRequirement GetSubject();
+
+        /// <summary>
+        /// Applies configuration to the subject.
+        /// </summary>
+        /// <param name="reqSubject">The subject to apply configuration to.</param>
+        public virtual void ApplyConfiguration(CrucibleQuestRequirement reqSubject)
+        {
+        }
     }
 }
