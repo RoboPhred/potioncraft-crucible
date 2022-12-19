@@ -115,11 +115,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 case StartDialogueNodeData startingNodeData:
                     // TODO is there anything special we need to do for the starting node?
                     break;
-                case DialogueNodeData castSource:
+                case DialogueNodeData dialogNodeData:
                     // Localize node strings
                     var localizationkey = $"{localizationKey}_dialogue_{localizationKeyUniqueId}";
                     CrucibleLocalization.SetLocalizationKey(localizationkey, node.Dialogue);
-                    (nodeData as DialogueNodeData).key = localizationkey;
+                    dialogNodeData.key = localizationkey;
 
                     // Increment the unique id so the next dialogue node has a new localization key
                     localizationKeyUniqueId++;
