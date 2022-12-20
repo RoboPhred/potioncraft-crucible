@@ -36,7 +36,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public List<CrucibleTraderConfig> Traders { get; set; } = new();
 
         /// <summary>
-        /// Gets or sets the list of ingredients.
+        /// Gets or sets the list of factions.
         /// </summary>
         // public List<CrucibleFactionConfig> Factions { get; set; } = new();
 

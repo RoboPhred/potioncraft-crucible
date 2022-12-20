@@ -49,12 +49,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <summary>
         /// Gets or sets the list of dialogues for this NPC.
         /// </summary>
-        public OneOrMany<CrucibleNPCDialogueConfig> Dialogue { get; set; } = new OneOrMany<CrucibleNPCDialogueConfig>();
+        public OneOrMany<CrucibleNPCDialogueConfig> Dialogue { get; set; } = new ();
 
         /// <summary>
         /// Gets or sets the list of closeness quests for this NPC.
         /// </summary>
-        public OneOrMany<CrucibleNPCClosenessQuestConfig> Quests { get; set; } = new OneOrMany<CrucibleNPCClosenessQuestConfig>();
+        public OneOrMany<CrucibleNPCClosenessQuestConfig> Quests { get; set; } = new ();
 
         /// <summary>
         /// Gets or sets the tags associated with this NPC.

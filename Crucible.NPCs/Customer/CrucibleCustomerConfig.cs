@@ -16,6 +16,7 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
+    using System;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
 
     /// <summary>
@@ -66,7 +67,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
             {
                 if (this.MinimumDaysOfCooldown > this.MaximumDaysOfCooldown)
                 {
-                    throw new ArgumentException("MinimumDaysOfCooldown must be less than or equal to MaximumDaysOfCooldown!").
+                    throw new ArgumentException("MinimumDaysOfCooldown must be less than or equal to MaximumDaysOfCooldown!");
                 }
 
                 subject.DaysOfCooldown = (this.MinimumDaysOfCooldown, this.MaximumDaysOfCooldown);

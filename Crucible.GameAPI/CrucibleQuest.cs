@@ -49,6 +49,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public bool IsNull => this.Quest == null;
 
         /// <summary>
+        /// Gets or sets the uniqueId for this quest.
+        /// </summary>
+        public string ID
+        {
+            get => this.Quest.name;
+            set => this.Quest.name = value;
+        }
+
+        /// <summary>
         /// Gets or sets the karma reward for completing this quest.
         /// </summary>
         public int KarmaReward
@@ -123,6 +132,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public void AddOptionalRequirement(CrucibleQuestRequirement requirement)
         {
             Traverse.Create(this.Quest).Field<List<QuestRequirementInQuest>>("optionalRequirements").Value.Add(requirement.Requirement);
+        }
+
+        /// <summary>
+        /// Sets the localized text for the quest.
+        /// </summary>
+        /// <param name="questText">The main localized text for the quest.</param>
+        /// <param name="subsequentQuestText">The localized text for subsequent instances of the quest.</param>
+        public void SetQuestText(LocalizedString questText, LocalizedString subsequentQuestText)
+        {
+            var localizationkey = $"unique_quest_text_{this.ID}_first_visit";
+            CrucibleLocalization.SetLocalizationKey(localizationkey, questText);
+            var subsequentLocalizationkey = $"unique_quest_text_{this.ID}_other_visits";
+            CrucibleLocalization.SetLocalizationKey(subsequentLocalizationkey, subsequentQuestText);
         }
     }
 }

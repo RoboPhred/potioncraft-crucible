@@ -22,12 +22,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
+    using YamlDotNet.Serialization;
 
     /// <summary>
     /// Configuration specifying the chance a quest with a specific effect request will be chosen.
     /// </summary>
     public class CrucibleNPCQuestConfig : CruciblePackageConfigNode
     {
+        /// <summary>
+        /// Gets or sets the ID of this quest.
+        /// </summary>
+        [YamlMember(Alias = "id")]
+        public string ID { get; set; }
+
         /// <summary>
         /// Gets or sets the karma reward for the quest. This can be negative or positive.
         /// </summary>
@@ -36,7 +43,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <summary>
         /// Gets or sets the desired effects for the quest.
         /// </summary>
-        public OneOrMany<string> DesiredEffects { get; set; } = new OneOrMany<string>();
+        public OneOrMany<string> DesiredEffects { get; set; } = new ();
+
+        /// <summary>
+        /// Gets or sets the main quest text.
+        /// </summary>
+        public LocalizedString QuestText { get; set; }
+
+        /// <summary>
+        /// Gets or sets the quest text for subsequent visits if the quest isn't completeled the first time.
+        /// </summary>
+        public LocalizedString SubsequentVisitsQuestText { get; set; }
 
         /// <summary>
         /// Gets or sets the minimum chapter needed to encounter this quest.
@@ -56,7 +73,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <summary>
         /// Gets or sets the mandatory requirements for the quest.
         /// </summary>
-        public OneOrMany<CrucibleQuestRequirementConfig> MandatoryRequirements { get; set; } = new OneOrMany<CrucibleQuestRequirementConfig>();
+        public OneOrMany<CrucibleQuestRequirementConfig> MandatoryRequirements { get; set; } = new ();
 
         /// <summary>
         /// Gets or sets a value indicating whether gets or sets whether or not random requirements will be generated for the optional requirements list.
@@ -66,7 +83,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <summary>
         /// Gets or sets the optional requirements for the quest.
         /// </summary>
-        public OneOrMany<CrucibleQuestRequirementConfig> OptionalRequirements { get; set; } = new OneOrMany<CrucibleQuestRequirementConfig>();
+        public OneOrMany<CrucibleQuestRequirementConfig> OptionalRequirements { get; set; } = new ();
 
         /// <summary>
         /// Applies configuration to the NPC subject.
@@ -75,9 +92,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <param name="subject">The NPC to apply configuration to.</param>
         public void ApplyConfiguration(CrucibleQuest subject)
         {
+            subject.ID = this.PackageMod.Namespace + "." + this.ID;
             subject.KarmaReward = this.KarmaReward;
             subject.DesiredEffects = this.DesiredEffects.ToList();
             subject.MinMaxChapters = (this.MinimumChapter, this.MaximumChapter);
+            subject.SetQuestText(this.QuestText, this.SubsequentVisitsQuestText);
 
             subject.GenerateRandomMandatoryRequirements = this.GenerateRandomMandatoryRequirements;
             foreach(var mandatoryRequirement in this.MandatoryRequirements)
