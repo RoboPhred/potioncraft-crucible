@@ -83,7 +83,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
             var targetQuestList = subject.ClosenessQuests;
             var orderedQuests = this.Quests.OrderByDescending(d => d.ClosenessRequirement).ToList();
             var appliedQuests = 0;
-            for (var closeness = 0; closeness < subject.MaximumCloseness; closeness++)
+            var maxCloseness = subject.MaximumCloseness;
+            for (var closeness = 0; closeness < maxCloseness; closeness++)
             {
                 var questToApply = orderedQuests.FirstOrDefault(d => d.ClosenessRequirement >= 0 && d.ClosenessRequirement <= closeness);
                 if (questToApply == null)
@@ -101,7 +102,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                     var quest = subject.ClosenessQuests[closeness];
 
                     // If no id was provided generate a unique quest id using the closeness level
-                    if (string.IsNullOrEmpty(questToApply.Quest.ID))
+                    if (string.IsNullOrEmpty(questToApply.Quest.ID) || (int.TryParse(questToApply.Quest.ID, out int intId) && intId == closeness - 1))
                     {
                         questToApply.Quest.ID = closeness.ToString();
                     }

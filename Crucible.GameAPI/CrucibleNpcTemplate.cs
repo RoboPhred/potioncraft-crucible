@@ -460,7 +460,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             var closenessPart = this.ClosenessParts[closenessLevel];
-            var dialogueData = CrucibleDialogueData.CreateDialogueData(this.ID, startingDialogue, this is CrucibleCustomerNpcTemplate);
+            var dialogueData = CrucibleDialogueData.CreateDialogueData($"{this.ID}_{closenessLevel}", startingDialogue, this is CrucibleCustomerNpcTemplate);
             var dialogueIndex = closenessPart.parts.FindIndex(p => p is DialogueData);
             if (dialogueIndex == -1)
             {

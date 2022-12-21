@@ -64,7 +64,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // FIXME: Override value at LocalizationSystem.GetText(), not Key.GetText()
             KeyGetTextEvent.OnGetText += (_, e) =>
             {
-                Debug.Log($"Trying to get localized text for {e.Key}"); //TODO never being hit for our quest text
                 if (Localization.TryGetValue(e.Key, out var value))
                 {
                     e.Result = value;

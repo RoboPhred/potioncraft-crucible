@@ -22,6 +22,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using global::PotionCraft.DialogueSystem.Dialogue;
     using global::PotionCraft.DialogueSystem.Dialogue.Data;
     using global::PotionCraft.DialogueSystem.Dialogue.LocalProperties;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ObjectBased.UIElements.Dialogue;
     using UnityEngine;
 
     /// <summary>
@@ -158,9 +160,30 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                         AnswerText = "[1]",
                     });
                 }
+
+                // Non-quest nodes can only have 4 answers max
+                if (dialogueNode.Answers.Count > 4)
+                {
+                    dialogueNode.Answers = dialogueNode.Answers.Take(4).ToList();
+                }
+
+                // Ensure there is a way to get back to the beginning or end the conversation which is still possible.
+                // If there is no way back add a back button to prevent soft lock.
+                if (dialogueNode.Answers.All(a => !a.CanGoBack))
+                {
+                    if (dialogueNode.Answers.Count > 3)
+                    {
+                        dialogueNode.Answers = dialogueNode.Answers.Take(3).ToList();
+                    }
+
+                    dialogueNode.Answers.Add(new CrucibleAnswerNode
+                    {
+                        AnswerText = "[1]",
+                    });
+                }
             }
 
-            foreach(var answer in dialogueNode.Answers)
+            foreach (var answer in dialogueNode.Answers)
             {
                 CreateAnswer(localizationKey, ref localizationKeyUniqueId, dialogueData, newNode, answer);
             }
@@ -172,6 +195,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             var answerKey = $"{localizationKey}_dialogue_answer_{localizationKeyUniqueId}";
             CrucibleLocalization.SetLocalizationKey(answerKey, answer.AnswerText);
+
+            // Increment the unique id so the next dialogue node has a new localization key
+            localizationKeyUniqueId++;
+
             var newAnswer = new AnswerData
             {
                 guid = Guid.NewGuid().ToString(),
@@ -260,9 +287,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // Switch on node type to populate data specific to this node type
             switch (nodeData)
             {
-                case StartDialogueNodeData startingNodeData:
-                    // TODO is there anything special we need to do for the starting node?
-                    break;
                 case DialogueNodeData dialogNodeData:
                     // Localize node strings
                     var dialogueLocalizationKey = $"{localizationKey}_dialogue_{localizationKeyUniqueId}";
@@ -387,6 +411,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             /// Gets or sets a value indicating whether or not this node is a quest node. This value should be true for a trader's special request closeness quest node.
             /// </summary>
             public bool IsQuestNode { get; set; }
+
+            /// <summary>
+            /// Gets a value indicating whether or not this or any child nodes are a quest node.
+            /// </summary>
+            public bool HasQuestNode => this.IsQuestNode || this.Answers.Any(a => a.NextNode?.HasQuestNode ?? false);
+
+            /// <summary>
+            /// Gets a value indicating whether or not any child node can go back to the beginning or end the conversation.
+            /// </summary>
+            public bool HasWayBackToBeginning => this.Answers.Any(a => a.HasWayBackToBeginning);
         }
 
         /// <summary>
@@ -413,6 +447,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             /// Gets or sets a value indicating whether or not this node is the answer which ends interaction with the trader. There should only be a single one of these nodes in the dialog system.
             /// </summary>
             public bool IsConversationEndAnswer { get; set; }
+
+            /// <summary>
+            /// Gets or sets a value indicating whether or not this node is the answer which goes back to the beginning of the conversation.
+            /// </summary>
+            public bool IsBackToBeginningAnswer { get; set; }
+
+            /// <summary>
+            /// Gets a value indicating whether or not this or any child node can go back to the parent node.
+            /// </summary>
+            public bool CanGoBack => this.NextNode == null || this.IsBackToBeginningAnswer || this.IsConversationEndAnswer || this.NextNode.HasWayBackToBeginning;
+
+            /// <summary>
+            /// Gets a value indicating whether or not this or any child node can go back to the beginning or end the conversation.
+            /// </summary>
+            public bool HasWayBackToBeginning => this.IsBackToBeginningAnswer || this.IsConversationEndAnswer || (this.NextNode?.HasWayBackToBeginning ?? false);
         }
     }
 }

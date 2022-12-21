@@ -69,7 +69,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
             // Customers must always have a quest node as their starting dialogue
             foreach(var quest in this.Quests)
             {
-                quest.Dialogue.IsQuestNode = true;
+                if (!quest.Dialogue.HasQuestNode)
+                {
+                    quest.Dialogue.IsQuestNode = true;
+                }
             }
 
             base.OnApplyConfiguration(subject);
