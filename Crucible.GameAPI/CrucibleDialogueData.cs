@@ -21,6 +21,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System.Linq;
     using global::PotionCraft.DialogueSystem.Dialogue;
     using global::PotionCraft.DialogueSystem.Dialogue.Data;
+    using global::PotionCraft.DialogueSystem.Dialogue.LocalProperties;
     using UnityEngine;
 
     /// <summary>
@@ -60,6 +61,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public static CrucibleDialogueData CreateDialogueData(string localizationKey, CrucibleDialogueNode startingDialogue, bool isCustomer)
         {
             var dialogue = new CrucibleDialogueData();
+            dialogue.DialogueData.name = $"{localizationKey}_dialogue";
 
             var localizationKeyUniqueId = 0;
 
@@ -67,17 +69,20 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             dialogue.DialogueData.startDialogue = GetNode<StartDialogueNodeData>(localizationKey, ref localizationKeyUniqueId, startingDialogue);
             dialogue.DialogueData.endsOfDialogue.Add(GetNode<EndOfDialogueNodeData>(localizationKey, ref localizationKeyUniqueId, startingDialogue));
 
-            // Mark the initial node as a quest node if this is a customer
-            if (isCustomer)
-            {
-                startingDialogue.IsQuestNode = true;
-            }
-
             // Naviate through the provided dialogue nodes constructing a list of nodes and edges
-            var node = CreateDialogueNode(localizationKey, ref localizationKeyUniqueId, dialogue, startingDialogue);
+            CreateDialogueNode(localizationKey, ref localizationKeyUniqueId, dialogue, startingDialogue, dialogue.DialogueData.startDialogue.guid);
 
-            // Create an edge linking the starting node to the first dialogue node
-            CreateEdge(dialogue, dialogue.DialogueData.startDialogue.guid, node.guid);
+            // Create these text nodes which are used to populate text for the end of dialogue node and the dialogue_back button
+            dialogue.DialogueData.textProperties.Add(new TextProperty
+            {
+                entity = Property.TextEntity.Key,
+                name = "#end_of_dialogue",
+            });
+            dialogue.DialogueData.textProperties.Add(new TextProperty
+            {
+                entity = Property.TextEntity.Key,
+                name = "dialogue_back",
+            });
 
             return dialogue;
         }
@@ -115,7 +120,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return new CrucibleDialogueData(dialogueData);
         }
 
-        private static NodeData CreateDialogueNode(string localizationKey, ref int localizationKeyUniqueId, CrucibleDialogueData dialogueData, CrucibleDialogueNode dialogueNode)
+        private static NodeData CreateDialogueNode(string localizationKey, ref int localizationKeyUniqueId, CrucibleDialogueData dialogueData, CrucibleDialogueNode dialogueNode, string parentGuid)
         {
             NodeData newNode;
             if (dialogueNode.IsQuestNode)
@@ -123,6 +128,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 var newQuestNode = GetNode<PotionRequestNodeData>(localizationKey, ref localizationKeyUniqueId, dialogueNode);
                 dialogueData.DialogueData.potionRequests.Add(newQuestNode);
                 newNode = newQuestNode;
+
+                // Create edge leading to this node from parent
+                CreateEdge(dialogueData, parentGuid, newQuestNode.guid);
+
+                // Create edge leading to the end node for completing the potion request
+                CreateEdge(dialogueData, newQuestNode.guid, dialogueData.DialogueData.endsOfDialogue.First().guid);
 
                 // Quest nodes are only allowed a single dynamic answer
                 if (dialogueNode.Answers.Count > 1)
@@ -135,6 +146,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 var newDialogueNode = GetNode<DialogueNodeData>(localizationKey, ref localizationKeyUniqueId, dialogueNode);
                 dialogueData.DialogueData.dialogues.Add(newDialogueNode);
                 newNode = newDialogueNode;
+
+                // Create edge leading to this node from parent
+                CreateEdge(dialogueData, parentGuid, newDialogueNode.guid);
+
+                // Ensure every dialogue has a back button
+                if (!dialogueNode.Answers.Any())
+                {
+                    dialogueNode.Answers.Add(new CrucibleAnswerNode
+                    {
+                        AnswerText = "[1]",
+                    });
+                }
             }
 
             foreach(var answer in dialogueNode.Answers)
@@ -147,36 +170,38 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         private static void CreateAnswer(string localizationKey, ref int localizationKeyUniqueId, CrucibleDialogueData dialogueData, NodeData parent, CrucibleAnswerNode answer)
         {
-            var localizationkey = $"{localizationKey}_dialogue_{localizationKeyUniqueId}";
-            CrucibleLocalization.SetLocalizationKey(localizationkey, answer.AnswerText);
+            var answerKey = $"{localizationKey}_dialogue_answer_{localizationKeyUniqueId}";
+            CrucibleLocalization.SetLocalizationKey(answerKey, answer.AnswerText);
             var newAnswer = new AnswerData
             {
                 guid = Guid.NewGuid().ToString(),
-                key = localizationKey,
+                key = answerKey,
             };
             AddAnswerToParent(parent, newAnswer);
 
             // If there is no next node and this node is not a conversation end node then add an edge leading back to the first dialogue
-            NodeData nextNode = null;
-            if (answer.NextNode.Equals(CrucibleDialogueNode.Empty) && !answer.IsConversationEndAnswer)
+            if (answer.NextNode == null && !answer.IsConversationEndAnswer)
             {
-                nextNode = GetNodeToGoBackTo(dialogueData, parent);
-            }
-            else if (answer.IsConversationEndAnswer)
-            {
-                nextNode = dialogueData.DialogueData.endsOfDialogue.First();
-            }
-            else if (!answer.NextNode.Equals(CrucibleDialogueNode.Empty))
-            {
-                nextNode = CreateDialogueNode(localizationKey, ref localizationKeyUniqueId, dialogueData, answer.NextNode);
-            }
+                var nextNode = GetNodeToGoBackTo(dialogueData, parent);
 
-            if (nextNode == null)
-            {
+                // Create edge from this answer to the previous dialogue
+                CreateEdge(dialogueData, newAnswer.guid, nextNode.guid);
                 return;
             }
 
-            CreateEdge(dialogueData, newAnswer.guid, nextNode.guid);
+            if (answer.IsConversationEndAnswer)
+            {
+                var nextNode = dialogueData.DialogueData.endsOfDialogue.First();
+
+                // Create edge from this answer to the end node
+                CreateEdge(dialogueData, newAnswer.guid, nextNode.guid);
+                return;
+            }
+
+            if (answer.NextNode != null)
+            {
+                CreateDialogueNode(localizationKey, ref localizationKeyUniqueId, dialogueData, answer.NextNode, newAnswer.guid);
+            }
         }
 
         private static NodeData GetNodeToGoBackTo(CrucibleDialogueData dialogueData, NodeData node)
@@ -184,14 +209,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var parent = dialogueData.DialogueData.edges.FirstOrDefault(e => e.input.Equals(node.guid)).output;
 
             // Check if this is a child node of a potion request (quest) node and return that if it is.
-            var matchingPotionRequestNode = dialogueData.DialogueData.potionRequests.FirstOrDefault(p => p.guid.Equals(parent));
+            var matchingPotionRequestNode = dialogueData.DialogueData.potionRequests.FirstOrDefault(p => p.morePort.guid.Equals(parent));
             if (matchingPotionRequestNode != null)
             {
                 return matchingPotionRequestNode;
             }
 
             // Get the parent dialogue node.
-            var matchingDialogueNode = dialogueData.DialogueData.dialogues.FirstOrDefault(p => p.guid.Equals(parent));
+            var matchingDialogueNode = dialogueData.DialogueData.dialogues.FirstOrDefault(p => p.answers.Any(a => a.guid.Equals(parent)));
             if (matchingDialogueNode != null)
             {
                 return matchingDialogueNode;
@@ -216,16 +241,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         private static void CreateEdge(CrucibleDialogueData dialogueData, string output, string input)
         {
-            throw new NotImplementedException();
+            dialogueData.DialogueData.edges.Add(new EdgeData
+            {
+                output = output,
+                input = input,
+            });
         }
 
         private static T GetNode<T>(string localizationKey, ref int localizationKeyUniqueId, CrucibleDialogueNode node)
-            where T : NodeData
+            where T : NodeData, new()
         {
-            var nodeData = default(T);
-
             // Populate basic node data
-            nodeData.guid = Guid.NewGuid().ToString();
+            var nodeData = new T
+            {
+                guid = Guid.NewGuid().ToString(),
+            };
 
             // Switch on node type to populate data specific to this node type
             switch (nodeData)
@@ -236,7 +266,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 case DialogueNodeData dialogNodeData:
                     // Localize node strings
                     var dialogueLocalizationKey = $"{localizationKey}_dialogue_{localizationKeyUniqueId}";
-                    CrucibleLocalization.SetLocalizationKey(dialogueLocalizationKey, node.Dialogue);
+                    CrucibleLocalization.SetLocalizationKey(dialogueLocalizationKey, node.DialogueText);
                     dialogNodeData.key = dialogueLocalizationKey;
 
                     // Increment the unique id so the next dialogue node has a new localization key
@@ -248,13 +278,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         private static T CopyNode<T>(T source)
-            where T : NodeData
+            where T : NodeData, new()
         {
-            var newNode = default(T);
-            newNode.guid = source.guid;
-            newNode.position = source.position;
+            var newNode = new T
+            {
+                guid = source.guid,
+                position = source.position,
+            };
 
-            switch(source)
+            switch (source)
             {
                 case DialogueNodeData castSource:
                     (newNode as DialogueNodeData).title = castSource.title;
@@ -339,17 +371,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Currently there is no way to create a dialogue tree from a Potion Craft <see cref="DialogueData"/>.
         /// These structs are used only to construct Potion Craft <see cref="DialogueData"/>.
         /// </summary>
-        public struct CrucibleDialogueNode : IEqualityComparer<CrucibleDialogueNode>
+        public class CrucibleDialogueNode
         {
-            /// <summary>
-            /// Gets the default value for any node which should be treated like a null value for a class.
-            /// </summary>
-            public static CrucibleDialogueNode Empty { get; } = new CrucibleDialogueNode { };
-
             /// <summary>
             /// Gets or sets the NPC's dialogue text for this node. This can be left blank for quest nodes.
             /// </summary>
-            public LocalizedString Dialogue { get; set; }
+            public LocalizedString DialogueText { get; set; }
 
             /// <summary>
             /// Gets or sets the list of possible responses to this dialogue node.
@@ -360,24 +387,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             /// Gets or sets a value indicating whether or not this node is a quest node. This value should be true for a trader's special request closeness quest node.
             /// </summary>
             public bool IsQuestNode { get; set; }
-
-            /// <inheritdoc/>
-            public bool Equals(CrucibleDialogueNode x, CrucibleDialogueNode y)
-            {
-                return x.Dialogue.Equals(y.Dialogue);
-            }
-
-            /// <inheritdoc/>
-            public int GetHashCode(CrucibleDialogueNode obj)
-            {
-                return obj.Dialogue.GetHashCode();
-            }
         }
 
         /// <summary>
         /// Defines a possible response to an NPC's dialogue.
         /// </summary>
-        public struct CrucibleAnswerNode
+        public class CrucibleAnswerNode
         {
             /// <summary>
             /// Gets or sets the text used to populate the answer button.
@@ -387,12 +402,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             /// <summary>
             /// Gets or sets the next node which would be loaded if this answer is selected. If this is equalt to CrucibleDialogNode.Empty this answer is treated as either the end of the conversation or as an answer which should return to the starting node.
             /// </summary>
-            public CrucibleDialogueNode NextNode { get; set; } = CrucibleDialogueNode.Empty;
+            public CrucibleDialogueNode NextNode { get; set; }
 
             /// <summary>
             /// Gets or sets a value indicating whether or not this node is the answer which opens the trader's trade screen. There should only be a single one of these nodes in the dialog system.
             /// </summary>
-            public bool IsTradeAnswer { get; set; }
+            public bool IsTradeAnswer { get; set; } //TODO implement
 
             /// <summary>
             /// Gets or sets a value indicating whether or not this node is the answer which ends interaction with the trader. There should only be a single one of these nodes in the dialog system.

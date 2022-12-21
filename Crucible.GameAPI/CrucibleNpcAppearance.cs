@@ -18,6 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Linq;
+    using global::PotionCraft.Npc.MonoBehaviourScripts.Settings;
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Appearance;
     using global::PotionCraft.Npc.Parts.Settings;
@@ -484,8 +485,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var sourceTemplate = sourceAppearance.npcTemplate;
 
-            // TOOD Fahlgorithm not sure if this is still a thing
-            // prefab.prefab = sourcePrefab.prefab;
+            prefab.settings = CloneSettings(sourcePrefab.settings);
             prefab.clothesColorPalette1 = sourcePrefab.clothesColorPalette1;
             prefab.clothesColorPalette2 = sourcePrefab.clothesColorPalette2;
             prefab.clothesColorPalette3 = sourcePrefab.clothesColorPalette3;
@@ -525,6 +525,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 skullShapeFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature1),
                 skullShapeFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature2),
                 skullShapeFeature3 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature3),
+            };
+        }
+
+        private static NpcSettings CloneSettings(NpcSettings settings)
+        {
+            return new NpcSettings
+            {
+                headSettings = settings.headSettings.Clone(),
+                emotionsSettings = settings.emotionsSettings.Clone(),
+                potionFlyingToNpcSettings = settings.potionFlyingToNpcSettings.Clone(),
+                otherSettings = settings.otherSettings.Clone(),
             };
         }
 

@@ -45,10 +45,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         internal CrucibleCustomerNpcTemplate(NpcTemplate npcTemplate)
             : base(npcTemplate)
         {
-            if (this.Quest == null)
-            {
-                throw new ArgumentException("NPC Template does not contain a Quest.", nameof(npcTemplate));
-            }
         }
 
         /// <summary>
@@ -190,6 +186,46 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public bool Equals(CrucibleCustomerNpcTemplate other)
         {
             return this.NpcTemplate == other.NpcTemplate;
+        }
+
+        /// <summary>
+        /// Sets the maximum closeness for this customer. This will effectivly limit the ammount of visits for this customer.
+        /// </summary>
+        /// <param name="newMaxCloseness">The new maximum closeness for this customer.</param>
+        public void SetMaximumCloseness(int newMaxCloseness)
+        {
+            var oldMaxCloseness = this.MaximumCloseness;
+            if (newMaxCloseness == oldMaxCloseness)
+            {
+                return;
+            }
+
+            // If we are decreasing maximum closeness simply truncate the closeness parts and closeness quests lists
+            if (newMaxCloseness < oldMaxCloseness)
+            {
+                for (var i = oldMaxCloseness - 1; i >= newMaxCloseness; i--)
+                {
+                    this.NpcTemplate.closenessParts.RemoveAt(i);
+                    this.NpcTemplate.uniqueClosenessQuests.RemoveAt(i);
+                }
+
+                return;
+            }
+
+            // If we are increasing maximum closeness copy the parts at the last level of closeness for each list to bring them up to the proper count
+            var lastClosenessPart = this.NpcTemplate.closenessParts.LastOrDefault();
+            var lastClosenessQuest = this.NpcTemplate.uniqueClosenessQuests.LastOrDefault();
+
+            if (lastClosenessPart == null || lastClosenessQuest == null)
+            {
+                throw new Exception("Customer has been copied from an old template. If you are seeing this exception the customer creation code should be updated to disallow this!");
+            }
+
+            for (var i = oldMaxCloseness; i < newMaxCloseness; i++)
+            {
+                this.NpcTemplate.closenessParts.Add(CloneClosenessPart(lastClosenessPart));
+                this.NpcTemplate.uniqueClosenessQuests.Add(CrucibleQuest.Clone(new CrucibleQuest(lastClosenessQuest)).Quest);
+            }
         }
 
         private static DialogueData GetTestDialogue2()

@@ -41,7 +41,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <summary>
         /// Gets or sets the ingredient used for this requirement.
         /// </summary>
-        public string RequirementIngredient 
+        public string RequirementIngredient
         {
             get => this.Requirement.ingredient.name;
             set => this.Requirement.ingredient = Ingredient.GetByName(value);

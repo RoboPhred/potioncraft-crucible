@@ -109,6 +109,26 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Clones the provided <see cref="CrucibleQuest"/>.
+        /// </summary>
+        /// <param name="copyFrom">The <see cref="CrucibleQuest"/> to clone.</param>
+        /// <returns>A copy of the provided <see cref="CrucibleQuest"/>.</returns>
+        public static CrucibleQuest Clone(CrucibleQuest copyFrom)
+        {
+            var newQuest = new CrucibleQuest(ScriptableObject.CreateInstance<Quest>())
+            {
+                KarmaReward = copyFrom.KarmaReward,
+                DesiredEffects = copyFrom.DesiredEffects,
+                MinMaxChapters = copyFrom.MinMaxChapters,
+                GenerateRandomMandatoryRequirements = copyFrom.GenerateRandomMandatoryRequirements,
+                GenerateRandomOptionalRequirements = copyFrom.GenerateRandomOptionalRequirements,
+            };
+            GetQuestRequirementsField(newQuest, true).Value = GetQuestRequirementsField(copyFrom, true).Value;
+            GetQuestRequirementsField(newQuest, false).Value = GetQuestRequirementsField(copyFrom, false).Value;
+            return newQuest;
+        }
+
+        /// <summary>
         /// Generates an empty <see cref="Quest"/> to use as a base.
         /// </summary>
         public void GenerateEmptyQuest()
@@ -122,7 +142,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="requirement">The <see cref="CrucibleQuestRequirement"/> to add.</param>
         public void AddMandatoryRequirement(CrucibleQuestRequirement requirement)
         {
-            Traverse.Create(this.Quest).Field<List<QuestRequirementInQuest>>("mandatoryRequirements").Value.Add(requirement.Requirement);
+            GetQuestRequirementsField(this, true).Value.Add(requirement.Requirement);
         }
 
         /// <summary>
@@ -131,7 +151,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="requirement">The <see cref="CrucibleQuestRequirement"/> to add.</param>
         public void AddOptionalRequirement(CrucibleQuestRequirement requirement)
         {
-            Traverse.Create(this.Quest).Field<List<QuestRequirementInQuest>>("optionalRequirements").Value.Add(requirement.Requirement);
+            GetQuestRequirementsField(this, false).Value.Add(requirement.Requirement);
         }
 
         /// <summary>
@@ -139,12 +159,45 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         /// <param name="questText">The main localized text for the quest.</param>
         /// <param name="subsequentQuestText">The localized text for subsequent instances of the quest.</param>
-        public void SetQuestText(LocalizedString questText, LocalizedString subsequentQuestText)
+        public void SetQuestText(CrucibleDialogueData.CrucibleDialogueNode dialogue, LocalizedString subsequentQuestText)
         {
+            var dialogueQuestNode = GetDialogueQuestNode(dialogue);
+
+            if (dialogueQuestNode == null)
+            {
+                throw new ArgumentException("No text was provided for quest within dialogue tree!");
+            }
+
             var localizationkey = $"unique_quest_text_{this.ID}_first_visit";
-            CrucibleLocalization.SetLocalizationKey(localizationkey, questText);
+            CrucibleLocalization.SetLocalizationKey(localizationkey, dialogueQuestNode.DialogueText);
             var subsequentLocalizationkey = $"unique_quest_text_{this.ID}_other_visits";
             CrucibleLocalization.SetLocalizationKey(subsequentLocalizationkey, subsequentQuestText);
+        }
+
+        private static Traverse<List<QuestRequirementInQuest>> GetQuestRequirementsField(CrucibleQuest quest, bool mandatory)
+        {
+            return Traverse.Create(quest.Quest).Field<List<QuestRequirementInQuest>>(mandatory ? "mandatoryRequirements" : "optionalRequirements");
+        }
+
+        private static CrucibleDialogueData.CrucibleDialogueNode GetDialogueQuestNode(CrucibleDialogueData.CrucibleDialogueNode dialogue)
+        {
+            if (dialogue == null)
+            {
+                return null;
+            }
+
+            if (dialogue.IsQuestNode)
+            {
+                return dialogue;
+            }
+
+            if (!dialogue.Answers.Any())
+            {
+                return null;
+            }
+
+            return dialogue.Answers.Select(a => GetDialogueQuestNode(a.NextNode))
+                                   .FirstOrDefault(n => n != null);
         }
     }
 }

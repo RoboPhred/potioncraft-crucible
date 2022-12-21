@@ -39,7 +39,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <summary>
         /// Gets or sets the template to copy this NPC from.
         /// </summary>
-        public string CopyFrom { get; set; }
+        public string InheritFrom { get; set; } = "Brewer";
 
         /// <summary>
         /// Gets or sets the appearance configuration for this npc.
@@ -47,14 +47,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public CrucibleNpcAppearanceConfig Appearance { get; set; }
 
         /// <summary>
-        /// Gets or sets the list of dialogues for this NPC.
-        /// </summary>
-        public OneOrMany<CrucibleNPCDialogueConfig> Dialogue { get; set; } = new ();
-
-        /// <summary>
         /// Gets or sets the list of closeness quests for this NPC.
         /// </summary>
-        public OneOrMany<CrucibleNPCClosenessQuestConfig> Quests { get; set; } = new ();
+        public OneOrMany<CrucibleNPCDialogueQuestConfig> Quests { get; set; } = new ();
 
         /// <summary>
         /// Gets or sets the tags associated with this NPC.
@@ -86,45 +81,42 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
             // Apply quests
             subject.PrepareClosenessQuestsForNewQuests();
             var targetQuestList = subject.ClosenessQuests;
-            foreach (var quest in this.Quests)
-            {
-                if (quest.ClosenessLevel < 0)
-                {
-                    throw new ArgumentException($"Quest ClosenessLevel must be greater than zero!");
-                }
-
-                if (quest.ClosenessLevel >= targetQuestList.Count)
-                {
-                    throw new ArgumentException($"Given quest ClosenessLevel is larger than the maximum closeness for this trader ({targetQuestList.Count})");
-                }
-
-                var currentTarget = targetQuestList[quest.ClosenessLevel];
-                if (currentTarget.IsNull)
-                {
-                    currentTarget.GenerateEmptyQuest();
-                }
-
-                quest.ApplyConfiguration(currentTarget);
-            }
-
-            // Apply dialogues
-            var orderedDialogues = this.Dialogue.OrderByDescending(d => d.ClosnessRequirement).ToList();
-            var appliedDialogues = 0;
+            var orderedQuests = this.Quests.OrderByDescending(d => d.ClosenessRequirement).ToList();
+            var appliedQuests = 0;
             for (var closeness = 0; closeness < subject.MaximumCloseness; closeness++)
             {
-                var dialogueToApply = orderedDialogues.FirstOrDefault(d => d.ClosnessRequirement <= closeness);
-                if (dialogueToApply == null)
+                var questToApply = orderedQuests.FirstOrDefault(d => d.ClosenessRequirement >= 0 && d.ClosenessRequirement <= closeness);
+                if (questToApply == null)
                 {
                     continue;
                 }
 
-                subject.ApplyDialogueForClosenessLevel(closeness, dialogueToApply.Dialogue);
-                appliedDialogues++;
+                if (questToApply.Quest != null || subject is CrucibleCustomerConfig)
+                {
+                    if (questToApply.Quest == null)
+                    {
+                        throw new ArgumentException("Dialgue without quests is not allowed for customer npcs. Each unique dialogue tree must also define a quest.");
+                    }
+
+                    var quest = subject.ClosenessQuests[closeness];
+
+                    // If no id was provided generate a unique quest id using the closeness level
+                    if (string.IsNullOrEmpty(questToApply.Quest.ID))
+                    {
+                        questToApply.Quest.ID = closeness.ToString();
+                    }
+
+                    questToApply.Quest.ApplyConfiguration(quest);
+                    quest.SetQuestText(questToApply.Dialogue, questToApply.Quest.SubsequentVisitsQuestText);
+                }
+
+                subject.ApplyDialogueForClosenessLevel(closeness, questToApply.Dialogue);
+                appliedQuests++;
             }
 
-            if (appliedDialogues < this.Dialogue.Count)
+            if (appliedQuests < this.Quests.Count)
             {
-                CrucibleLog.Log("Some dialogues were not applied to NPC due to issues with specified closeness requirements.");
+                CrucibleLog.Log($"Some quests were not applied to NPC due to issues with specified closeness requirements. Be sure you have specified a closeness requirement for each quest and that each closeness is less than the maximum closeness level ({subject.MaximumCloseness}).");
             }
 
             if (this.Tags != null)

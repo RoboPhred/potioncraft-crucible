@@ -180,13 +180,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             for (var i = 0; i < this.MaximumCloseness; i++)
             {
+                var newQuest = ScriptableObject.CreateInstance<Quest>();
                 if (i == this.NpcTemplate.uniqueClosenessQuests.Count)
                 {
-                    this.NpcTemplate.uniqueClosenessQuests.Add(null);
+                    this.NpcTemplate.uniqueClosenessQuests.Add(newQuest);
                     continue;
                 }
 
-                this.NpcTemplate.uniqueClosenessQuests[i] = null;
+                this.NpcTemplate.uniqueClosenessQuests[i] = newQuest;
             }
         }
 
@@ -210,6 +211,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             template.daysOfCooldown = copyFrom.daysOfCooldown;
             template.karmaForSpawn = copyFrom.karmaForSpawn;
 
+
             // TODO: How do prefabs differ?
             var prefab = ScriptableObject.CreateInstance<NpcPrefab>();
             var parentPrefab = copyFrom.baseParts.OfType<NpcPrefab>().FirstOrDefault();
@@ -221,12 +223,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // Used in getting potion reactions
             var gender = ScriptableObject.CreateInstance<Gender>();
             var parentGender = copyFrom.baseParts.OfType<Gender>().FirstOrDefault();
-            if (parentGender == null)
+            if (parentGender != null)
             {
-                throw new Exception("Copy target had no Gender part!");
+                gender.gender = parentGender.gender;
             }
 
-            gender.gender = parentGender.gender;
 
             var animationOnHaggle = ScriptableObject.CreateInstance<AnimationOnHaggle>();
             var parentAnimationOnHaggle = copyFrom.baseParts.OfType<AnimationOnHaggle>().FirstOrDefault();
@@ -255,42 +256,38 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var queueSpace = ScriptableObject.CreateInstance<QueueSpace>();
             var parentQueueSpace = copyFrom.baseParts.OfType<QueueSpace>().FirstOrDefault();
-            if (parentQueueSpace == null)
+            if (parentQueueSpace != null)
             {
-                throw new Exception("Copy target had no QueueSpace part!");
+                queueSpace.spawnAfterPause = parentQueueSpace.spawnAfterPause;
+                queueSpace.pauseAfterSpawn = parentQueueSpace.pauseAfterSpawn;
             }
-
-            queueSpace.spawnAfterPause = parentQueueSpace.spawnAfterPause;
-            queueSpace.pauseAfterSpawn = parentQueueSpace.pauseAfterSpawn;
 
             template.baseParts = new NonAppearancePart[] { prefab, animationOnHaggle, haggleStaticSettings, queueSpace, gender };
 
             // Copy closeness parts for each level of closeness
             foreach (var closenessPart in copyFrom.closenessParts)
             {
-                var parentDialogueData = copyFrom.baseParts.OfType<DialogueData>().FirstOrDefault();
-                if (parentDialogueData == null)
-                {
-                    throw new Exception("Copy target had no DialogueData part!");
-                }
+                var newPart = CloneClosenessPart(closenessPart);
 
-                var dialogueData = new CrucibleDialogueData(parentDialogueData).Clone();
-
-                var traderSettings = ScriptableObject.CreateInstance<TraderSettings>();
-                var parentTraderSettings = copyFrom.baseParts.OfType<TraderSettings>().FirstOrDefault();
-                if (parentTraderSettings == null)
+                if (newPart == null)
                 {
                     continue;
                 }
 
-                traderSettings.canTrade = parentTraderSettings.canTrade;
-                traderSettings.gold = parentTraderSettings.gold;
-                traderSettings.deliveriesCategories = parentTraderSettings.deliveriesCategories.Select(CopyDeliveryCategory).ToList();
+                template.closenessParts.Add(newPart);
+            }
 
-                template.closenessParts.Add(new NonAppearanceClosenessPartsList
+            // Copy closeness quests for each level of closeness
+            foreach (var quest in copyFrom.uniqueClosenessQuests)
+            {
+                var newQuest = CrucibleQuest.Clone(new CrucibleQuest(quest));
+
+                if (newQuest == null)
                 {
-                    parts = new List<NonAppearancePart> { dialogueData.DialogueData, traderSettings },
-                });
+                    continue;
+                }
+
+                template.uniqueClosenessQuests.Add(newQuest.Quest);
             }
 
             template.appearance = new AppearanceContainer();
@@ -298,6 +295,36 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // Add trader to list of all templates
             NpcTemplate.allNpcTemplates.templates.Add(template);
             return template;
+        }
+
+        /// <summary>
+        /// Clones the proved closeness part list.
+        /// </summary>
+        /// <param name="copyFrom">The closeness part list to clone.</param>
+        /// <returns>A copy of the provided closeness part list.</returns>
+        protected static NonAppearanceClosenessPartsList CloneClosenessPart(NonAppearanceClosenessPartsList copyFrom)
+        {
+            var returnValue = new NonAppearanceClosenessPartsList
+            {
+                parts = new List<NonAppearancePart>(),
+            };
+            var parentDialogueData = copyFrom.parts.OfType<DialogueData>().FirstOrDefault();
+            if (parentDialogueData != null)
+            {
+                returnValue.parts.Add(new CrucibleDialogueData(parentDialogueData).Clone().DialogueData);
+            }
+
+            var parentTraderSettings = copyFrom.parts.OfType<TraderSettings>().FirstOrDefault();
+            if (parentTraderSettings != null)
+            {
+                var traderSettings = ScriptableObject.CreateInstance<TraderSettings>();
+                traderSettings.canTrade = parentTraderSettings.canTrade;
+                traderSettings.gold = parentTraderSettings.gold;
+                traderSettings.deliveriesCategories = parentTraderSettings.deliveriesCategories.Select(CopyDeliveryCategory).ToList();
+                returnValue.parts.Add(traderSettings);
+            }
+
+            return returnValue;
         }
 
         private static Category CopyDeliveryCategory(Category source)
@@ -422,7 +449,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="startingDialogue">The dialogue which should appear at the given closeness level.</param>
         public void ApplyDialogueForClosenessLevel(int closenessLevel, CrucibleDialogueData.CrucibleDialogueNode startingDialogue)
         {
-            if (startingDialogue.Equals(CrucibleDialogueData.CrucibleDialogueNode.Empty))
+            if (startingDialogue == null)
             {
                 return;
             }

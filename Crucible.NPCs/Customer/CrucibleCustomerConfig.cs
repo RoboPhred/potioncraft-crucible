@@ -39,6 +39,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// </summary>
         public int MaximumDaysOfCooldown { get; set; } = -1;
 
+        /// <summary>
+        /// Gets or sets the maximum level of closeness this customer can gain. This effectivly limits how many visits the customer will make to the shop in total.
+        /// </summary>
+        public int MaximumCloseness { get; set; } = -1;
+
         /// <inheritdoc/>
         public override string ToString()
         {
@@ -50,12 +55,23 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         {
             var id = this.PackageMod.Namespace + "." + this.ID;
             return CrucibleCustomerNpcTemplate.GetCustomerNpcTemplateById(id)
-                   ?? CrucibleCustomerNpcTemplate.CreateCustomerNpcTemplate(id, this.CopyFrom);
+                   ?? CrucibleCustomerNpcTemplate.CreateCustomerNpcTemplate(id, this.InheritFrom);
         }
 
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(CrucibleCustomerNpcTemplate subject)
         {
+            if (this.MaximumCloseness > 0)
+            {
+                subject.SetMaximumCloseness(this.MaximumCloseness);
+            }
+
+            // Customers must always have a quest node as their starting dialogue
+            foreach(var quest in this.Quests)
+            {
+                quest.Dialogue.IsQuestNode = true;
+            }
+
             base.OnApplyConfiguration(subject);
 
             if (this.ChanceToAppear > 0)

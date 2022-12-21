@@ -1,4 +1,4 @@
-// <copyright file="CrucibleNPCClosenessQuestConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleNPCDialogueQuestConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,20 +16,27 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System;
-    using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
-    using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
     /// Configuration specifying the chance a quest with a specific effect request will be chosen.
     /// </summary>
-    public class CrucibleNPCClosenessQuestConfig : CrucibleNPCQuestConfig
+    public class CrucibleNPCDialogueQuestConfig : CruciblePackageConfigNode
     {
         /// <summary>
-        /// Gets or sets the closeness level this quest will appear at.
+        /// Gets or sets the closness requirement for this dialogue to be chosen.
         /// </summary>
-        public int ClosenessLevel { get; set; }
+        public int ClosenessRequirement { get; set; }
+
+        /// <summary>
+        /// Gets or sets the starting dialogue node.
+        /// </summary>
+        public CrucibleNPCQuestConfig Quest { get; set; }
+
+        /// <summary>
+        /// Gets or sets the starting dialogue node.
+        /// </summary>
+        public CrucibleDialogueData.CrucibleDialogueNode Dialogue { get; set; }
     }
 }

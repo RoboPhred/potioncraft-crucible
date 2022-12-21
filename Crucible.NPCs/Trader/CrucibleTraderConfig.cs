@@ -86,7 +86,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         {
             var id = this.PackageMod.Namespace + "." + this.ID;
             return CrucibleTraderNpcTemplate.GetTraderNpcTemplateById(id)
-                    ?? CrucibleTraderNpcTemplate.CreateTraderNpcTemplate(id, this.CopyFrom);
+                    ?? CrucibleTraderNpcTemplate.CreateTraderNpcTemplate(id, this.InheritFrom);
         }
 
         /// <inheritdoc/>

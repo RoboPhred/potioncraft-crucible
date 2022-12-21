@@ -46,11 +46,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public OneOrMany<string> DesiredEffects { get; set; } = new ();
 
         /// <summary>
-        /// Gets or sets the main quest text.
-        /// </summary>
-        public LocalizedString QuestText { get; set; }
-
-        /// <summary>
         /// Gets or sets the quest text for subsequent visits if the quest isn't completeled the first time.
         /// </summary>
         public LocalizedString SubsequentVisitsQuestText { get; set; }
@@ -96,7 +91,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
             subject.KarmaReward = this.KarmaReward;
             subject.DesiredEffects = this.DesiredEffects.ToList();
             subject.MinMaxChapters = (this.MinimumChapter, this.MaximumChapter);
-            subject.SetQuestText(this.QuestText, this.SubsequentVisitsQuestText);
 
             subject.GenerateRandomMandatoryRequirements = this.GenerateRandomMandatoryRequirements;
             foreach(var mandatoryRequirement in this.MandatoryRequirements)
