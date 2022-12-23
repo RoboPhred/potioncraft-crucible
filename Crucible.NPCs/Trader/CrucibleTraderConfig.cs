@@ -92,6 +92,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             if (this.Items != null)
             {
+                subject.ClearTradeItems();
                 foreach (var item in this.Items)
                 {
                     item.OnApplyConfiguration(subject);

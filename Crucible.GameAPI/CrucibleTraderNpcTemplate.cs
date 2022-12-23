@@ -248,6 +248,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        /// <summary>
+        /// Clears the trader's inventory of all items.
+        /// </summary>
+        public void ClearTradeItems()
+        {
+            var allSettings = this.TraderSettings;
+            var validSettings = allSettings.Select(s => s.Value)
+                                           .Where(s => s != null);
+
+            foreach (var settings in validSettings)
+            {
+                settings.deliveriesCategories.Clear();
+            }
+        }
+
         private Dictionary<int, TraderSettings> GetTraderSettings()
         {
             var settings = new Dictionary<int, TraderSettings>();
