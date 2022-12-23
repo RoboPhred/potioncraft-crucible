@@ -27,22 +27,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <summary>
         /// Gets or sets the chance of this npc spawning.
         /// </summary>
-        public float ChanceToAppear { get; set; }
-
-        /// <summary>
-        /// Gets or sets the minimum number of days between NPC visits.
-        /// </summary>
-        public int MinimumDaysOfCooldown { get; set; } = -1;
-
-        /// <summary>
-        /// Gets or sets the minimum number of days between NPC visits.
-        /// </summary>
-        public int MaximumDaysOfCooldown { get; set; } = -1;
-
-        /// <summary>
-        /// Gets or sets the maximum level of closeness this customer can gain. This effectivly limits how many visits the customer will make to the shop in total.
-        /// </summary>
-        public int MaximumCloseness { get; set; } = -1;
+        public float ChanceToAppear { get; set; } = 1;
 
         /// <inheritdoc/>
         public override string ToString()
@@ -61,11 +46,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(CrucibleCustomerNpcTemplate subject)
         {
-            if (this.MaximumCloseness > 0)
-            {
-                subject.SetMaximumCloseness(this.MaximumCloseness);
-            }
-
             // Customers must always have a quest node as their starting dialogue
             foreach(var quest in this.Quests)
             {
@@ -80,16 +60,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
             if (this.ChanceToAppear > 0)
             {
                 subject.SpawnChance = this.ChanceToAppear;
-            }
-
-            if (this.MinimumDaysOfCooldown > 0 && this.MaximumDaysOfCooldown > 0)
-            {
-                if (this.MinimumDaysOfCooldown > this.MaximumDaysOfCooldown)
-                {
-                    throw new ArgumentException("MinimumDaysOfCooldown must be less than or equal to MaximumDaysOfCooldown!");
-                }
-
-                subject.DaysOfCooldown = (this.MinimumDaysOfCooldown, this.MaximumDaysOfCooldown);
             }
         }
     }

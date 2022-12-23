@@ -17,6 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
     using BepInEx;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
 
     /// <summary>
     /// BepInEx plugin for Crucible Config mods.
@@ -25,5 +26,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     [BepInDependency("net.RoboPhredDev.PotionCraft.Crucible")]
     public class CrucibleNPCsPlugin : BaseUnityPlugin
     {
+        /// <summary>
+        /// Called by unity when the plugin loads.
+        /// </summary>
+        public void Awake()
+        {
+            //CrucibleGameEvents.OnSaveLoaded += (_, e) =>
+            //{
+            //    // All custom traders which have been added to the pool need to be readded each time a new save file is loaded.
+            //    CrucibleTraderNpcTemplate.AddAllCustomTradersToPool();
+            //};
+        }
     }
 }

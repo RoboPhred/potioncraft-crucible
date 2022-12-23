@@ -80,29 +80,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             set
             {
-                if (value < 0 || value > 100) //TODO is this actually the upper limit?
+                if (value < 0 || value > 10)
                 {
-                    throw new ArgumentException("SpawnChance values must range from 0 to 100. Unable to set SpawnChance");
+                    throw new ArgumentException("SpawnChance values must range from 0 to 10. Unable to set SpawnChance");
                 }
 
                 Settings<NpcManagerSettings>.Asset.plotNpc[this.NpcTemplate] = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the minimum number of days between NPC visits.
-        /// </summary>
-        public (int, int) DaysOfCooldown
-        {
-            get => (this.NpcTemplate.daysOfCooldown.min, this.NpcTemplate.daysOfCooldown.max);
-            set
-            {
-                if (value.Item1 < 0)
-                {
-                    throw new ArgumentException("DaysOfCooldown values must be greater than 0.");
-                }
-
-                this.NpcTemplate.daysOfCooldown = new MinMaxInt(value.Item1, value.Item2);
             }
         }
 
@@ -168,7 +151,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             // Add template to plot npc list with a default spawn rate.
             var npcSettings = Settings<NpcManagerSettings>.Asset;
-            npcSettings.plotNpc[baseTemplate] = npcSettings.plotNpcSpawnChance; //TODO does this line up with other plot npcs??
+            npcSettings.plotNpc[baseTemplate] = 1;
+
+            template.NpcTemplate.showDontComeAgainOption = false;
 
             return template;
         }
@@ -186,46 +171,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public bool Equals(CrucibleCustomerNpcTemplate other)
         {
             return this.NpcTemplate == other.NpcTemplate;
-        }
-
-        /// <summary>
-        /// Sets the maximum closeness for this customer. This will effectivly limit the ammount of visits for this customer.
-        /// </summary>
-        /// <param name="newMaxCloseness">The new maximum closeness for this customer.</param>
-        public void SetMaximumCloseness(int newMaxCloseness)
-        {
-            var oldMaxCloseness = this.MaximumCloseness;
-            if (newMaxCloseness == oldMaxCloseness)
-            {
-                return;
-            }
-
-            // If we are decreasing maximum closeness simply truncate the closeness parts and closeness quests lists
-            if (newMaxCloseness < oldMaxCloseness)
-            {
-                for (var i = oldMaxCloseness - 1; i >= newMaxCloseness; i--)
-                {
-                    this.NpcTemplate.closenessParts.RemoveAt(i);
-                    this.NpcTemplate.uniqueClosenessQuests.RemoveAt(i);
-                }
-
-                return;
-            }
-
-            // If we are increasing maximum closeness copy the parts at the last level of closeness for each list to bring them up to the proper count
-            var lastClosenessPart = this.NpcTemplate.closenessParts.LastOrDefault();
-            var lastClosenessQuest = this.NpcTemplate.uniqueClosenessQuests.LastOrDefault();
-
-            if (lastClosenessPart == null || lastClosenessQuest == null)
-            {
-                throw new Exception("Customer has been copied from an old template. If you are seeing this exception the customer creation code should be updated to disallow this!");
-            }
-
-            for (var i = oldMaxCloseness; i < newMaxCloseness; i++)
-            {
-                this.NpcTemplate.closenessParts.Add(CloneClosenessPart(lastClosenessPart));
-                this.NpcTemplate.uniqueClosenessQuests.Add(CrucibleQuest.Clone(new CrucibleQuest(lastClosenessQuest)).Quest);
-            }
         }
 
         private static DialogueData GetTestDialogue2()

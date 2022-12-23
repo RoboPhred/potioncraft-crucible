@@ -115,6 +115,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>A copy of the provided <see cref="CrucibleQuest"/>.</returns>
         public static CrucibleQuest Clone(CrucibleQuest copyFrom)
         {
+            if (copyFrom.IsNull)
+            {
+                return new CrucibleQuest(null);
+            }
+
             var newQuest = new CrucibleQuest(ScriptableObject.CreateInstance<Quest>())
             {
                 KarmaReward = copyFrom.KarmaReward,

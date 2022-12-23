@@ -42,6 +42,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public string InheritFrom { get; set; } = "Brewer";
 
         /// <summary>
+        /// Gets or sets the maximum level of closeness this customer can gain. This effectivly limits how many visits the customer will make to the shop in total.
+        /// </summary>
+        public int MaximumCloseness { get; set; } = -1;
+
+        /// <summary>
+        /// Gets or sets the minimum number of days of cooldown for this trader to spawn.
+        /// </summary>
+        public int MinimumDaysOfCooldown { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number of days of cooldown for this trader to spawn.
+        /// </summary>
+        public int MaximumDaysOfCooldown { get; set; }
+
+        /// <summary>
         /// Gets or sets the appearance configuration for this npc.
         /// </summary>
         public CrucibleNpcAppearanceConfig Appearance { get; set; }
@@ -58,9 +73,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public OneOrMany<string> Tags { get; set; }
 
         /// <summary>
-        /// Gets or sets the day time for npc to spawn. 0 is at the start of the day and 100 is at the end of the day.
+        /// Gets or sets the gender of the trader. Current options are "Male" and "Female".
         /// </summary>
-        public int DayTimeForSpawn { get; set; } = int.MaxValue;
+        public string Gender { get; set; }
+
+        /// <summary>
+        /// Gets or sets the visual mood of the faction ("Bad", "Normal", "Good").
+        /// </summary>
+        public string VisualMood { get; set; }
+
+        /// <summary>
+        /// Gets or sets the haggling themes for each difficulty of haggling.
+        /// </summary>
+        public CrucibleHagglingThemesConfig HagglingThemes { get; set; }
 
         /// <inheritdoc/>
         public override string ToString()
@@ -71,12 +96,34 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(T subject)
         {
-            if (this.DayTimeForSpawn != int.MaxValue)
+            this.Appearance?.ApplyAppearance(subject);
+
+            if (this.MinimumDaysOfCooldown > 0 && this.MaximumDaysOfCooldown > 0)
             {
-                subject.DayTimeForSpawn = this.DayTimeForSpawn;
+                if (this.MinimumDaysOfCooldown > this.MaximumDaysOfCooldown)
+                {
+                    throw new ArgumentException("MinimumDaysOfCooldown must be less than or equal to MaximumDaysOfCooldown!");
+                }
+
+                subject.DaysOfCooldown = (this.MinimumDaysOfCooldown, this.MaximumDaysOfCooldown);
             }
 
-            this.Appearance?.ApplyAppearance(subject);
+            if (!string.IsNullOrEmpty(this.Gender))
+            {
+                subject.Gender = this.Gender;
+            }
+
+            if (!string.IsNullOrEmpty(this.VisualMood))
+            {
+                subject.VisualMood = this.VisualMood;
+            }
+
+            if (this.MaximumCloseness > 0)
+            {
+                subject.SetMaximumCloseness(this.MaximumCloseness);
+            }
+
+            this.HagglingThemes?.ApplyConfiguration(subject);
 
             // Apply quests
             subject.PrepareClosenessQuestsForNewQuests();
@@ -92,7 +139,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                     continue;
                 }
 
-                if (questToApply.Quest != null || subject is CrucibleCustomerConfig)
+                var applyQuest = subject is CrucibleCustomerNpcTemplate || questToApply.ClosenessRequirement == closeness;
+                if ((applyQuest && questToApply.Quest != null) || subject is CrucibleCustomerNpcTemplate)
                 {
                     if (questToApply.Quest == null)
                     {
@@ -107,12 +155,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                         questToApply.Quest.ID = closeness.ToString();
                     }
 
+                    // Ensure the quest id will be unique across all quests by combining it with the npc id
+                    questToApply.Quest.ID = subject.ID + "." + questToApply.Quest.ID;
                     questToApply.Quest.ApplyConfiguration(quest);
                     quest.SetQuestText(questToApply.Dialogue, questToApply.Quest.SubsequentVisitsQuestText);
+                    appliedQuests++;
                 }
 
-                subject.ApplyDialogueForClosenessLevel(closeness, questToApply.Dialogue);
-                appliedQuests++;
+                subject.ApplyDialogueForClosenessLevel(closeness, questToApply.Dialogue, applyQuest);
             }
 
             if (appliedQuests < this.Quests.Count)

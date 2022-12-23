@@ -17,6 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
     using System;
+    using System.Linq;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
@@ -51,29 +52,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public OneOrMany<CrucibleInventoryItemSoldByNpcStaticConfig> Items { get; set; }
 
         /// <summary>
-        /// Gets or sets the visual mood of the faction ("Bad", "Normal", "Good").
+        /// Gets or sets the day time for trader to spawn. 0 is at the start of the day and 100 is at the end of the day.
         /// </summary>
-        public string VisualMood { get; set; }
-
-        /// <summary>
-        /// Gets or sets the minimum number of days of cooldown for this trader to spawn.
-        /// </summary>
-        public int MinimumDaysOfCooldown { get; set; }
-
-        /// <summary>
-        /// Gets or sets the maximum number of days of cooldown for this trader to spawn.
-        /// </summary>
-        public int MaximumDaysOfCooldown { get; set; }
-
-        /// <summary>
-        /// Gets or sets the gender of the trader. Current options are "Male" and "Female".
-        /// </summary>
-        public string Gender { get; set; }
-
-        /// <summary>
-        /// Gets or sets the haggling themes for each difficulty of haggling
-        /// </summary>
-        public CrucibleHagglingThemesConfig HagglingThemes { get; set; }
+        public int DayTimeForSpawn { get; set; } = int.MaxValue;
 
         /// <inheritdoc/>
         public override string ToString()
@@ -99,27 +80,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 subject.UnlockAtChapter = this.UnlockAtChapter;
             }
 
-            if (!string.IsNullOrEmpty(this.VisualMood))
-            {
-                subject.VisualMood = this.VisualMood;
-            }
-
-            if (this.MinimumDaysOfCooldown > 0 && this.MaximumDaysOfCooldown > 0)
-            {
-                subject.DaysOfCooldown = (this.MinimumDaysOfCooldown, this.MaximumDaysOfCooldown);
-            }
-
             if (this.MinimumKarmaForSpawn != int.MaxValue && this.MaximumKarmaForSpawn != int.MaxValue)
             {
                 subject.KarmaForSpawn = (this.MinimumKarmaForSpawn, this.MaximumKarmaForSpawn);
             }
 
-            if (!string.IsNullOrEmpty(this.Gender))
+            if (this.DayTimeForSpawn != int.MaxValue)
             {
-                subject.Gender = this.Gender;
+                subject.DayTimeForSpawn = this.DayTimeForSpawn;
             }
-
-            this.HagglingThemes?.ApplyConfiguration(subject);
 
             if (this.Items != null)
             {

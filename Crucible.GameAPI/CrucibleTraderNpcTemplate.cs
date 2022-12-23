@@ -22,11 +22,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using global::PotionCraft.Core.ValueContainers;
     using global::PotionCraft.DialogueSystem.Dialogue;
     using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ManagersSystem.Npc;
     using global::PotionCraft.Npc.MonoBehaviourScripts;
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Settings;
     using global::PotionCraft.ObjectBased.Deliveries;
     using global::PotionCraft.ObjectBased.Haggle;
+    using global::PotionCraft.Settings;
     using HarmonyLib;
     using UnityEngine;
 
@@ -35,6 +37,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public sealed class CrucibleTraderNpcTemplate : CrucibleNpcTemplate
     {
+        private static readonly List<string> AddedTraders = new();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CrucibleTraderNpcTemplate"/> class.
         /// </summary>
@@ -68,34 +72,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
                 this.NpcTemplate.unlockAtChapter = value;
             }
-        }
-
-        /// <summary>
-        /// Gets or sets the visual mood of the trader.
-        /// </summary>
-        public string VisualMood
-        {
-            get => this.NpcTemplate.visualMood.ToString();
-            set
-            {
-                if (!Enum.TryParse(value, out NpcVisualMoodInspector parsed))
-                {
-                    var availableMoods = Enum.GetNames(typeof(NpcVisualMoodInspector));
-                    var availableMoodsS = availableMoods.Length > 1 ? availableMoods.Aggregate((m1, m2) => $"{m1}, {m2}") : availableMoods.FirstOrDefault();
-                    throw new ArgumentException($"Visual mood value is not in the list of possible visual moods. Available visual moods are: {availableMoodsS}");
-                }
-
-                this.NpcTemplate.visualMood = parsed;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the minimum and maximum days of cooldown between visits.
-        /// </summary>
-        public (int, int) DaysOfCooldown
-        {
-            get => (this.NpcTemplate.daysOfCooldown.min, this.NpcTemplate.daysOfCooldown.max);
-            set => this.NpcTemplate.daysOfCooldown = new MinMaxInt(value.Item1, value.Item2);
         }
 
         /// <summary>
@@ -138,25 +114,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets or sets the gender of the trader. This is used to pick between reactions.
-        /// </summary>
-        public string Gender
-        {
-            get => this.RequireBasePart<Gender>().gender.ToString();
-            set
-            {
-                if (!Enum.TryParse(value, out Gender.GenderSet parsed))
-                {
-                    var availableGenders = Enum.GetNames(typeof(Gender.GenderSet));
-                    var availableGendersS = availableGenders.Length > 1 ? availableGenders.Aggregate((m1, m2) => $"{m1}, {m2}") : availableGenders.FirstOrDefault();
-                    throw new ArgumentException($"Gender value is not in the list of possible genders. Available genders are: {availableGendersS}");
-                }
-
-                this.RequireBasePart<Gender>().gender = parsed;
-            }
-        }
-
-        /// <summary>
         /// Creates a new blank NPC template.
         /// </summary>
         /// <param name="name">The name of the template.</param>
@@ -181,12 +138,47 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             template.Appearance.CopyFrom(copyFromTemplate);
 
-            // Add trader to the extra traders virtual queue so it can actually spawn like any other trader
-            var traderQueue = Managers.Npc.globalSettings.extraTradersVirtualQueue;
-            var traderPool = Traverse.Create(traderQueue).Field<List<string>>("temporaryPool").Value;
-            traderPool.Add(template.NpcTemplate.name);
+            // Add trader to the karmic traders virtual queue so it can actually spawn like any other trader
+            Settings<NpcManagerSettings>.Asset.mainTraders.templates.Add(template.NpcTemplate);
+            AddTraderToPool(template);
+            AddedTraders.Add(template.NpcTemplate.name);
 
             return template;
+        }
+
+        /// <summary>
+        /// Adds all custom crucible traders to the trader bool if that trader is not already in the pool.
+        /// </summary>
+        public static void AddAllCustomTradersToPool()
+        {
+            var traderQueue = Managers.Npc.globalSettings.karmicTradersVirtualQueue;
+            var traderPool = Traverse.Create(traderQueue).Field<List<string>>("temporaryPool").Value;
+
+            AddedTraders.ForEach(trader =>
+            {
+                if (traderPool.Contains(trader))
+                {
+                    return;
+                }
+
+                traderPool.Add(trader);
+            });
+        }
+
+        /// <summary>
+        /// Adds the trader to the proper trader pool if this trader is not already in the pool.
+        /// </summary>
+        /// <param name="template">The trader to add to the pool.</param>
+        public static void AddTraderToPool(CrucibleTraderNpcTemplate template)
+        {
+            var traderQueue = Managers.Npc.globalSettings.karmicTradersVirtualQueue;
+            var traderPool = Traverse.Create(traderQueue).Field<List<string>>("temporaryPool").Value;
+            if (traderPool.Contains(template.NpcTemplate.name))
+            {
+                return;
+            }
+
+            traderPool.Add(template.NpcTemplate.name);
         }
 
         /// <summary>
@@ -254,49 +246,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     applyExtraCharge = true,
                 });
             }
-        }
-
-        /// <summary>
-        /// Sets the haggle themes for this trader.
-        /// </summary>
-        /// <param name="veryEasyTheme">the haggle theme name for very easy haggling.</param>
-        /// <param name="easyTheme">the haggle theme name for easy haggling.</param>
-        /// <param name="mediumTheme">the haggle theme name for medium haggling.</param>
-        /// <param name="hardTheme">the haggle theme name for hard haggling.</param>
-        /// <param name="veryHardTheme">the haggle theme name for very hard haggling.</param>
-        public void SetHagglingThemes(string veryEasyTheme, string easyTheme, string mediumTheme, string hardTheme, string veryHardTheme)
-        {
-            var haggleStaticSettings = this.RequireBasePart<HaggleStaticSettings>();
-
-            if (!string.IsNullOrEmpty(veryEasyTheme))
-            {
-                haggleStaticSettings.veryEasyTheme = GetHaggleTheme(veryEasyTheme);
-            }
-
-            if (!string.IsNullOrEmpty(veryEasyTheme))
-            {
-                haggleStaticSettings.easyTheme = GetHaggleTheme(easyTheme);
-            }
-
-            if (!string.IsNullOrEmpty(veryEasyTheme))
-            {
-                haggleStaticSettings.mediumTheme = GetHaggleTheme(mediumTheme);
-            }
-
-            if (!string.IsNullOrEmpty(veryEasyTheme))
-            {
-                haggleStaticSettings.hardTheme = GetHaggleTheme(hardTheme);
-            }
-
-            if (!string.IsNullOrEmpty(veryEasyTheme))
-            {
-                haggleStaticSettings.veryHardTheme = GetHaggleTheme(veryHardTheme);
-            }
-        }
-
-        private static Theme GetHaggleTheme(string themeId)
-        {
-            return Theme.GetByName(themeId);
         }
 
         private Dictionary<int, TraderSettings> GetTraderSettings()

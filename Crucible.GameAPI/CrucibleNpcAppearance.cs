@@ -17,6 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using global::PotionCraft.Npc.MonoBehaviourScripts.Settings;
     using global::PotionCraft.Npc.Parts;
@@ -236,6 +237,59 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 group.partsInGroup = group.partsInGroup.Concat(new[] { part }).ToArray();
             }
+        }
+
+        /// <summary>
+        /// Adds a beard to this appearance.
+        /// </summary>
+        /// <param name="background">The beard background sprite.</param>
+        /// <param name="contour">The beard contour sprite.</param>
+        /// <param name="scratches">The beard scratches sprite.</param>
+        /// <param name="chance">The chance for this beard to be chosen.</param>
+        public void AddBeard(Sprite background, Sprite contour, Sprite scratches, float chance)
+        {
+            var beard = ScriptableObject.CreateInstance<Beard>();
+            beard.beardBase = new ColorablePart
+            {
+                background = background,
+                contour = contour,
+                scratches = scratches,
+            };
+
+            var container = new PartContainer<Beard>
+            {
+                part = beard,
+                chanceBtwParts = chance,
+            };
+
+            var group = this.npcTemplate.appearance.beard;
+
+            // Remove our blank if present.
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.beardBase.background.name == BlankSprite.name)
+            {
+                group.partsInGroup = new[] { container };
+            }
+            else
+            {
+                group.partsInGroup = group.partsInGroup.Concat(new[] { container }).ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Clear all beard data for this appearance.
+        /// </summary>
+        public void ClearBeards()
+        {
+            var beard = ScriptableObject.CreateInstance<Beard>();
+            beard.beardBase = BlankColorablePart;
+
+            this.npcTemplate.appearance.beard.partsInGroup = new[]
+            {
+                new PartContainer<Beard>
+                {
+                    part = beard,
+                },
+            };
         }
 
         /// <summary>
@@ -495,36 +549,37 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             this.npcTemplate.appearance = new AppearanceContainer
             {
-                aboveHairFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.aboveHairFeature1),
-                aboveHairFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.aboveHairFeature2),
-                behindBodyFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.behindBodyFeature1),
-                behindBodyFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.behindBodyFeature2),
-                body = ClonePartContainerGroup(sourceTemplate.appearance.body),
-                bodyFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.bodyFeature1),
-                bodyFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.bodyFeature2),
-                breastSize = ClonePartContainerGroup(sourceTemplate.appearance.breastSize),
-                clothesColor1 = ClonePartContainerGroup(sourceTemplate.appearance.clothesColor1),
-                clothesColor2 = ClonePartContainerGroup(sourceTemplate.appearance.clothesColor2),
-                clothesColor3 = ClonePartContainerGroup(sourceTemplate.appearance.clothesColor3),
-                clothesColor4 = ClonePartContainerGroup(sourceTemplate.appearance.clothesColor4),
-                eyes = ClonePartContainerGroup(sourceTemplate.appearance.eyes),
-                face = ClonePartContainerGroup(sourceTemplate.appearance.face),
-                faceFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.faceFeature1),
-                faceFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.faceFeature2),
-                hairColor = ClonePartContainerGroup(sourceTemplate.appearance.hairColor),
-                hairstyle = ClonePartContainerGroup(sourceTemplate.appearance.hairstyle),
-                hat = ClonePartContainerGroup(sourceTemplate.appearance.hat),
-                handBackFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.handBackFeature1),
-                handBackFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.handBackFeature2),
-                handFrontFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.handFrontFeature2),
-                handFrontFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.handFrontFeature1),
-                skinColor = ClonePartContainerGroup(sourceTemplate.appearance.skinColor),
-                shortHairFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.shortHairFeature2),
-                shortHairFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.shortHairFeature1),
-                skullShape = ClonePartContainerGroup(sourceTemplate.appearance.skullShape),
-                skullShapeFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature1),
-                skullShapeFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature2),
-                skullShapeFeature3 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature3),
+                aboveHairFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.aboveHairFeature1, sourcePrefab.appearanceParts),
+                aboveHairFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.aboveHairFeature2, sourcePrefab.appearanceParts),
+                behindBodyFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.behindBodyFeature1, sourcePrefab.appearanceParts),
+                behindBodyFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.behindBodyFeature2, sourcePrefab.appearanceParts),
+                body = ClonePartContainerGroup(sourceTemplate.appearance.body, sourcePrefab.appearanceParts),
+                bodyFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.bodyFeature1, sourcePrefab.appearanceParts),
+                bodyFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.bodyFeature2, sourcePrefab.appearanceParts),
+                breastSize = ClonePartContainerGroup(sourceTemplate.appearance.breastSize, sourcePrefab.appearanceParts),
+                clothesColor1 = ClonePartContainerGroup(sourceTemplate.appearance.clothesColor1, sourcePrefab.appearanceParts),
+                clothesColor2 = ClonePartContainerGroup(sourceTemplate.appearance.clothesColor2, sourcePrefab.appearanceParts),
+                clothesColor3 = ClonePartContainerGroup(sourceTemplate.appearance.clothesColor3, sourcePrefab.appearanceParts),
+                clothesColor4 = ClonePartContainerGroup(sourceTemplate.appearance.clothesColor4, sourcePrefab.appearanceParts),
+                eyes = ClonePartContainerGroup(sourceTemplate.appearance.eyes, sourcePrefab.appearanceParts),
+                face = ClonePartContainerGroup(sourceTemplate.appearance.face, sourcePrefab.appearanceParts),
+                beard = ClonePartContainerGroup(sourceTemplate.appearance.beard, sourcePrefab.appearanceParts),
+                faceFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.faceFeature1, sourcePrefab.appearanceParts),
+                faceFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.faceFeature2, sourcePrefab.appearanceParts),
+                hairColor = ClonePartContainerGroup(sourceTemplate.appearance.hairColor, sourcePrefab.appearanceParts),
+                hairstyle = ClonePartContainerGroup(sourceTemplate.appearance.hairstyle, sourcePrefab.appearanceParts),
+                hat = ClonePartContainerGroup(sourceTemplate.appearance.hat, sourcePrefab.appearanceParts),
+                handBackFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.handBackFeature1, sourcePrefab.appearanceParts),
+                handBackFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.handBackFeature2, sourcePrefab.appearanceParts),
+                handFrontFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.handFrontFeature2, sourcePrefab.appearanceParts),
+                handFrontFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.handFrontFeature1, sourcePrefab.appearanceParts),
+                skinColor = ClonePartContainerGroup(sourceTemplate.appearance.skinColor, sourcePrefab.appearanceParts),
+                shortHairFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.shortHairFeature2, sourcePrefab.appearanceParts),
+                shortHairFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.shortHairFeature1, sourcePrefab.appearanceParts),
+                skullShape = ClonePartContainerGroup(sourceTemplate.appearance.skullShape, sourcePrefab.appearanceParts),
+                skullShapeFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature1, sourcePrefab.appearanceParts),
+                skullShapeFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature2, sourcePrefab.appearanceParts),
+                skullShapeFeature3 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature3, sourcePrefab.appearanceParts),
             };
         }
 
@@ -539,8 +594,28 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             };
         }
 
-        private static PartContainerGroup<T> ClonePartContainerGroup<T>(PartContainerGroup<T> group)
+        private static PartContainerGroup<T> ClonePartContainerGroup<T>(PartContainerGroup<T> group, List<AppearancePart> partOverrides)
         {
+            // Some NPCs have appearance parts in their prefab which ordinarily override any parts in the appearance container.
+            // If this NPC has any of those parts use them to create a part container group instead for ease of override later.
+            var overrides = partOverrides.OfType<T>().ToList();
+            if (overrides.Any())
+            {
+                return new PartContainerGroup<T>
+                {
+                    groupName = group.groupName,
+                    groupChance = 100,
+                    partsInGroup = new List<PartContainer<T>>
+                    {
+                        new PartContainer<T>
+                        {
+                            chanceBtwParts = 100,
+                            part = overrides.First(),
+                        },
+                    }.ToArray(),
+                };
+            }
+
             return new PartContainerGroup<T>
             {
                 groupName = group.groupName,

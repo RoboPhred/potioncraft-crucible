@@ -49,6 +49,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public OneOrMany<EyesConfig> Eyes { get; set; }
 
         /// <summary>
+        /// Gets or sets the configuration for the appearance of the NPC's beard.
+        /// </summary>
+        public OneOrMany<BeardConfig> Beard { get; set; }
+
+        /// <summary>
         /// Gets or sets the configuration for the appearance of the NPC's body.
         /// </summary>
         public OneOrMany<BodyConfig> Body { get; set; }
@@ -92,6 +97,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 foreach (var eyes in this.Eyes)
                 {
                     eyes.Apply(npc);
+                }
+            }
+
+            if (this.Beard != null)
+            {
+                npc.Appearance.ClearBeards();
+                foreach (var beard in this.Beard)
+                {
+                    if (beard != null)
+                    {
+                        beard.Apply(npc);
+                    }
                 }
             }
 
@@ -237,6 +254,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
 
                 npc.Appearance.AddHairStyle(hairs.ToArray(), this.Chance);
+            }
+        }
+
+        public class BeardConfig
+        {
+            public float Chance { get; set; } = 1f;
+
+            public Sprite Background { get; set; }
+
+            public Sprite Contour { get; set; }
+
+            public Sprite Scratches { get; set; }
+
+            public void Apply(CrucibleNpcTemplate npc)
+            {
+                npc.Appearance.AddBeard(Background, Contour, Scratches, this.Chance);
             }
         }
     }

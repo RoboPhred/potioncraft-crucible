@@ -179,7 +179,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             var panelGroup = iconSkinChangerField.Value;
-            var mainPanel = panelGroup.mainPanel as ElementChangerPanelWithElements;
+            var mainPanel = panelGroup.mainPanel as IconSkinChangerPanel;
             if (mainPanel != null)
             {
                 mainPanel.elements.Add(icon);

@@ -19,11 +19,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.Core.ValueContainers;
     using global::PotionCraft.DialogueSystem.Dialogue;
     using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.Npc.MonoBehaviourScripts;
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Settings;
     using global::PotionCraft.ObjectBased.Deliveries;
+    using global::PotionCraft.ObjectBased.Haggle;
     using global::PotionCraft.QuestSystem;
     using UnityEngine;
 
@@ -83,6 +86,62 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 this.NpcTemplate.dayTimeForSpawn = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the minimum number of days between NPC visits.
+        /// </summary>
+        public (int, int) DaysOfCooldown
+        {
+            get => (this.NpcTemplate.daysOfCooldown.min, this.NpcTemplate.daysOfCooldown.max);
+            set
+            {
+                if (value.Item1 < 0)
+                {
+                    throw new ArgumentException("DaysOfCooldown values must be greater than 0.");
+                }
+
+                this.NpcTemplate.daysOfCooldown = new MinMaxInt(value.Item1, value.Item2);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the gender of the NPC. This is used to pick between reactions.
+        /// </summary>
+        public string Gender
+        {
+            get => this.RequireBasePart<Gender>().gender.ToString();
+            set
+            {
+                if (!Enum.TryParse(value, out Gender.GenderSet parsed))
+                {
+                    var availableGenders = Enum.GetNames(typeof(Gender.GenderSet));
+                    var availableGendersS = availableGenders.Length > 1 ? availableGenders.Aggregate((m1, m2) => $"{m1}, {m2}") : availableGenders.FirstOrDefault();
+                    throw new ArgumentException($"Gender value is not in the list of possible genders. Available genders are: {availableGendersS}");
+                }
+
+                this.RequireBasePart<Gender>().gender = parsed;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the visual mood of the npc.
+        /// </summary>
+        public string VisualMood
+        {
+            get => this.NpcTemplate.visualMood.ToString();
+            set
+            {
+                if (!Enum.TryParse(value, out NpcVisualMoodInspector parsed))
+                {
+                    var availableMoods = Enum.GetNames(typeof(NpcVisualMoodInspector));
+                    var availableMoodsS = availableMoods.Length > 1 ? availableMoods.Aggregate((m1, m2) => $"{m1}, {m2}") : availableMoods.FirstOrDefault();
+                    throw new ArgumentException($"Visual mood value is not in the list of possible visual moods. Available visual moods are: {availableMoodsS}");
+                }
+
+                this.NpcTemplate.visualMood = parsed;
+            }
+        }
+
 
         /// <summary>
         /// Gets the ID of this npc template.
@@ -174,6 +233,94 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Sets the maximum closeness for this trader.
+        /// </summary>
+        /// <param name="newMaxCloseness">The new maximum closeness for this trader.</param>
+        public void SetMaximumCloseness(int newMaxCloseness)
+        {
+            var oldMaxCloseness = this.MaximumCloseness;
+            if (newMaxCloseness == oldMaxCloseness)
+            {
+                return;
+            }
+
+            if (newMaxCloseness > 100)
+            {
+                throw new ArgumentException("Maximum closeness cannot exceed 100. This is due to performance concerns when loading mods.");
+            }
+
+            // If we are decreasing maximum closeness simply truncate the closeness parts and closeness quests lists
+            if (newMaxCloseness < oldMaxCloseness)
+            {
+                this.NpcTemplate.closenessParts = this.NpcTemplate.closenessParts.Take(newMaxCloseness).ToList();
+                this.NpcTemplate.uniqueClosenessQuests = this.NpcTemplate.uniqueClosenessQuests.Take(newMaxCloseness).ToList();
+                return;
+            }
+
+            // If we are increasing maximum closeness copy the parts at the last level of closeness for each list to bring them up to the proper count
+            var lastClosenessPart = this.NpcTemplate.closenessParts.LastOrDefault();
+            var lastClosenessQuest = this.NpcTemplate.uniqueClosenessQuests.LastOrDefault();
+
+            if (lastClosenessPart == null || lastClosenessQuest == null)
+            {
+                if (this is CrucibleCustomerNpcTemplate || lastClosenessPart == null)
+                {
+                    throw new Exception("NPC has been copied from an old template. If you are seeing this exception the NPC creation code should be updated to disallow this!");
+                }
+            }
+
+            for (var i = oldMaxCloseness; i < newMaxCloseness; i++)
+            {
+                this.NpcTemplate.closenessParts.Add(CloneClosenessPart(lastClosenessPart));
+                this.NpcTemplate.uniqueClosenessQuests.Add(CrucibleQuest.Clone(new CrucibleQuest(lastClosenessQuest)).Quest);
+            }
+
+            // For now lets just allow max closeness in chapter 1. This may need to be able to be specified by the modder in the future.
+            for (var i = 0; i < this.NpcTemplate.maxClosenessForChapters.Count; i++)
+            {
+                this.NpcTemplate.maxClosenessForChapters[i] = newMaxCloseness;
+            }
+        }
+
+        /// <summary>
+        /// Sets the haggle themes for this npc.
+        /// </summary>
+        /// <param name="veryEasyTheme">the haggle theme name for very easy haggling.</param>
+        /// <param name="easyTheme">the haggle theme name for easy haggling.</param>
+        /// <param name="mediumTheme">the haggle theme name for medium haggling.</param>
+        /// <param name="hardTheme">the haggle theme name for hard haggling.</param>
+        /// <param name="veryHardTheme">the haggle theme name for very hard haggling.</param>
+        public void SetHagglingThemes(string veryEasyTheme, string easyTheme, string mediumTheme, string hardTheme, string veryHardTheme)
+        {
+            var haggleStaticSettings = this.RequireBasePart<HaggleStaticSettings>();
+
+            if (!string.IsNullOrEmpty(veryEasyTheme))
+            {
+                haggleStaticSettings.veryEasyTheme = GetHaggleTheme(veryEasyTheme);
+            }
+
+            if (!string.IsNullOrEmpty(veryEasyTheme))
+            {
+                haggleStaticSettings.easyTheme = GetHaggleTheme(easyTheme);
+            }
+
+            if (!string.IsNullOrEmpty(veryEasyTheme))
+            {
+                haggleStaticSettings.mediumTheme = GetHaggleTheme(mediumTheme);
+            }
+
+            if (!string.IsNullOrEmpty(veryEasyTheme))
+            {
+                haggleStaticSettings.hardTheme = GetHaggleTheme(hardTheme);
+            }
+
+            if (!string.IsNullOrEmpty(veryEasyTheme))
+            {
+                haggleStaticSettings.veryHardTheme = GetHaggleTheme(veryHardTheme);
+            }
+        }
+
+        /// <summary>
         /// Clears the existing closeness quest list and ensures the list is populated with the correct number of entries.
         /// </summary>
         public void PrepareClosenessQuestsForNewQuests()
@@ -210,7 +357,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             template.visualMood = copyFrom.visualMood;
             template.daysOfCooldown = copyFrom.daysOfCooldown;
             template.karmaForSpawn = copyFrom.karmaForSpawn;
-
 
             // TODO: How do prefabs differ?
             var prefab = ScriptableObject.CreateInstance<NpcPrefab>();
@@ -325,6 +471,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             return returnValue;
+        }
+
+        private static Theme GetHaggleTheme(string themeId)
+        {
+            return Theme.GetByName(themeId);
         }
 
         private static Category CopyDeliveryCategory(Category source)
@@ -447,7 +598,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         /// <param name="closenessLevel">The closeness level the given dialogue should appear at.</param>
         /// <param name="startingDialogue">The dialogue which should appear at the given closeness level.</param>
-        public void ApplyDialogueForClosenessLevel(int closenessLevel, CrucibleDialogueData.CrucibleDialogueNode startingDialogue)
+        public void ApplyDialogueForClosenessLevel(int closenessLevel, CrucibleDialogueData.CrucibleDialogueNode startingDialogue, bool showQuestDialogue)
         {
             if (startingDialogue == null)
             {
@@ -460,7 +611,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             var closenessPart = this.ClosenessParts[closenessLevel];
-            var dialogueData = CrucibleDialogueData.CreateDialogueData($"{this.ID}_{closenessLevel}", startingDialogue, this is CrucibleCustomerNpcTemplate);
+            var dialogueData = CrucibleDialogueData.CreateDialogueData($"{this.ID}_{closenessLevel}", startingDialogue, showQuestDialogue, this is CrucibleTraderNpcTemplate);
             var dialogueIndex = closenessPart.parts.FindIndex(p => p is DialogueData);
             if (dialogueIndex == -1)
             {

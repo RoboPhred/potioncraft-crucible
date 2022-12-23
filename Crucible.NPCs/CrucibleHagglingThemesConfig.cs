@@ -53,7 +53,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// Apply the configuration to the subject.
         /// </summary>
         /// <param name="subject">The subject to apply configuration to.</param>
-        public void ApplyConfiguration(CrucibleTraderNpcTemplate subject)
+        public void ApplyConfiguration(CrucibleNpcTemplate subject)
         {
             subject.SetHagglingThemes(this.VeryEasyTheme, this.EasyTheme, this.MediumTheme, this.HardTheme, this.VeryHardTheme);
         }
