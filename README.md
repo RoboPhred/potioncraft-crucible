@@ -12,6 +12,7 @@ Out of the box, Crucible provides support for creating code-free PotionCraft mod
 -   Custom potion bases and maps
 -   Custom potion effects
 -   Custom customers
+-   Custom traders
 
 Additionally, Crucible provides an API for other BepInEx mods that provides:
 
