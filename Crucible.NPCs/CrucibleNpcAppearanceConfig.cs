@@ -105,10 +105,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 npc.Appearance.ClearBeards();
                 foreach (var beard in this.Beard)
                 {
-                    if (beard != null)
-                    {
-                        beard.Apply(npc);
-                    }
+                    beard.Apply(npc);
                 }
             }
 
@@ -242,7 +239,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                     hairs.Add(CrucibleNpcAppearance.Hair.Left(this.FrontLeft));
                 }
 
-
                 if (this.FrontRight != null)
                 {
                     hairs.Add(CrucibleNpcAppearance.Hair.Right(this.FrontRight));
@@ -269,7 +265,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             public void Apply(CrucibleNpcTemplate npc)
             {
-                npc.Appearance.AddBeard(Background, Contour, Scratches, this.Chance);
+                npc.Appearance.AddBeard(Background ?? BlankSprite, Contour ?? BlankSprite, Scratches ?? BlankSprite, this.Chance);
             }
         }
     }
