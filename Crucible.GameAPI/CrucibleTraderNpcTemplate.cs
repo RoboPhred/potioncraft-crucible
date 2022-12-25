@@ -75,24 +75,48 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets or sets the minimum karma that this trader will spawn at.
+        /// </summary>
+        public int MinimumKarmaForSpawn
+        {
+            get => this.NpcTemplate.karmaForSpawn.min;
+            set
+            {
+                this.KarmaForSpawn = (value, this.KarmaForSpawn.Max);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum karma that this trader will spawn at.
+        /// </summary>
+        public int MaximumKarmaForSpawn
+        {
+            get => this.NpcTemplate.karmaForSpawn.max;
+            set
+            {
+                this.KarmaForSpawn = (this.KarmaForSpawn.Min, value);
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the minimum and maximum karma range that this trader will spawn in.
         /// </summary>
-        public (int, int) KarmaForSpawn
+        public (int Min, int Max) KarmaForSpawn
         {
             get => (this.NpcTemplate.karmaForSpawn.min, this.NpcTemplate.karmaForSpawn.max);
             set
             {
-                if (value.Item1 < -100 || value.Item2 > 100)
+                if (value.Min < -100 || value.Max > 100)
                 {
                     throw new ArgumentException("Karma values must range from -100 to 100. Unable to set KarmaForSpawn");
                 }
 
-                if (value.Item1 > value.Item2)
+                if (value.Min > value.Max)
                 {
                     throw new ArgumentException("Minimum karma to spawn must be less than maximum karma to spawn. Unable to set KarmaForSpawn");
                 }
 
-                this.NpcTemplate.karmaForSpawn = new MinMaxInt(value.Item1, value.Item2);
+                this.NpcTemplate.karmaForSpawn = new MinMaxInt(value.Min, value.Max);
             }
         }
 
@@ -214,10 +238,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="chance">The chance of the trader having the item for any given appearance.</param>
         /// <param name="minCount">The minimum amount of the item to stock.</param>
         /// <param name="maxCount">The maximum amount of the item to stock.</param>
-        public void AddTradeItem(CrucibleInventoryItem item, float chance = 1, int minCount = 1, int maxCount = 1)
+        /// <param name="closenessRequirement">The required closeness level for this trader to stock this item.</param>
+        public void AddTradeItem(CrucibleInventoryItem item, float chance = 1, int minCount = 1, int maxCount = 1, int closenessRequirement = 0)
         {
             var allSettings = this.TraderSettings;
-            var validSettings = allSettings.Where(s => s.Key >= item.ClosenessRequirement)
+            var validSettings = allSettings.Where(s => s.Key >= closenessRequirement)
                                            .Select(s => s.Value)
                                            .Where(s => s != null);
 

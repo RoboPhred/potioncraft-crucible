@@ -87,20 +87,50 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+
+        /// <summary>
+        /// Gets or sets the minimum days of cooldown for this npc to appear again. If this value is the same as <see cref="MaximumDaysOfCooldownForSpawn"/> the days of cooldown will not be random.
+        /// </summary>
+        public int MinimumDaysOfCooldownForSpawn
+        {
+            get => this.NpcTemplate.daysOfCooldown.min;
+            set
+            {
+                this.DaysOfCooldown = (value, this.DaysOfCooldown.Max);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum days of cooldown for this npc to appear again. If this value is the same as <see cref="MinimumDaysOfCooldownForSpawn"/> the days of cooldown will not be random.
+        /// </summary>
+        public int MaximumDaysOfCooldownForSpawn
+        {
+            get => this.NpcTemplate.daysOfCooldown.max;
+            set
+            {
+                this.DaysOfCooldown = (this.DaysOfCooldown.Min, value);
+            }
+        }
+
         /// <summary>
         /// Gets or sets the minimum number of days between NPC visits.
         /// </summary>
-        public (int, int) DaysOfCooldown
+        public (int Min, int Max) DaysOfCooldown
         {
             get => (this.NpcTemplate.daysOfCooldown.min, this.NpcTemplate.daysOfCooldown.max);
             set
             {
-                if (value.Item1 < 0)
+                if (value.Min < 0)
                 {
                     throw new ArgumentException("DaysOfCooldown values must be greater than 0.");
                 }
 
-                this.NpcTemplate.daysOfCooldown = new MinMaxInt(value.Item1, value.Item2);
+                if (value.Max < value.Min)
+                {
+                    throw new ArgumentException("DaysOfCooldown maximum must be greater or equal than minimum.");
+                }
+
+                this.NpcTemplate.daysOfCooldown = new MinMaxInt(value.Min, value.Max);
             }
         }
 
