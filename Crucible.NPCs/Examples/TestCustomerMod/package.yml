@@ -1,0 +1,148 @@
+name: TestCustomer
+author: fahlgorithm
+version: 1.0.0
+
+dependencies:
+  - bepInExGUID: net.RoboPhredDev.PotionCraft.Crucible.Ingredients
+
+customers:
+  - id: horse_man
+    inheritFrom: MonsterHunter
+    chanceToAppear: 10
+    minimumDaysOfCooldown: 1
+    maximumDaysOfCooldown: 1
+    maximumCloseness: 10
+    quests:
+      - closenessRequirement: 0
+        quest:
+            karmaReward: 4
+            desiredEffects:
+              -  Healing
+              -  Necromancy
+            subsequentVisitsQuestText: I still need to revive my dying horse.
+            generateRandomMandatoryRequirements: false
+            generateRandomOptionalRequirements: false
+        dialogue:
+            dialogueText: I need to revive my dying horse.
+            answers:
+              -  answerText: How soon do you need this potion?
+                 nextNode:
+                    dialogueText: Well if you wait too long I will need a potion to bring it back from the dead.
+                    answers:
+                      -  answerText: Hmm...
+  - id: trickster
+    inheritFrom: Witch
+    chanceToAppear: 10
+    minimumDaysOfCooldown: 1
+    maximumDaysOfCooldown: 1
+    maximumCloseness: 10
+    quests:
+      - closenessRequirement: 0
+        quest:
+            karmaReward: 4
+            desiredEffects:
+              -  Healing
+            subsequentVisitsQuestText: Do you think I have forgotten about our game? Want to play?
+            generateRandomMandatoryRequirements: false
+            generateRandomOptionalRequirements: false
+        dialogue:
+            dialogueText: Want to play a game?
+            answers:
+              -  answerText: I guess...
+                 nextNode:
+                    dialogueText: Pick a number.
+                    answers:
+                      -  answerText: 1
+                         nextNode:
+                            dialogueText: Wrong!
+                      -  answerText: 2
+                         nextNode:
+                            dialogueText: Wrong!
+                      -  answerText: 3
+                         nextNode:
+                            dialogueText: Well done! Now that you have guessed correctly I will tell you what I am looking to buy. I would like a health potion.
+                            answers:
+                              -  answerText: "[1]"
+                                 isBackToBeginningAnswer: true
+                      -  answerText: 4
+                         nextNode:
+                            dialogueText: Wrong!
+                            
+traders:
+  - id: evil_mushroomer
+    inheritFrom: Mushroomer
+    chanceToAppear: 10
+    minimumKarmaForSpawn: -100
+    maximumKarmaForSpawn: 100
+    unlockAtChapter: 1
+    minimumDaysOfCooldown: 1
+    maximumDaysOfCooldown: 1
+    dayTimeForSpawn: 30
+    visualMood: Bad
+    gender: Male
+    items:
+      -  inventoryItemName: Moon Salt
+         closenessRequirement: 0
+         chanceToAppear: 0.6
+         minCount: 500
+         maxCount: 5000
+      -  inventoryItemName: Philosopher's Salt
+         closenessRequirement: 0
+         chanceToAppear: 0.2
+         minCount: 500
+         maxCount: 5000
+      -  inventoryItemName: Sun Salt
+         closenessRequirement: 0
+         chanceToAppear: 0.4
+         minCount: 500
+         maxCount: 5000
+      -  inventoryItemName: Void Salt
+         closenessRequirement: 0
+         chanceToAppear: 0.8
+         minCount: 500
+         maxCount: 5000
+      -  inventoryItemName: BloodRuby
+         closenessRequirement: 0
+         chanceToAppear: 0.75
+         minCount: 1
+         maxCount: 10
+      -  inventoryItemName: FableBismuth
+         closenessRequirement: 0
+         chanceToAppear: 0.75
+         minCount: 1
+         maxCount: 10
+      -  inventoryItemName: PlagueStibnite
+         closenessRequirement: 0
+         chanceToAppear: 0.75
+         minCount: 1
+         maxCount: 10
+      -  inventoryItemName: FoggyParasol
+         closenessRequirement: 0
+         chanceToAppear: 0.75
+         minCount: 1
+         maxCount: 100
+      -  inventoryItemName: GoblinMushroom
+         closenessRequirement: 0
+         chanceToAppear: 0.75
+         minCount: 1
+         maxCount: 100
+    appearance:
+        beard:
+          - chance: 100
+    quests:
+      - closenessRequirement: 0
+        quest:
+            karmaReward: 4
+            desiredEffects:
+              -  Healing
+              -  Necromancy
+            subsequentVisitsQuestText: I still need to revive my dying horse. If you wait much longer I will need a potion to bring it back from the dead.
+            generateRandomMandatoryRequirements: false
+            generateRandomOptionalRequirements: false
+        dialogue:
+            dialogueText: Would you like to buy some salt or whatever? Oh also I could use your help with my horse.
+            answers:
+              -  answerText: Horse you say?
+                 nextNode:
+                    dialogueText: I need to revive my dying horse.
+                    isQuestNode: true
