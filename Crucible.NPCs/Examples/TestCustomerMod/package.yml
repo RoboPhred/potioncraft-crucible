@@ -59,7 +59,7 @@ customers:
         beard:
           -  background: trickster/beard/background.png
           -  contour: trickster/beard/contour.png
-          -  scratches:
+          -  scratches: trickster/beard/scratches.png
         body:
           -  Torso: trickster/body/torso.png
           -  LeftArm: trickster/body/leftArm.png
