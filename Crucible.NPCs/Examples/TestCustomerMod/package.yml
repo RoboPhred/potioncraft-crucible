@@ -38,10 +38,10 @@ customers:
     maximumCloseness: 10
     appearance:
         headShape:
-          -  mask:
+          -  mask: trickster/head_shape/mask.png
           -  background: trickster/head_shape/background.png
           -  contour: trickster/head_shape/contour.png
-          -  scratches:
+          -  scratches: trickster/head_shape/scratches.png
         hairStyle:
           -  frontLeft: trickster/hair_style/frontLeft.png
           -  frontRight: trickster/hair_style/frontRight.png
