@@ -138,7 +138,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var group = this.npcTemplate.appearance.skullShape;
 
             // Remove our blank if present.
-            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.shape.background.name == BlankSprite.name)
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part?.shape?.background?.name == BlankSprite.name)
             {
                 group.partsInGroup = new[] { container };
             }
@@ -146,6 +146,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 group.partsInGroup = group.partsInGroup.Concat(new[] { container }).ToArray();
             }
+
+            skullShape.name = $"skull_shape {group.partsInGroup.Length}";
         }
 
         /// <summary>
@@ -229,7 +231,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var group = this.npcTemplate.appearance.body;
 
             // Remove our blank if present.
-            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.bodyBase.Length >= 1 && group.partsInGroup[0].part.bodyBase[0].background.name == BlankSprite.name)
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part?.bodyBase?.Length >= 1 && group.partsInGroup[0].part?.bodyBase[0]?.background?.name == BlankSprite.name)
             {
                 group.partsInGroup = new[] { part };
             }
@@ -237,6 +239,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 group.partsInGroup = group.partsInGroup.Concat(new[] { part }).ToArray();
             }
+
+            body.name = $"body {group.partsInGroup.Length}";
         }
 
         /// <summary>
@@ -265,7 +269,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var group = this.npcTemplate.appearance.beard;
 
             // Remove our blank if present.
-            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.beardBase.background.name == BlankSprite.name)
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part?.beardBase?.background?.name == BlankSprite.name)
             {
                 group.partsInGroup = new[] { container };
             }
@@ -273,6 +277,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 group.partsInGroup = group.partsInGroup.Concat(new[] { container }).ToArray();
             }
+
+            beard.name = $"beard {group.partsInGroup.Length}";
         }
 
         /// <summary>
@@ -378,7 +384,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var group = this.npcTemplate.appearance.face;
 
             // Remove our blank if present.
-            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.hair.Length >= 6 && group.partsInGroup[0].part.hair[3].contour.name == BlankSprite.name)
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part?.hair?.Length >= 6 && group.partsInGroup[0].part?.hair[3]?.contour?.name == BlankSprite.name)
             {
                 group.partsInGroup = new[] { part };
             }
@@ -386,6 +392,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 group.partsInGroup = group.partsInGroup.Concat(new[] { part }).ToArray();
             }
+
+            face.name = $"face {group.partsInGroup.Length}";
         }
 
         /// <summary>
@@ -427,7 +435,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var group = this.npcTemplate.appearance.eyes;
 
             // Remove our blank placeholder if present.
-            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.left.name == BlankSprite.name)
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part?.left?.name == BlankSprite.name)
             {
                 group.partsInGroup = new[] { part };
             }
@@ -435,6 +443,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 group.partsInGroup = group.partsInGroup.Concat(new[] { part }).ToArray();
             }
+
+            eyes.name = $"eyes {group.partsInGroup.Length}";
         }
 
         /// <summary>
@@ -485,7 +495,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var group = this.npcTemplate.appearance.hairstyle;
 
             // Remove our blank placeholder if present.
-            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part.longFront.background.name == BlankSprite.name)
+            if (group.partsInGroup.Length == 1 && group.partsInGroup[0].part?.longFront?.background?.name == BlankSprite.name)
             {
                 group.partsInGroup = new[] { part };
             }
@@ -493,6 +503,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 group.partsInGroup = group.partsInGroup.Concat(new[] { part }).ToArray();
             }
+
+            hairStyle.name = $"hairStyle {group.partsInGroup.Length}";
         }
 
         /// <summary>

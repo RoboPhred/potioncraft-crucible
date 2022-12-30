@@ -37,7 +37,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public void OnApplyConfiguration(CrucibleTraderNpcTemplate subject)
         {
             var inventoryItem = CrucibleInventoryItem.GetByName(this.InventoryItemName);
-            subject.AddTradeItem(inventoryItem, this.ChanceToAppear, this.MinCount, this.MaxCount, this.ClosenessRequirement);
+            subject.AddTradeItem(inventoryItem, this.ChanceToAppear, this.MinCount, this.MaxCount, this.ClosenessRequirement ?? 0);
         }
 
         /// <inheritdoc/>
