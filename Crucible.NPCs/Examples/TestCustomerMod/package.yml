@@ -36,6 +36,34 @@ customers:
     minimumDaysOfCooldown: 1
     maximumDaysOfCooldown: 1
     maximumCloseness: 10
+    appearance:
+        headShape:
+          -  mask:
+          -  background: trickster/head_shape/background.png
+          -  contour: trickster/head_shape/contour.png
+          -  scratches:
+        hairStyle:
+          -  frontLeft: trickster/hair_style/frontLeft.png
+          -  frontRight: trickster/hair_style/frontRight.png
+          -  back: trickster/hair_style/back.png
+        face:
+          -  positiveReaction: trickster/face/positive_reaction.png
+          -  negativeReaction: trickster/face/negative_reaction.png
+          -  idle: trickster/face/idle_face.png
+          -  anger1: trickster/face/anger.png
+          -  anger2: trickster/face/anger2.png
+          -  happy1: trickster/face/happy_reaction.png
+        eyes:
+          -  leftEye: trickster/eyes/left.png
+          -  rightEye: trickster/eyes/right.png
+        beard:
+          -  background: trickster/beard/background.png
+          -  contour: trickster/beard/contour.png
+          -  scratches:
+        body:
+          -  Torso: trickster/body/torso.png
+          -  LeftArm: trickster/body/leftArm.png
+          -  RightArm: trickster/head_shape/right_arm.png
     quests:
       - closenessRequirement: 0
         quest:
