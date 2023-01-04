@@ -1,4 +1,4 @@
-// <copyright file="CrucibleCustomersConfigRoot.cs" company="RoboPhredDev">
+// <copyright file="CrucibleMaxIngredientsQuestRequirementConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -16,35 +16,28 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System.Collections.Generic;
-    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
+    using System;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
 
     /// <summary>
-    /// The configuration root for ingredients.
+    /// Configuration specifying an addional quest requirement.
     /// </summary>
-    [CruciblePackageConfigRoot]
-    public class CrucibleCustomersConfigRoot : CruciblePackageConfigRoot
+    public class CrucibleMaxIngredientsQuestRequirementConfig : CrucibleQuestRequirementConfig
     {
         /// <summary>
-        /// Gets or sets the list of customers.
+        /// Gets or sets the maximum number of ingredients allowed for this quest requirement. This should be a value between 1 and 3.
         /// </summary>
-        public List<CrucibleCustomerConfig> Customers { get; set; } = new();
-
-        /// <summary>
-        /// Gets or sets the list of traders.
-        /// </summary>
-        public List<CrucibleTraderConfig> Traders { get; set; } = new();
-
-        /// <summary>
-        /// Gets or sets the list of factions.
-        /// </summary>
-        // public List<CrucibleFactionConfig> Factions { get; set; } = new();
+        public int MaximumIngredients { get; set; } = 3;
 
         /// <inheritdoc/>
-        public override void ApplyConfiguration()
+        public override CrucibleQuestRequirement GetSubject()
         {
-            this.Customers.ForEach(x => x.ApplyConfiguration());
-            this.Traders.ForEach(x => x.ApplyConfiguration());
+            if (this.MaximumIngredients < 0 || this.MaximumIngredients > 3)
+            {
+                throw new ArgumentException("Maximum ingredient quest requirement must be greater than 0 and less than 3.");
+            }
+
+            return CrucibleQuestRequirement.GetByName($"MaxIngredients{this.MaximumIngredients}");
         }
     }
 }

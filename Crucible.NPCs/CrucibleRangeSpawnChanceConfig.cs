@@ -1,4 +1,4 @@
-// <copyright file="CrucibleCustomersConfigRoot.cs" company="RoboPhredDev">
+// <copyright file="CrucibleRangeSpawnChanceConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -18,33 +18,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using RoboPhredDev.PotionCraft.Crucible.Yaml;
 
     /// <summary>
-    /// The configuration root for ingredients.
+    /// Configuration specifying data on a faction.
     /// </summary>
-    [CruciblePackageConfigRoot]
-    public class CrucibleCustomersConfigRoot : CruciblePackageConfigRoot
+    public class CrucibleRangeSpawnChanceConfig : CrucibleSpawnChanceConfig
     {
         /// <summary>
-        /// Gets or sets the list of customers.
+        /// Gets or sets the minimum karma at which this spawn chance takes effect.
         /// </summary>
-        public List<CrucibleCustomerConfig> Customers { get; set; } = new();
+        public float KarmaMin { get; set; } = -100f;
 
         /// <summary>
-        /// Gets or sets the list of traders.
+        /// Gets or sets the maximum karma at which this spawn chance takes effect.
         /// </summary>
-        public List<CrucibleTraderConfig> Traders { get; set; } = new();
-
-        /// <summary>
-        /// Gets or sets the list of factions.
-        /// </summary>
-        // public List<CrucibleFactionConfig> Factions { get; set; } = new();
-
-        /// <inheritdoc/>
-        public override void ApplyConfiguration()
-        {
-            this.Customers.ForEach(x => x.ApplyConfiguration());
-            this.Traders.ForEach(x => x.ApplyConfiguration());
-        }
+        public float KarmaMax { get; set; } = 100f;
     }
 }

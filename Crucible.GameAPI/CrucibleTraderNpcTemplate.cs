@@ -19,9 +19,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.Core.ValueContainers;
+    using global::PotionCraft.DialogueSystem.Dialogue;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ManagersSystem.Npc;
+    using global::PotionCraft.Npc.MonoBehaviourScripts;
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Settings;
     using global::PotionCraft.ObjectBased.Deliveries;
+    using global::PotionCraft.ObjectBased.Haggle;
+    using global::PotionCraft.Settings;
+    using HarmonyLib;
     using UnityEngine;
 
     /// <summary>
@@ -29,6 +37,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     /// </summary>
     public sealed class CrucibleTraderNpcTemplate : CrucibleNpcTemplate
     {
+        private static readonly List<string> AddedTraders = new();
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CrucibleTraderNpcTemplate"/> class.
         /// </summary>
@@ -48,6 +58,177 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         public Dictionary<int, TraderSettings> TraderSettings => this.GetTraderSettings();
 
         /// <summary>
+        /// Gets or sets the chapter at which this npc unlocks.
+        /// </summary>
+        public int UnlockAtChapter
+        {
+            get => this.NpcTemplate.unlockAtChapter;
+            set
+            {
+                if (value < 1 || value > 10)
+                {
+                    throw new ArgumentException("Chapter values must range from 1 to 10. Unable to set UnlockAtChapter");
+                }
+
+                this.NpcTemplate.unlockAtChapter = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum karma that this trader will spawn at.
+        /// </summary>
+        public int MinimumKarmaForSpawn
+        {
+            get => this.NpcTemplate.karmaForSpawn.min;
+            set
+            {
+                this.KarmaForSpawn = (value, this.KarmaForSpawn.Max);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum karma that this trader will spawn at.
+        /// </summary>
+        public int MaximumKarmaForSpawn
+        {
+            get => this.NpcTemplate.karmaForSpawn.max;
+            set
+            {
+                this.KarmaForSpawn = (this.KarmaForSpawn.Min, value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum and maximum karma range that this trader will spawn in.
+        /// </summary>
+        public (int Min, int Max) KarmaForSpawn
+        {
+            get => (this.NpcTemplate.karmaForSpawn.min, this.NpcTemplate.karmaForSpawn.max);
+            set
+            {
+                if (value.Min < -100 || value.Max > 100)
+                {
+                    throw new ArgumentException("Karma values must range from -100 to 100. Unable to set KarmaForSpawn");
+                }
+
+                if (value.Min > value.Max)
+                {
+                    throw new ArgumentException("Minimum karma to spawn must be less than maximum karma to spawn. Unable to set KarmaForSpawn");
+                }
+
+                this.NpcTemplate.karmaForSpawn = new MinMaxInt(value.Min, value.Max);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the starting gold of the trader.
+        /// </summary>
+        public int Gold
+        {
+            get => this.GetTraderSettings().FirstOrDefault().Value?.gold ?? 1000;
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentException("Gold cannot be less than zero. Unable to set Gold for custom trader.");
+                }
+
+                this.GetTraderSettings().Values.ToList().ForEach(v => v.gold = value);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new blank NPC template.
+        /// </summary>
+        /// <param name="name">The name of the template.</param>
+        /// <param name="copyAppearanceFrom">The NPC template to copy the appearance from.</param>
+        /// <returns>A new blank NPC template.</returns>
+        public static CrucibleTraderNpcTemplate CreateTraderNpcTemplate(string name, string copyAppearanceFrom = null)
+        {
+            CrucibleNpcTemplate copyFromTemplate = null;
+            if (!string.IsNullOrEmpty(copyAppearanceFrom))
+            {
+                copyFromTemplate = GetNpcTemplateById(copyAppearanceFrom);
+                if (copyFromTemplate == null || !copyFromTemplate.IsTrader)
+                {
+                    throw new ArgumentException($"Could not find Trader NPC template with id \"{copyAppearanceFrom}\" to copy appearance from.", nameof(copyAppearanceFrom));
+                }
+            }
+
+            var baseTemplate = CreateNpcTemplate(name, copyFromTemplate);
+            var template = new CrucibleTraderNpcTemplate(baseTemplate);
+            template.NpcTemplate.closenessLevelUpIcon = copyFromTemplate.NpcTemplate.closenessLevelUpIcon;
+            template.NpcTemplate.dayTimeForSpawn = copyFromTemplate.NpcTemplate.dayTimeForSpawn;
+
+            template.Appearance.CopyFrom(copyFromTemplate);
+
+            // Add trader to the karmic traders virtual queue so it can actually spawn like any other trader
+            Settings<NpcManagerSettings>.Asset.mainTraders.templates.Add(template.NpcTemplate);
+            AddTraderToPool(template);
+            AddedTraders.Add(template.NpcTemplate.name);
+
+            return template;
+        }
+
+        /// <summary>
+        /// Adds all custom crucible traders to the trader bool if that trader is not already in the pool.
+        /// </summary>
+        public static void AddAllCustomTradersToPool()
+        {
+            var traderQueue = Managers.Npc.globalSettings.karmicTradersVirtualQueue;
+            var traderPool = Traverse.Create(traderQueue).Field<List<string>>("temporaryPool").Value;
+
+            AddedTraders.ForEach(trader =>
+            {
+                if (traderPool.Contains(trader))
+                {
+                    return;
+                }
+
+                traderPool.Add(trader);
+            });
+        }
+
+        /// <summary>
+        /// Adds the trader to the proper trader pool if this trader is not already in the pool.
+        /// </summary>
+        /// <param name="template">The trader to add to the pool.</param>
+        public static void AddTraderToPool(CrucibleTraderNpcTemplate template)
+        {
+            var traderQueue = Managers.Npc.globalSettings.karmicTradersVirtualQueue;
+            var traderPool = Traverse.Create(traderQueue).Field<List<string>>("temporaryPool").Value;
+            if (traderPool.Contains(template.NpcTemplate.name))
+            {
+                return;
+            }
+
+            traderPool.Add(template.NpcTemplate.name);
+        }
+
+        /// <summary>
+        /// Gets the NPC Template by the given name.
+        /// </summary>
+        /// <param name="id">The name of the npc template to fetch.</param>
+        /// <returns>A <see cref="CrucibleNpcTemplate"/> api object for manipulating the template.</returns>
+        public static CrucibleTraderNpcTemplate GetTraderNpcTemplateById(string id)
+        {
+            var template = NpcTemplate.allNpcTemplates.templates.Find(x => x.name == id);
+            if (template == null)
+            {
+                return null;
+            }
+
+            var traderTemplate = new CrucibleTraderNpcTemplate(template);
+
+            if (!traderTemplate.IsTrader)
+            {
+                return null;
+            }
+
+            return traderTemplate;
+        }
+
+        /// <summary>
         /// If this npc is a trader, adds an item to this template's trader inventory.
         /// </summary>
         /// <remarks>
@@ -57,10 +238,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="chance">The chance of the trader having the item for any given appearance.</param>
         /// <param name="minCount">The minimum amount of the item to stock.</param>
         /// <param name="maxCount">The maximum amount of the item to stock.</param>
-        public void AddTradeItem(CrucibleInventoryItem item, float chance = 1, int minCount = 1, int maxCount = 1)
+        /// <param name="closenessRequirement">The required closeness level for this trader to stock this item.</param>
+        public void AddTradeItem(CrucibleInventoryItem item, float chance = 1, int minCount = 1, int maxCount = 1, int closenessRequirement = 0)
         {
             var allSettings = this.TraderSettings;
-            var validSettings = allSettings.Where(s => s.Key >= item.ClosenessRequirement)
+            var validSettings = allSettings.Where(s => s.Key >= closenessRequirement)
                                            .Select(s => s.Value)
                                            .Where(s => s != null);
 
@@ -88,6 +270,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     applyDiscounts = true,
                     applyExtraCharge = true,
                 });
+            }
+        }
+
+        /// <summary>
+        /// Clears the trader's inventory of all items.
+        /// </summary>
+        public void ClearTradeItems()
+        {
+            var allSettings = this.TraderSettings;
+            var validSettings = allSettings.Select(s => s.Value)
+                                           .Where(s => s != null);
+
+            foreach (var settings in validSettings)
+            {
+                settings.deliveriesCategories.Clear();
             }
         }
 

@@ -29,11 +29,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         private static readonly Sprite BlankSprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear).WithName("Crucible unset appearance sprite");
 
         /// <summary>
-        /// Gets or sets the NPC ID to copy appearance from.
-        /// </summary>
-        public string CopyFrom { get; set; }
-
-        /// <summary>
         /// Gets or sets the configuration for the appearance of the NPC's head.
         /// </summary>
         public OneOrMany<HeadShapeConfig> HeadShape { get; set; }
@@ -54,6 +49,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public OneOrMany<EyesConfig> Eyes { get; set; }
 
         /// <summary>
+        /// Gets or sets the configuration for the appearance of the NPC's beard.
+        /// </summary>
+        public OneOrMany<BeardConfig> Beard { get; set; }
+
+        /// <summary>
         /// Gets or sets the configuration for the appearance of the NPC's body.
         /// </summary>
         public OneOrMany<BodyConfig> Body { get; set; }
@@ -64,23 +64,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <param name="npc">The NPC to apply the configuration to.</param>
         public void ApplyAppearance(CrucibleNpcTemplate npc)
         {
-            npc.Appearance.Clear();
-
-            if (!string.IsNullOrEmpty(this.CopyFrom))
-            {
-                var template = CrucibleNpcTemplate.GetNpcTemplateById(this.CopyFrom);
-                if (template == null)
-                {
-                    CrucibleLog.Log($"Could not apply \"copyAppearanceFrom\" for customer ID \"{npc.ID}\" because no NPC template with an ID of \"{this.CopyFrom}\" was found.");
-                }
-                else
-                {
-                    npc.Appearance.CopyFrom(template);
-                }
-            }
-
             if (this.HeadShape != null)
             {
+                npc.Appearance.ClearHeadShapes();
                 foreach (var shape in this.HeadShape)
                 {
                     shape.Apply(npc);
@@ -89,6 +75,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             if (this.HairStyle != null)
             {
+                npc.Appearance.ClearHairStyles();
                 foreach (var style in this.HairStyle)
                 {
                     style.Apply(npc);
@@ -97,6 +84,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             if (this.Face != null)
             {
+                npc.Appearance.ClearFaces();
                 foreach (var face in this.Face)
                 {
                     face.Apply(npc);
@@ -105,14 +93,25 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             if (this.Eyes != null)
             {
+                npc.Appearance.ClearEyes();
                 foreach (var eyes in this.Eyes)
                 {
                     eyes.Apply(npc);
                 }
             }
 
+            if (this.Beard != null)
+            {
+                npc.Appearance.ClearBeards();
+                foreach (var beard in this.Beard)
+                {
+                    beard.Apply(npc);
+                }
+            }
+
             if (this.Body != null)
             {
+                npc.Appearance.ClearBodies();
                 foreach (var bodyConfig in this.Body)
                 {
                     bodyConfig.Apply(npc);
@@ -240,7 +239,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                     hairs.Add(CrucibleNpcAppearance.Hair.Left(this.FrontLeft));
                 }
 
-
                 if (this.FrontRight != null)
                 {
                     hairs.Add(CrucibleNpcAppearance.Hair.Right(this.FrontRight));
@@ -252,6 +250,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
                 }
 
                 npc.Appearance.AddHairStyle(hairs.ToArray(), this.Chance);
+            }
+        }
+
+        public class BeardConfig
+        {
+            public float Chance { get; set; } = 1f;
+
+            public Sprite Background { get; set; }
+
+            public Sprite Contour { get; set; }
+
+            public Sprite Scratches { get; set; }
+
+            public void Apply(CrucibleNpcTemplate npc)
+            {
+                npc.Appearance.AddBeard(Background ?? BlankSprite, Contour ?? BlankSprite, Scratches ?? BlankSprite, this.Chance);
             }
         }
     }

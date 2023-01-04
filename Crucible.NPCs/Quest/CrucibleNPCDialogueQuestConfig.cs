@@ -1,4 +1,4 @@
-// <copyright file="CrucibleNpcCalendarVisitConfig.cs" company="RoboPhredDev">
+// <copyright file="CrucibleNPCDialogueQuestConfig.cs" company="RoboPhredDev">
 // This file is part of the Crucible Modding Framework.
 //
 // Crucible is free software; you can redistribute it and/or modify
@@ -14,38 +14,29 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-
 namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 {
-    using System.Linq;
+    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
 
     /// <summary>
-    /// Configuration for specifying on what day an npc appears.
+    /// Configuration specifying the chance a quest with a specific effect request will be chosen.
     /// </summary>
-    public class CrucibleNpcCalendarVisitConfig
+    public class CrucibleNPCDialogueQuestConfig : CruciblePackageConfigNode
     {
         /// <summary>
-        /// Gets or sets the day this npc will appear on.
+        /// Gets or sets the closness requirement for this dialogue to be chosen.
         /// </summary>
-        public int Day { get; set; }
+        public int ClosenessRequirement { get; set; }
 
         /// <summary>
-        /// Adds the given npc template to this day.
+        /// Gets or sets the starting dialogue node.
         /// </summary>
-        /// <param name="npcTemplate">The npc template to add to the configured day.</param>
-        public void AddToDay(CrucibleNpcTemplate npcTemplate)
-        {
-            if (this.Day == 0)
-            {
-                return;
-            }
+        public CrucibleNPCQuestConfig Quest { get; set; }
 
-            // TODO: Allow adding to start / middle / end / before npc / after npc
-            //CrucibleDayManager.BackfillDaysTo(this.Day);
-            //var count = CrucibleDayManager.GetNpcTemplatesForDay(this.Day).Count();
-            //CrucibleDayManager.InsertNpcTemplateToDay(this.Day, count, npcTemplate);
-        }
+        /// <summary>
+        /// Gets or sets the starting dialogue node.
+        /// </summary>
+        public CrucibleDialogueData.CrucibleDialogueNode Dialogue { get; set; }
     }
 }
-

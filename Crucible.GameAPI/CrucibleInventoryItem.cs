@@ -81,14 +81,25 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
-        /// Gets or sets the required closeness level for this item to appear in a trader's inventory.
+        /// Gets or sets the default required closeness level for this item to appear in a trader's inventory.
+        /// This is a crucible specific field and will not actually be saved to the Potion Craft inventory object.
         /// </summary>
-        public int ClosenessRequirement { get; set; }
+        public int DefaultClosenessRequirement { get; set; }
 
         /// <summary>
         /// Gets the game item being controlled by this api wrapper.
         /// </summary>
         internal InventoryItem InventoryItem { get; }
+
+        /// <summary>
+        /// Gets the inventory item with the specified name.
+        /// </summary>
+        /// <param name="inventoryItemName">The inventory item name to look up.</param>
+        /// <returns>The inventory item with the specified name.</returns>
+        public static CrucibleInventoryItem GetByName(string inventoryItemName)
+        {
+            return new CrucibleInventoryItem(InventoryItem.GetByName(inventoryItemName));
+        }
 
         /// <inheritdoc/>
         CrucibleInventoryItem ICrucibleInventoryItemProvider.GetInventoryItem()

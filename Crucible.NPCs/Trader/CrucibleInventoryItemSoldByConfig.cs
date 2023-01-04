@@ -26,6 +26,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
     /// </summary>
     [DuckTypeCandidate(typeof(CrucibleInventoryItemSoldByNpcTemplateConfig))]
     [DuckTypeCandidate(typeof(CrucibleInventoryItemSoldByNpcTagConfig))]
+    [DuckTypeCandidate(typeof(CrucibleInventoryItemSoldByNpcStaticConfig))]
     public abstract class CrucibleInventoryItemSoldByConfig : CruciblePackageConfigNode
     {
         /// <summary>
@@ -44,14 +45,19 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         public int MaxCount { get; set; } = 1;
 
         /// <summary>
+        /// Gets or sets the closeness requirement for this item to be sold by this trader.
+        /// </summary>
+        public int? ClosenessRequirement { get; set; }
+
+        /// <summary>
         /// Applies the configuration to the given inventory item.
         /// </summary>
         /// <param name="inventoryItem">The inventory item to apply the configuration to.</param>
-        public void OnApplyConfiguration(CrucibleInventoryItem inventoryItem)
+        public virtual void OnApplyConfiguration(CrucibleInventoryItem inventoryItem)
         {
             foreach (var trader in this.GetTraders())
             {
-                trader.AddTradeItem(inventoryItem, this.ChanceToAppear, this.MinCount, this.MaxCount);
+                trader.AddTradeItem(inventoryItem, this.ChanceToAppear, this.MinCount, this.MaxCount, this.ClosenessRequirement ?? inventoryItem.DefaultClosenessRequirement);
             }
         }
 

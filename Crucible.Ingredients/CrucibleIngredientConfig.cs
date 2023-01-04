@@ -103,9 +103,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         public bool? IsStackItemsSolid { get; set; }
 
         /// <summary>
-        /// Gets or sets the closeness requirement for this ingredient to show up in a trader's inventory.
+        /// Gets or sets the default closeness requirement for this ingredient to show up in a trader's inventory.
         /// </summary>
-        public int? ClosenessRequirement { get; set; }
+        public int ClosenessRequirement { get; set; } = 0;
 
         /// <inheritdoc/>
         public override string ToString()
@@ -192,9 +192,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 subject.IsStackItemSolid = this.IsStackItemsSolid.Value;
             }
 
-            if (this.ClosenessRequirement.HasValue)
+            if (this.ClosenessRequirement > 0)
             {
-                subject.ClosenessRequirement = this.ClosenessRequirement.Value;
+                subject.DefaultClosenessRequirement = this.ClosenessRequirement;
             }
         }
     }
