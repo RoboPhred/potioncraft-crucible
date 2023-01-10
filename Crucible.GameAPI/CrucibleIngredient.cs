@@ -20,12 +20,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System.Collections.Generic;
     using System.Linq;
     using global::PotionCraft.Assemblies.GamepadNavigation;
+    using global::PotionCraft.Assemblies.GamepadNavigation.Conditions;
     using global::PotionCraft.LocalizationSystem;
     using global::PotionCraft.ObjectBased;
     using global::PotionCraft.ObjectBased.InteractiveItem.SoundControllers;
     using global::PotionCraft.ObjectBased.RecipeMap.Path;
     using global::PotionCraft.ObjectBased.Stack;
     using global::PotionCraft.ObjectBased.Stack.StackItem;
+    using global::PotionCraft.ObjectBased.UIElements.Tooltip;
     using global::PotionCraft.ScriptableObjects;
     using global::PotionCraft.ScriptableObjects.Ingredient;
     using global::PotionCraft.Utils.BezierCurves;
@@ -425,16 +427,59 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             prefab.transform.parent = GameObjectUtilities.CruciblePrefabRoot.transform;
             prefab.SetActive(false);
 
+            prefab.AddComponent<Rigidbody2D>();
+
             var stack = prefab.AddComponent<Stack>();
             stack.inventoryItem = this.InventoryItem;
             var stackTraverse = Traverse.Create(stack);
             stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new global::PotionCraft.ObjectBased.Stack.SoundController(stack, this.Ingredient.soundPreset);
             stackTraverse.Field<float>("assemblingSpeed").Value = 3;
 
+            prefab.AddComponent<StackHighlight>();
+
             var visualEffects = prefab.AddComponent<StackVisualEffects>();
             visualEffects.stackScript = stack;
 
-            prefab.AddComponent<Rigidbody2D>();
+            var tooltipProvider = prefab.AddComponent<StackTooltipContentProvider>();
+            Traverse.Create(tooltipProvider).Field("stack").SetValue(stack);
+            tooltipProvider.fadingType = TooltipContentProvider.FadingType.SceneElement;
+
+            // These seem to be the same for each ingredient. Manually specifying them for now.
+            tooltipProvider.positioningSettings = new List<PositioningSettings>
+            {
+                new PositioningSettings
+                {
+                    bindingPoint = PositioningSettings.BindingPoint.ColliderLeftBottom,
+                    freezeX = false,
+                    freezeY = true,
+                    position = new Vector2(0, -0.05f),
+                    tooltipCorner = PositioningSettings.TooltipCorner.LeftTop,
+                },
+                new PositioningSettings
+                {
+                    bindingPoint = PositioningSettings.BindingPoint.ColliderRightTop,
+                    freezeX = true,
+                    freezeY = false,
+                    position = new Vector2(0.05f, 0),
+                    tooltipCorner = PositioningSettings.TooltipCorner.LeftTop,
+                },
+                new PositioningSettings
+                {
+                    bindingPoint = PositioningSettings.BindingPoint.ColliderLeftTop,
+                    freezeX = false,
+                    freezeY = true,
+                    position = new Vector2(0, 0.05f),
+                    tooltipCorner = PositioningSettings.TooltipCorner.LeftBottom,
+                },
+                new PositioningSettings
+                {
+                    bindingPoint = PositioningSettings.BindingPoint.ColliderLeftTop,
+                    freezeX = true,
+                    freezeY = false,
+                    position = new Vector2(-0.05f, 0),
+                    tooltipCorner = PositioningSettings.TooltipCorner.RightTop,
+                },
+            };
 
             // Not sure what settings this wants.
             // It seems to remove itself automatically, as this component does not exist when inspecting the game object later.
@@ -442,11 +487,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var slotObject = new GameObject
             {
-                name = "Slot Object",
+                name = "SlotObject",
             };
             slotObject.transform.parent = prefab.transform;
-            slotObject.AddComponent<Slot>();
+            var slot = slotObject.AddComponent<Slot>();
+            slot.conditions = new[] { Condition.EmptyHand };
             slotObject.AddComponent<ItemFromInventorySectionFinder>();
+            var positionProvider = slotObject.AddComponent<StackSlotPositionProvider>();
+            Traverse.Create(positionProvider).Field("stack").SetValue(stack);
+            var slotSpriteRenderer = slotObject.AddComponent<SpriteRenderer>();
+            slotSpriteRenderer.sprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear).WithName("Crucible empty slot sprite");
+
+            // These objects are destroyed after activation but are needed during initialization.
+            slot.lineSubObject = slotObject.AddComponent<SlotSubLine>();
+            slot.cursorAnchorSubObject = slotObject.AddComponent<SlotSubCursorAnchor>();
+            slot.mainAnchorSubObject = slotObject.AddComponent<SlotSubMainAnchor>();
+            slot.forbiddenAngleSubObject = slotObject.AddComponent<SlotSubSector>();
 
             foreach (var rootItem in rootItems)
             {
@@ -562,6 +618,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 if (StackOverriddenIngredients.Contains(ingredient))
                 {
                     e.Stack.gameObject.SetActive(true);
+
+                    // These were only useful to prevent exceptions while initializing the stack so they can now be destroyed
+                    // These objects are automatically destroyed under normal conditions for base game ingredients
+                    UnityEngine.Object.Destroy(e.Stack.slot.cursorAnchorSubObject);
+                    UnityEngine.Object.Destroy(e.Stack.slot.lineSubObject);
+                    UnityEngine.Object.Destroy(e.Stack.slot.mainAnchorSubObject);
+                    UnityEngine.Object.Destroy(e.Stack.slot.forbiddenAngleSubObject);
                 }
             };
         }
