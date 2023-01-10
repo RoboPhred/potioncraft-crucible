@@ -14,24 +14,31 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-#if ENABLE_POTION_BASE
+#if CRUCIBLE_BASES
 
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.LocalizationSystem;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ManagersSystem.RecipeMap;
+    using global::PotionCraft.ObjectBased.RecipeMap;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionBaseMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionEffectMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.Settings;
+    using global::PotionCraft.ScriptableObjects;
+    using global::PotionCraft.ScriptableObjects.TradableUpgrades;
+    using global::PotionCraft.Settings;
     using HarmonyLib;
-    using LocalizationSystem;
-    using ObjectBased.RecipeMap;
-    using ObjectOptimizationSystem;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
     using UnityEngine;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="PotionBase"/>s.
     /// </summary>
-    public sealed class CruciblePotionBase
+    public sealed class CruciblePotionBase : IEquatable<CruciblePotionBase>, ICrucibleInventoryItemProvider
     {
         private static readonly HashSet<MapState> CustomMapStates = new();
         private static readonly HashSet<PotionBase> AtlasOverriddenPotionBases = new();
@@ -77,6 +84,30 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             get
             {
                 return this.mapState.potionBase;
+            }
+        }
+
+        /// <summary>
+        /// Gets the inventory item used to unlock this potion base.
+        /// </summary>
+        /// <remarks>
+        /// If no upgrade item exists for this potion base, one will be created.
+        /// </remarks>
+        public CrucibleInventoryItem UpgradeItem
+        {
+            get
+            {
+                var upgrade = TradableUpgrade.allTradableUpgrades.OfType<PotionBaseUpgrade>().FirstOrDefault(x => x.potionBase == this.PotionBase);
+                if (upgrade == null)
+                {
+                    upgrade = ScriptableObject.CreateInstance<PotionBaseUpgrade>();
+                    upgrade.name = $"Crucible PotionBase {this.ID} Upgrade";
+                    upgrade.inventoryIconObject = SpriteUtilities.CreateBlankSprite(32, 32, Color.clear);
+                    upgrade.potionBase = this.PotionBase;
+                    TradableUpgrade.allTradableUpgrades.Add(upgrade);
+                }
+
+                return new CrucibleInventoryItem(upgrade);
             }
         }
 
@@ -306,7 +337,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Creates a new potion base with the given id.
         /// </summary>
         /// <param name="id">The id of the potion base to create.</param>
-        /// <returns>The potion base api object for the created potion base.</returns>
+        /// <returns>The api object for the created potion base.</returns>
         public static CruciblePotionBase CreatePotionBase(string id)
         {
             if (GetPotionBaseById(id) != null)
@@ -314,13 +345,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 throw new ArgumentException($"A base with id \"{id}\" already exists.", nameof(id));
             }
 
-            var waterBase = Array.Find(Managers.RecipeMap.potionBasesSettings.potionBases, x => x.name == "Water");
+            var waterBase = Array.Find(Settings<RecipeMapManagerPotionBasesSettings>.Asset.potionBases, x => x.name == "Water");
 
             var newBase = ScriptableObject.CreateInstance<PotionBase>();
-            Managers.RecipeMap.potionBasesSettings.potionBases = Managers.RecipeMap.potionBasesSettings.potionBases.Concat(new[] { newBase }).ToArray();
+            Settings<RecipeMapManagerPotionBasesSettings>.Asset.potionBases = Settings<RecipeMapManagerPotionBasesSettings>.Asset.potionBases.Concat(new[] { newBase }).ToArray();
 
             newBase.name = id;
             newBase.mapPrefab = GetBlankMapPrefab();
+
+            var localizationKey = $"potion_base_{id.ToLowerInvariant().Replace(" ", "_")}";
+            CrucibleLocalization.SetLocalizationKey(localizationKey, id);
+            CrucibleLocalization.SetLocalizationKey($"{localizationKey}_description", string.Empty);
 
             newBase.baseColor = waterBase.baseColor;
             newBase.smallIconSprite = waterBase.smallIconSprite;
@@ -333,20 +368,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             newBase.mapItemSprite = waterBase.mapItemSprite;
             newBase.recipeMapIconSprite = waterBase.recipeMapIconSprite;
 
-            var index = MapLoader.loadedMaps.Count;
+            var index = MapStatesManager.MapStates.Length;
             var mapState = new MapState
             {
                 index = index,
-                zoom = Managers.RecipeMap.settings.zoomSettings.defaultZoom,
+                zoom = Settings<RecipeMapManagerSettings>.Asset.zoomSettings.defaultZoom,
                 potionBase = newBase,
             };
-            MapLoader.loadedMaps.Add(mapState);
+            var newMapStates = MapStatesManager.MapStates.Concat(new[] { mapState }).ToArray();
+            var mapStatesField = typeof(MapStatesManager).GetField("_mapStates");
+            mapStatesField.SetValue(null, newMapStates);
 
             var oldCurrentMap = Managers.RecipeMap.currentMap;
             Managers.RecipeMap.currentMap = mapState;
             try
             {
-                mapState.transform = Traverse.Create(typeof(MapLoader)).Method("InstantiateMap", new[] { typeof(int) }).GetValue<Transform>(index);
+                mapState.transform = Traverse.Create(typeof(MapStatesManager)).Method("InstantiateMap", new[] { typeof(int) }).GetValue<Transform>(index);
                 mapState.transform.gameObject.name = $"Crucible RecipeMap {id}";
                 mapState.transform.GetComponent<RecipeMapPrefabController>().mapState = mapState;
 
@@ -357,8 +394,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 mapState.UpdateMapBounds();
 
                 Managers.RecipeMap.fogOfWar.InitializeMap(index);
-
-                RegisterMapStatePhysics(mapState);
             }
             finally
             {
@@ -387,6 +422,39 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets an enumerable of all potion bases.
+        /// </summary>
+        /// <returns>An enumerable of all potion bases.</returns>
+        public static IEnumerable<CruciblePotionBase> GetAllPotionBases()
+        {
+            return MapLoader.loadedMaps.Select(x => new CruciblePotionBase(x));
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(CruciblePotionBase other)
+        {
+            return this.PotionBase == other.PotionBase;
+        }
+
+        /// <inheritdoc/>
+        CrucibleInventoryItem ICrucibleInventoryItemProvider.GetInventoryItem()
+        {
+            return this.UpgradeItem;
+        }
+
+        /// <summary>
+        /// Gets all potion effects on this potion base.
+        /// </summary>
+        /// <returns>An enumerable of potion effects on this potion base.</returns>
+        public IEnumerable<CruciblePotionBaseEffect> GetEffects()
+        {
+            foreach (var mapItem in this.MapGameObject.GetComponentsInChildren<PotionEffectMapItem>())
+            {
+                yield return new CruciblePotionBaseEffect(mapItem);
+            }
+        }
+
+        /// <summary>
         /// Clears the recipe map of all entities.
         /// </summary>
         /// <remarks>
@@ -408,6 +476,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <para>
         /// This should be called after adding or removing game objects on the recipe map.
         /// </para>
+        /// </remarks>
         public void Reinitialize()
         {
             RecipeMapGameObjectUtilities.Reinitialize(this.MapGameObject);
@@ -443,46 +512,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return blankMapPrefab;
         }
 
-        /// <summary>
-        /// Initialize the map physics optimizer data.
-        /// </summary>
-        /// <seealso cref="RecipeMapPhysicsOptimizer.Initialize"/>
-        /// <param name="mapState">The map state to initialize physics data for.</param>
-        private static void RegisterMapStatePhysics(MapState mapState)
-        {
-            var physicsOptimizerTraverse = Traverse.Create(typeof(RecipeMapPhysicsOptimizer));
-
-            // Note: If we (or potioncraft itself) ever support varying map sizes, this logic will need to be reset if crucible changes the size.
-            Vector2 vector2 = 0.5f * Managers.RecipeMap.currentMap.mapBgRect.size;
-            Rect rect = Rect.MinMaxRect(-vector2.x, -vector2.y, vector2.x, vector2.y);
-
-            physicsOptimizerTraverse.Field<Dictionary<MapState, Rect>>("gridRectDictionary").Value.Add(mapState, rect);
-
-            var defaultCellWidth = physicsOptimizerTraverse.Field<float>("defaultCellWidth").Value;
-            var defaultCellHeight = physicsOptimizerTraverse.Field<float>("defaultCellHeight").Value;
-            var cellsX = Mathf.CeilToInt(rect.width / defaultCellWidth);
-            var cellsY = Mathf.CeilToInt(rect.height / defaultCellHeight);
-            physicsOptimizerTraverse.Field<Dictionary<MapState, int>>("columnsCountDictionary").Value.Add(mapState, cellsX);
-            physicsOptimizerTraverse.Field<Dictionary<MapState, int>>("rowsCountDictionary").Value.Add(mapState, cellsY);
-            physicsOptimizerTraverse.Field<Dictionary<MapState, float>>("cellWidthDictionary").Value.Add(mapState, rect.width / cellsX);
-            physicsOptimizerTraverse.Field<Dictionary<MapState, float>>("cellHeightDictionary").Value.Add(mapState, rect.height / cellsY);
-
-            var objectOptimizerTargetSetArray = new HashSet<IRecipeMapObjectOptimizerTarget>[cellsY][];
-            for (int cellY = 0; cellY < cellsY; ++cellY)
-            {
-                objectOptimizerTargetSetArray[cellY] = new HashSet<IRecipeMapObjectOptimizerTarget>[cellsX];
-                for (int cellX = 0; cellX < cellsX; ++cellX)
-                {
-                    objectOptimizerTargetSetArray[cellY][cellX] = new HashSet<IRecipeMapObjectOptimizerTarget>();
-                }
-            }
-
-            physicsOptimizerTraverse.Field<Dictionary<MapState, HashSet<IRecipeMapObjectOptimizerTarget>[][]>>("gridDictionary").Value.Add(mapState, objectOptimizerTargetSetArray);
-
-            physicsOptimizerTraverse.Field<Dictionary<MapState, HashSet<IRecipeMapObjectOptimizerTarget>>>("optimizerTargetsDictionary").Value.Add(mapState, new HashSet<IRecipeMapObjectOptimizerTarget>());
-            physicsOptimizerTraverse.Field<Dictionary<MapState, HashSet<IRecipeMapObjectOptimizerTarget>>>("disabledOptimizerTargetsDictionary").Value.Add(mapState, new HashSet<IRecipeMapObjectOptimizerTarget>());
-        }
-
         private static void SetPotionBaseIcon(PotionBase potionBase, Texture2D texture)
         {
             if (spriteAtlas == null)
@@ -490,7 +519,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 spriteAtlas = new CrucibleSpriteAtlas("CruciblePotionBases");
                 IngredientsListResolveAtlasEvent.OnAtlasRequest += (_, e) =>
                 {
-                    if (AtlasOverriddenPotionBases.Contains(e.Object))
+                    if (e.Object is not PotionBase potionBase)
+                    {
+                        return;
+                    }
+
+                    if (AtlasOverriddenPotionBases.Contains(potionBase))
                     {
                         e.AtlasResult = spriteAtlas.AtlasName;
                     }
@@ -499,7 +533,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 CrucibleSpriteAtlasManager.AddAtlas(spriteAtlas);
             }
 
-            spriteAtlas.SetIcon($"PotionBase {potionBase.name} SmallIcon", texture, yOffset: texture.height * 0.66f);
+            spriteAtlas.SetIcon($"PotionBase {potionBase.name} SmallIcon", texture, yOffset: texture.height - 5);
 
             AtlasOverriddenPotionBases.Add(potionBase);
         }
@@ -511,7 +545,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             try
             {
                 // ClearFogAroundIndicator can't be used, as the game save might have a potion in progress
-                Managers.RecipeMap.fogOfWar.FogShow(
+                Managers.RecipeMap.fogOfWar.FogShowInRadius(
                     Vector2.zero,
                     Managers.RecipeMap.fogOfWar.settings.visibilityRadiusAroundIndicator + Managers.RecipeMap.fogOfWar.exploringRadiusAddendum,
                     false);

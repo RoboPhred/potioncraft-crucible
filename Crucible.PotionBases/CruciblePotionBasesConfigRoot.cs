@@ -14,10 +14,12 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
+#if CRUCIBLE_BASES
+
 namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
 {
     using System.Collections.Generic;
-    using RoboPhredDev.PotionCraft.Crucible.Config;
+    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
 
     /// <summary>
     /// The configuration root for potion bases.
@@ -37,3 +39,5 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         }
     }
 }
+
+#endif

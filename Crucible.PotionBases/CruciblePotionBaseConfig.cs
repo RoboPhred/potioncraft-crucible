@@ -14,26 +14,46 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
+#if CRUCIBLE_BASES
+
 namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
 {
+    using System;
     using System.Collections.Generic;
-    using RoboPhredDev.PotionCraft.Crucible.Config;
+    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities;
+    using RoboPhredDev.PotionCraft.Crucible.PotionBases.Entities;
     using UnityEngine;
+    using YamlDotNet.Core;
+    using YamlDotNet.Serialization;
 
     /// <summary>
-    /// Configuration subject for a PotionCraft ingredient.
+    /// Configuration subject for a PotionCraft potion base.
     /// </summary>
     public class CruciblePotionBaseConfig : CruciblePackageConfigSubjectNode<CruciblePotionBase>
     {
+        private static readonly HashSet<CruciblePotionBase> CreatedPotionBases = new();
         private static readonly HashSet<string> UnlockIdsOnStart = new();
-
-        private string id;
 
         static CruciblePotionBaseConfig()
         {
             CrucibleGameEvents.OnSaveLoaded += (_, __) =>
             {
+                // HACK: Saves that did not previously contain a potion effect on a potion base will still load
+                // an empty serialized data object into the effect, zeroing out the status and making the effect
+                // unusable.
+                // FIXME: We might want to directly patch the game to supply sensible defaults in this case,
+                // but I want to avoid behavioral patches to keep crucible compatible with other mods.
+                // Hook into various MapItem OnLoad functions and implement the fix there?
+                foreach (var potionBase in CreatedPotionBases)
+                {
+                    foreach (var effect in potionBase.GetEffects())
+                    {
+                        effect.FixInvalidStatus();
+                    }
+                }
+
                 foreach (var potionBaseId in UnlockIdsOnStart)
                 {
                     var potionBase = CruciblePotionBase.GetPotionBaseById(potionBaseId);
@@ -43,35 +63,40 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         }
 
         /// <summary>
-        /// Gets or sets the ID of this ingredient.
+        /// Gets or sets the ID of this potion base.
         /// </summary>
-        public string ID
-        {
-            get
-            {
-                return this.id ?? this.Name.Replace(" ", string.Empty);
-            }
-
-            set
-            {
-                this.id = value;
-            }
-        }
+        [YamlMember(Alias = "id")]
+        public string ID { get; set; }
 
         /// <summary>
         /// Gets or sets the name of this potion base.
         /// </summary>
-        public string Name { get; set; }
+        public LocalizedString Name { get; set; }
 
         /// <summary>
         /// Gets or sets the description of this potion base.
         /// </summary>
-        public string Description { get; set; }
+        public LocalizedString Description { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this potion base is available from the start of the game.
         /// </summary>
         public bool UnlockedOnStart { get; set; }
+
+        /// <summary>
+        /// Gets or sets the icon used for the upgrade item that unlocks this potion base.
+        /// </summary>
+        public Sprite InventoryItemIcon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the price of the upgrade item that unlocks this potion base.
+        /// </summary>
+        public int? InventoryItemPrice { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color of this potion base.
+        /// </summary>
+        public Color? LiquidColor { get; set; }
 
         /// <summary>
         /// Gets or sets the small icon to display for this potion base in tooltips and ingredient lists.
@@ -118,28 +143,63 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
         /// </summary>
         public Sprite MapOriginImage { get; set; }
 
+        /// <summary>
+        /// Gets or sets the list of map entities to spawn on this potion effect.
+        /// </summary>
+        public List<CrucibleMapEntityConfig> MapEntities { get; set; } = new();
+
+        /// <inheritdoc/>
+        protected override void OnDeserializeCompleted(Mark start, Mark end)
+        {
+            if (string.IsNullOrWhiteSpace(this.ID))
+            {
+                throw new Exception($"Potion base at {start} must have an id.");
+            }
+        }
+
         /// <inheritdoc/>
         protected override CruciblePotionBase GetSubject()
         {
             var id = this.PackageMod.Namespace + "." + this.ID;
-            return CruciblePotionBase.GetPotionBaseById(id) ?? CruciblePotionBase.CreatePotionBase(id);
+
+            var potionBase = CruciblePotionBase.GetPotionBaseById(id);
+            if (potionBase != null)
+            {
+                return potionBase;
+            }
+
+            potionBase = CruciblePotionBase.CreatePotionBase(id);
+            CreatedPotionBases.Add(potionBase);
+            return potionBase;
         }
 
         /// <inheritdoc/>
         protected override void OnApplyConfiguration(CruciblePotionBase subject)
         {
-            if (!string.IsNullOrEmpty(this.Name))
+            if (this.Name != null)
             {
                 subject.Name = this.Name;
             }
 
-            if (!string.IsNullOrEmpty(this.Description))
+            if (this.Description != null)
             {
                 subject.Description = this.Description;
             }
 
-            // TODO: From config.  Make a deserializer for the Color class.  Use hex code string or rgba object
-            subject.LiquidColor = Color.red;
+            if (this.InventoryItemIcon != null)
+            {
+                subject.UpgradeItem.InventoryIcon = this.InventoryItemIcon;
+            }
+
+            if (this.InventoryItemPrice.HasValue)
+            {
+                subject.UpgradeItem.Price = this.InventoryItemPrice.Value;
+            }
+
+            if (this.LiquidColor.HasValue)
+            {
+                subject.LiquidColor = this.LiquidColor.Value;
+            }
 
             if (this.IngredientListIcon != null)
             {
@@ -166,7 +226,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
                 subject.MenuLockedIcon = this.MenuButtonLockedImage;
             }
 
-            // FIXME: This isnt working.  Image is missing from tooltip.
             if (this.TooltipImage != null)
             {
                 subject.TooltipIcon = this.TooltipImage;
@@ -174,7 +233,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
 
             if (this.LadleImage != null)
             {
-                subject.LadleIcon = Sprite.Create(this.LadleImage, new Rect(0, 0, this.LadleImage.width, this.LadleImage.height), new Vector2(0f, 0.5f));
+                subject.LadleIcon = Sprite.Create(this.LadleImage, new Rect(0, 0, this.LadleImage.width, this.LadleImage.height), new Vector2(-0.25f, 0.5f));
             }
 
             if (this.RecipeStepImage != null)
@@ -195,6 +254,15 @@ namespace RoboPhredDev.PotionCraft.Crucible.PotionBases
             {
                 UnlockIdsOnStart.Remove(subject.ID);
             }
+
+            if (this.MapEntities != null)
+            {
+                using var spawner = CrucibleMapEntitySpawner.WithPotionBase(this.Subject);
+                spawner.ClearMap();
+                this.MapEntities.ForEach(x => x.AddEntityToSpawner(this.PackageMod.Namespace, spawner));
+            }
         }
     }
 }
+
+#endif

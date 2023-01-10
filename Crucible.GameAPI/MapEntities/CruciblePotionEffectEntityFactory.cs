@@ -14,17 +14,20 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-#if ENABLE_POTION_BASE
+#if CRUCIBLE_BASES
 
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
 {
+    using System;
+    using global::PotionCraft.ObjectBased.RecipeMap;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionEffectMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionEffectMapItem.Settings;
     using HarmonyLib;
     using UnityEngine;
 
     /// <summary>
     /// A map object entity factory that can create potion effects on a recipe map.
     /// </summary>
-    // TODO: Since we set settings seperately, we can support custom artwork.
     public sealed class CruciblePotionEffectEntityFactory : ICrucibleMapEntityFactory
     {
         private static GameObject potionEffectPrefab;
@@ -61,17 +64,69 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         public Vector2 Position { get; set; }
 
         /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"PotionEffect PotionEffect={this.PotionEffect} Position={this.Position} Angle={this.Angle}";
+        }
+
+        /// <inheritdoc/>
         public GameObject SpawnEntity(GameObject recipeMap)
         {
-            throw new System.NotImplementedException("Potion effect prefab capture not yet implemented.");
-            var go = Object.Instantiate(potionEffectPrefab, new Vector3(0, 0, 0), Quaternion.identity, recipeMap.transform);
+            RecipeMapGameObjectUtilities.EnsureRecipeMapObject(recipeMap);
+
+            var settings = this.PotionEffect.PotionEffectSettings;
+            if (settings == null)
+            {
+                throw new Exception($"Unable to resolve effect settings for PotionEffect \"{this.PotionEffect.ID}\".  This may be because it is a base game effect that was deleted by a mod.");
+            }
+
+            var prefab = GetPotionEffectPrefab();
+
+            var go = UnityEngine.Object.Instantiate(prefab, Vector3.zero, Quaternion.identity, recipeMap.transform);
+            go.name = $"Crucible PotionEffect {this.PotionEffect.ID}";
             var mapItem = go.GetComponent<PotionEffectMapItem>();
-            mapItem.effect = this.PotionEffect.PotionEffect;
-            Traverse.Create(mapItem).Field<PotionEffectSettings>("settings").Value = this.PotionEffect.PotionEffectSettings;
+
+            mapItem.Effect = this.PotionEffect.PotionEffect;
+            mapItem.Status = PotionEffectStatus.Unknown;
+
+            Traverse.Create(mapItem).Field<PotionEffectSettings>("settings").Value = settings;
+
             mapItem.SetPositionOnMap(this.Position);
             mapItem.SetAngleOnMap(this.Angle);
+
             go.SetActive(true);
+
             return go;
+        }
+
+        private static GameObject GetPotionEffectPrefab()
+        {
+            if (potionEffectPrefab != null)
+            {
+                return potionEffectPrefab;
+            }
+
+            foreach (var mapState in MapStatesManager.MapStates)
+            {
+                var mapItem = mapState.transform.gameObject.GetComponentInChildren<PotionEffectMapItem>();
+                if (mapItem == null)
+                {
+                    continue;
+                }
+
+                var go = mapItem.gameObject;
+                var wasActive = go.activeSelf;
+
+                // Clone as inactive so the behaviors do not try to link up with a map.
+                go.SetActive(false);
+                potionEffectPrefab = UnityEngine.Object.Instantiate(go, Vector3.zero, Quaternion.identity, GameObjectUtilities.CruciblePrefabRoot.transform);
+                potionEffectPrefab.name = "Crucible RecipeMap Prefab";
+                go.SetActive(wasActive);
+
+                return potionEffectPrefab;
+            }
+
+            throw new Exception("Unable to find a PotionEffectMapItem on any loaded potion base.  At least one PotionEffectMapItem must exist to spawn additional effects.");
         }
     }
 }

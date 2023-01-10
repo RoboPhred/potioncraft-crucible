@@ -14,7 +14,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-#if ENABLE_POTION_BASE
+#if CRUCIBLE_BASES
 
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
 {
@@ -35,6 +35,29 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         public static void AddPotionEffect(this CrucibleMapEntitySpawner spawner, CruciblePotionEffect effect, Vector2 position, float angle = 0)
         {
             spawner.AddEntityFactory(new CruciblePotionEffectEntityFactory(effect, position, angle));
+        }
+
+        /// <summary>
+        /// Adds a danger zone entity to the spawn queue.
+        /// </summary>
+        /// <param name="spawner">The map entity spawner to add the danger zone to.</param>
+        /// <param name="prefabType">The prefab type to use for an existing danger zone entity.</param>
+        /// <param name="position">The position to spawn the danger zone at.</param>
+        /// <param name="angle">The angle to spawn the danger zone at.</param>
+        public static void AddDangerZonePart(this CrucibleMapEntitySpawner spawner, string prefabType, Vector2 position, float angle = 0)
+        {
+            spawner.AddEntityFactory(new CrucibleDangerZonePartEntityFactory(prefabType, position, angle));
+        }
+
+        /// <summary>
+        /// Adds a vortex entity to the spawn queue.
+        /// </summary>
+        /// <param name="spawner">The map entity spawner to add the vortex to.</param>
+        /// <param name="prefabType">The prefab type to use for an existing vortex entity.</param>
+        /// <param name="position">The position to spawn the vortex at.</param>
+        public static void AddVortex(this CrucibleMapEntitySpawner spawner, string prefabType, Vector2 position)
+        {
+            spawner.AddEntityFactory(new CrucibleVortexEntityFactory(prefabType, position));
         }
     }
 }

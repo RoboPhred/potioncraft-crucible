@@ -20,8 +20,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using System.Collections.Generic;
     using System.Reflection;
     using System.Reflection.Emit;
+    using global::PotionCraft.ObjectBased.Stack;
     using HarmonyLib;
-    using ObjectBased.Stack;
     using UnityEngine;
 
     /// <summary>

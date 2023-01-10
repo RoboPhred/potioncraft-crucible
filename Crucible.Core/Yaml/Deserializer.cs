@@ -156,7 +156,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
                 .IgnoreUnmatchedProperties()
                 .WithNodeTypeResolver(new ImportNodeTypeResolver(), s => s.OnTop())
                 .WithNodeDeserializer(new ImportDeserializer(), s => s.OnTop())
-                .WithNodeDeserializer(new DuckTypeDeserializer(), s => s.OnTop());
+                .WithNodeDeserializer(new DuckTypeDeserializer(), s => s.OnTop())
+                .WithNodeDeserializer(new TypePropertyDeserializer(), s => s.OnTop());
 
             foreach (var type in CrucibleTypeRegistry.GetTypesByAttribute<YamlDeserializerAttribute>())
             {

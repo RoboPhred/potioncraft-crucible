@@ -20,8 +20,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using System.Collections.Generic;
     using System.Reflection;
     using System.Reflection.Emit;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ManagersSystem.SaveLoad;
+    using global::PotionCraft.NotificationSystem;
+    using global::PotionCraft.SaveFileSystem;
     using HarmonyLib;
-    using SaveFileSystem;
     using UnityEngine;
 
     /// <summary>
@@ -29,6 +32,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     /// </summary>
     public static class SaveLoadEvent
     {
+        private static bool patchApplied = false;
+
         private static EventHandler<SaveLoadEventArgs> onGameSaved;
 
         private static EventHandler<SaveLoadEventArgs> onGameLoaded;
@@ -69,6 +74,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static void EnsurePatches()
         {
+            if (patchApplied)
+            {
+                return;
+            }
+
+            patchApplied = true;
+
             var loadLastProgressFromPool = AccessTools.Method(typeof(SaveLoadManager), nameof(SaveLoadManager.LoadLastProgressFromPool));
             if (loadLastProgressFromPool == null)
             {
@@ -80,7 +92,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 HarmonyInstance.Instance.Patch(loadLastProgressFromPool, transpiler: new HarmonyMethod(transpiler));
             }
 
-            // FIXME: IL error
             var saveProgressToPool = AccessTools.Method(typeof(SaveLoadManager), nameof(SaveLoadManager.SaveProgressToPool));
             if (saveProgressToPool == null)
             {
@@ -95,36 +106,53 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static void RaiseGameLoaded(File file)
         {
-            var e = new SaveLoadEventArgs(file);
-            onGameLoaded?.Invoke(null, e);
+            try
+            {
+                var e = new SaveLoadEventArgs(file);
+                onGameLoaded?.Invoke(null, e);
+            }
+            catch (Exception)
+            {
+                Notification.ShowText("Load Error", "Crucible failed to load data from the save.  Data loss might occur if you continue playing.", Notification.TextType.EventText);
+                throw;
+            }
         }
 
         private static void RaiseGameSaved(SavePool pool)
         {
-            // We dont get a direct reference to the file, but we can safely assume it was the
-            // most recent file in the given pool.
-            var file = FileStorage.GetNewestFromPool(pool);
-            var e = new SaveLoadEventArgs(file);
-            onGameSaved?.Invoke(null, e);
+            try
+            {
+                // We dont get a direct reference to the file, but we can safely assume it was the
+                // most recent file in the given pool.
+                var file = FileStorage.GetNewestSuitableFromPool(pool);
+                var e = new SaveLoadEventArgs(file);
+                onGameSaved?.Invoke(null, e);
+            }
+            catch (Exception)
+            {
+                Notification.ShowText("Save Error", "Crucible failed to save data.  Data loss may occur.", Notification.TextType.EventText);
+                throw;
+            }
         }
 
         private static IEnumerable<CodeInstruction> TranspileLoadLastProgressFromPool(IEnumerable<CodeInstruction> instructions)
         {
             var raiseGameLoadedMethodInfo = AccessTools.Method(typeof(SaveLoadEvent), nameof(RaiseGameLoaded));
 
-            var managersGetMenuMethodInfo = AccessTools.PropertyGetter(typeof(Managers), nameof(Managers.Menu));
+            var loadFileMethodInfo = AccessTools.Method(typeof(SaveLoadManager), nameof(SaveLoadManager.LoadFile));
 
             var found = false;
             foreach (var instruction in instructions)
             {
-                if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo methodInfo && methodInfo == managersGetMenuMethodInfo)
+                yield return instruction;
+
+                if (!found && instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo methodInfo && methodInfo == loadFileMethodInfo)
                 {
                     found = true;
+
                     yield return new CodeInstruction(OpCodes.Ldloc_0); // file
                     yield return new CodeInstruction(OpCodes.Call, raiseGameLoadedMethodInfo);
                 }
-
-                yield return instruction;
             }
 
             if (!found)

@@ -23,22 +23,22 @@ namespace RoboPhredDev.PotionCraft.Crucible
     /// </summary>
     public static class GameObjectUtilities
     {
-        private static GameObject disabledRoot;
+        private static GameObject cruciblePrefabRoot;
 
         /// <summary>
         /// Gets a game object that is disabled.
         /// </summary>
-        public static GameObject DisabledRoot
+        public static GameObject CruciblePrefabRoot
         {
             get
             {
-                if (disabledRoot == null)
+                if (cruciblePrefabRoot == null)
                 {
-                    disabledRoot = new GameObject("DisabledRoot");
-                    disabledRoot.SetActive(false);
+                    cruciblePrefabRoot = new GameObject("Crucible Prefab Root");
+                    cruciblePrefabRoot.SetActive(false);
                 }
 
-                return disabledRoot;
+                return cruciblePrefabRoot;
             }
         }
     }

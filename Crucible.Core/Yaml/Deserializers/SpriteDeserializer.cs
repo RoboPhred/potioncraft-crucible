@@ -43,8 +43,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
                 return true;
             }
 
-            value = null;
-            return false;
+            var data = (SpriteData)nestedObjectDeserializer(reader, typeof(SpriteData));
+            var tex = data.Texture;
+
+            if (tex == null)
+            {
+                throw new Exception("Sprite must specify a texture.");
+            }
+
+            var sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), data.Pivot ?? new Vector2(0.5f, 0.5f));
+            sprite.name = tex.name;
+            value = sprite;
+            return true;
         }
 
         private bool TryDeserializeFilename(IParser reader, out object value)
@@ -74,6 +84,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
             sprite.name = resource;
             value = sprite;
             return true;
+        }
+
+        internal class SpriteData
+        {
+            public Texture2D Texture { get; set; }
+
+            public Vector2? Pivot { get; set; }
         }
     }
 }

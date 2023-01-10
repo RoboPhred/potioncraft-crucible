@@ -19,9 +19,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Reflection;
-    using SaveFileSystem;
+    using global::PotionCraft.SaveFileSystem;
+    using global::PotionCraft.Utils;
     using UnityEngine;
-    using Utils;
     using YamlDotNet.Serialization;
     using YamlDotNet.Serialization.NamingConventions;
 
@@ -35,6 +35,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// </summary>
         /// <remarks>
         /// PotionCraft uses line 0 (for metadata) and 1 (for game data).
+        /// We give a generous boundary for the game to use, to ensure we do not conflict.
         /// </remarks>
         private const int CrucibleFileLine = 511;
 

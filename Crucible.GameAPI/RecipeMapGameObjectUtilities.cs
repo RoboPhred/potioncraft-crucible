@@ -14,15 +14,21 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // </copyright>
 
-#if ENABLE_POTION_BASE
+
+#if CRUCIBLE_BASES
 
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using System.Collections.Generic;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ObjectBased.RecipeMap;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.DashedLine;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.PotionBaseMapItem;
+    using global::PotionCraft.ObjectBased.RecipeMap.RecipeMapItem.Zones;
     using HarmonyLib;
-    using ObjectBased.RecipeMap;
-    using ObjectBased.RecipeMap.RecipeMapItem.DangerZoneMapItem;
+    using RecipeMapZoneEditor;
     using UnityEngine;
 
     /// <summary>
@@ -66,7 +72,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 throw new InvalidOperationException("The recipe map game object's transform does not match the map state's transform.");
             }
 
-            var oldMapState = rmo.mapState;
+            var oldMapState = Managers.RecipeMap.currentMap;
             Managers.RecipeMap.currentMap = mapState;
             try
             {
@@ -93,12 +99,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // Clear out map items such as effects, experience, vortecies, etc.
             foreach (var potionObject in recipeMapGameObject.GetComponentsInChildren<RecipeMapItem>())
             {
+                // Leave the base.
+                if (potionObject is PotionBaseMapItem)
+                {
+                    continue;
+                }
+
                 UnityEngine.Object.DestroyImmediate(potionObject.gameObject);
             }
 
-            // Clear out the danger zone pattern containers that the game builds by default.
-            //  This will wipe out all normal danger zone parts supplied by the base game.
-            foreach (var zoneObject in recipeMapGameObject.GetComponentsInChildren<DangerZoneMapItem>())
+            // Clear out all the zones the game builds by default
+            foreach (var zoneObject in recipeMapGameObject.GetComponentsInChildren<RecipeMapZoneContainer>())
             {
                 var partsObjectTransform = zoneObject.gameObject.transform.Find("Parts");
                 if (partsObjectTransform != null)
@@ -106,16 +117,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     for (var i = partsObjectTransform.childCount - 1; i >= 0; i--)
                     {
                         var pattern = partsObjectTransform.gameObject.transform.GetChild(i);
-                        if (pattern.name.StartsWith("DangerZonePattern"))
-                        {
-                            UnityEngine.Object.DestroyImmediate(pattern.gameObject);
-                        }
+                        UnityEngine.Object.DestroyImmediate(pattern.gameObject);
                     }
                 }
             }
 
             // Clear out any existing danger zone parts not in a pattern, such as those added by crucible.
-            foreach (var part in recipeMapGameObject.GetComponentsInChildren<DangerZonePart>())
+            foreach (var part in recipeMapGameObject.GetComponentsInChildren<ZonePart>())
             {
                 UnityEngine.Object.DestroyImmediate(part.gameObject);
             }
@@ -141,14 +149,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 var rmo = recipeMapGameObject.GetComponent<RecipeMapPrefabController>();
                 var mapState = rmo.mapState;
 
-                /*
-                TODO:
-                - Purge RecipeMapPhysicsOptimizer for this map, and call RecipeMapPhysicsOptimizer.AddTarget for each RecipeMapItem as seen in RecipeMapItem.Start()
-                - Run PotionEffectMapItem Awake code, namely
-                    - UpdateSprites();
-                    - Managers.RecipeMap.currentMap.potionEffectsOnMap.Add(this);
-                */
-
                 var listOfLines = Traverse.Create(typeof(DashedLineMapItem)).Field<List<DashedLineMapItem>>("listOfLines").Value;
                 foreach (var line in recipeMapGameObject.GetComponentsInChildren<DashedLineMapItem>())
                 {
@@ -156,8 +156,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                     UnityEngine.Object.DestroyImmediate(line.gameObject);
                 }
 
-                var oldMap = Managers.RecipeMap.currentMap;
-                Managers.RecipeMap.currentMap = mapState;
                 DashedLineMapItem.CreateLinesOnMap(mapState);
             });
         }

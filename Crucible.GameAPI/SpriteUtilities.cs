@@ -47,5 +47,28 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var tex = TextureUtilities.CreateBlankTexture(width, height, fill);
             return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
         }
+
+        /// <summary>
+        /// Creates a sprite from a texture with an optional pivot.
+        /// </summary>
+        /// <param name="texture">The texture to create the sprite from.</param>
+        /// <param name="pivot">The pivot to use.  If unset, the pivot will be centered.</param>
+        /// <returns>The sprite.</returns>
+        public static Sprite FromTexture(Texture2D texture, Vector2? pivot = null)
+        {
+            return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), pivot ?? new Vector2(0.5f, 0.5f));
+        }
+
+        /// <summary>
+        /// Associates a name with a sprite.
+        /// </summary>
+        /// <param name="sprite">The sprite to name.</param>
+        /// <param name="name">The name to apply to the sprite.</param>
+        /// <returns>The sprite.</returns>
+        public static Sprite WithName(this Sprite sprite, string name)
+        {
+            sprite.name = name;
+            return sprite;
+        }
     }
 }

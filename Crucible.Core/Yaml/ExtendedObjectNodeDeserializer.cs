@@ -41,9 +41,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml
         /// <inheritdoc/>
         public bool Deserialize(IParser reader, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
-            // Cloning the parser at every level is time consuming, but duck type candidates might need this, and we can't immediately
-            // check expectedType for this.
-            // TODO: Check expectedType for duck type candidates, and only do this if expectedType or a duck candidate has IDeserializeExtraData.
             var extraDataParser = ReplayParser.ParseObject(reader);
             reader = extraDataParser;
 

@@ -17,7 +17,7 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
-    using ObjectBased.Stack;
+    using global::PotionCraft.ObjectBased.Stack;
 
     /// <summary>
     /// Event args for when a stack item spawns.

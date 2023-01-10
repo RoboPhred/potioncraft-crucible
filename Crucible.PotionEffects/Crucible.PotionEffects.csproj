@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>RoboPhredDev.PotionCraft.Crucible.PotionEffects</RootNamespace>
+    <LangVersion>preview</LangVersion>
+    <CodeAnalysisRuleSet>../StyleCop.Analyzers.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>../StyleCop.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="../stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Crucible.Core\Crucible.Core.csproj" />
+    <ProjectReference Include="..\Crucible.GameAPI\Crucible.GameAPI.csproj" />
+
+    <Reference Include="BepInEx" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\BepInEx.dll</HintPath>
+    </Reference>
+
+    <Reference Include="UnityEngine" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

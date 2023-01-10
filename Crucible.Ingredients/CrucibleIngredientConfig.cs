@@ -18,8 +18,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
 {
     using System;
     using System.Linq;
-    using RoboPhredDev.PotionCraft.Crucible.Config;
+    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
+    using RoboPhredDev.PotionCraft.Crucible.SVG;
     using RoboPhredDev.PotionCraft.Crucible.Yaml;
     using UnityEngine;
     using YamlDotNet.Core;
@@ -101,6 +102,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
         /// </summary>
         public bool? IsStackItemsSolid { get; set; }
 
+        /// <summary>
+        /// Gets or sets the default closeness requirement for this ingredient to show up in a trader's inventory.
+        /// </summary>
+        public int ClosenessRequirement { get; set; } = 0;
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return this.PackageMod.Namespace + "." + this.ID;
+        }
+
         /// <inheritdoc/>
         protected override void OnDeserializeCompleted(Mark start, Mark end)
         {
@@ -170,7 +182,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
                 subject.GroundColor = this.GroundColor.Value;
             }
 
-            if (this.StackItems.Count > 0)
+            if (this.StackItems != null && this.StackItems.Count > 0)
             {
                 subject.SetStack(this.StackItems.Select(x => x.ToStackItem()));
             }
@@ -178,6 +190,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.Ingredients
             if (this.IsStackItemsSolid.HasValue)
             {
                 subject.IsStackItemSolid = this.IsStackItemsSolid.Value;
+            }
+
+            if (this.ClosenessRequirement > 0)
+            {
+                subject.DefaultClosenessRequirement = this.ClosenessRequirement;
             }
         }
     }

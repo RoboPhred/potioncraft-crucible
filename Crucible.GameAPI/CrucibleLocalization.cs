@@ -18,6 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System.Collections.Generic;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
+    using UnityEngine;
 
     /// <summary>
     /// Tools for registering keys and values in PotionCraft's localization system.

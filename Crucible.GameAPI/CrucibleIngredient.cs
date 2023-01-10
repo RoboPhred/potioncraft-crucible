@@ -19,14 +19,24 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using global::PotionCraft.Assemblies.GamepadNavigation;
+    using global::PotionCraft.Assemblies.GamepadNavigation.Conditions;
+    using global::PotionCraft.LocalizationSystem;
+    using global::PotionCraft.ObjectBased;
+    using global::PotionCraft.ObjectBased.InteractiveItem.SoundControllers;
+    using global::PotionCraft.ObjectBased.RecipeMap.Path;
+    using global::PotionCraft.ObjectBased.Stack;
+    using global::PotionCraft.ObjectBased.Stack.StackItem;
+    using global::PotionCraft.ObjectBased.UIElements.Tooltip;
+    using global::PotionCraft.ScriptableObjects;
+    using global::PotionCraft.ScriptableObjects.Ingredient;
+    using global::PotionCraft.Utils.BezierCurves;
+    using global::PotionCraft.Utils.SortingOrderSetter;
     using HarmonyLib;
-    using LocalizationSystem;
-    using ObjectBased.Stack;
+    using RoboPhredDev.PotionCraft.Crucible.GameAPI.BackwardsCompatibility;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
-    using SoundSystem.SoundControllers;
     using UnityEngine;
-    using Utils.BezierCurves;
-    using Utils.SortingOrderSetter;
+    using UnityEngine.Rendering;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="Ingredient"/>s.
@@ -264,14 +274,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 throw new ArgumentException($"An ingredient with the given id of \"{id}\" already exists.");
             }
 
-            var ingredientBase = Managers.Ingredient.ingredients.Find(x => x.name == copyFromId);
+            var ingredientBase = Ingredient.allIngredients.Find(x => x.name == copyFromId);
             if (ingredientBase == null)
             {
-                throw new ArgumentException($"Cannot find ingredient \"{copyFromId}\" to copy settings from.");
+                ingredientBase = GetBaseIngredientForOldId(copyFromId);
+                if (ingredientBase == null)
+                {
+                    throw new ArgumentException($"Cannot find ingredient \"{copyFromId}\" to copy settings from.");
+                }
             }
 
             var ingredient = ScriptableObject.CreateInstance<Ingredient>();
             ingredient.name = id;
+
+            var ingredientGO = new GameObject($"Ingredient_{id}");
+            ingredientGO.transform.parent = GameObjectUtilities.CruciblePrefabRoot.transform;
+            ingredientGO.SetActive(false);
 
             var crucibleIngredient = new CrucibleIngredient(ingredient)
             {
@@ -286,11 +304,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 IsTeleportationIngredient = ingredientBase.isTeleportationIngredient,
             };
 
-            ingredient.path = new IngredientPath
-            {
-                path = ingredientBase.path.path.ToList(),
-                grindedPathStartsFrom = ingredientBase.path.grindedPathStartsFrom,
-            };
+            var path = ingredientGO.AddComponent<IngredientPath>();
+            path.path = ingredientBase.path.path.ToList();
+            path.grindedPathStartsFrom = ingredientBase.path.grindedPathStartsFrom;
+            ingredient.path = path;
 
             ingredient.itemStackPrefab = ingredientBase.itemStackPrefab;
 
@@ -316,7 +333,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             ingredient.OnAwake();
 
-            Managers.Ingredient.ingredients.Add(ingredient);
+            Ingredient.allIngredients.Add(ingredient);
 
             return crucibleIngredient;
         }
@@ -328,7 +345,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>The ingredient if found, or null if no ingredient exists by the given id.</returns>
         public static CrucibleIngredient GetIngredientById(string id)
         {
-            var ingredient = Managers.Ingredient.ingredients.Find(x => x.name == id);
+            var ingredient = Ingredient.allIngredients.Find(x => x.name == id);
             if (ingredient == null)
             {
                 return null;
@@ -343,7 +360,23 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <returns>An enumerable of all ingredients.</returns>
         public static IEnumerable<CrucibleIngredient> GetAllIngredients()
         {
-            return Managers.Ingredient.ingredients.Select(x => new CrucibleIngredient(x));
+            return Ingredient.allIngredients.Select(x => new CrucibleIngredient(x));
+        }
+
+        /// <summary>
+        /// Gets the corresponding current version ingredient for an old id.
+        /// </summary>
+        /// <param name="oldId">The out of date id.</param>
+        /// <returns>The corresponding current version ingredient.</returns>
+        public static CrucibleIngredient GetIngredientForOldId(string oldId)
+        {
+            var ingredient = GetBaseIngredientForOldId(oldId);
+            if (ingredient == null)
+            {
+                return null;
+            }
+
+            return new CrucibleIngredient(ingredient);
         }
 
         /// <summary>
@@ -391,22 +424,85 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 name = $"{this.ID} Stack",
             };
+            prefab.transform.parent = GameObjectUtilities.CruciblePrefabRoot.transform;
             prefab.SetActive(false);
+
+            prefab.AddComponent<Rigidbody2D>();
 
             var stack = prefab.AddComponent<Stack>();
             stack.inventoryItem = this.InventoryItem;
             var stackTraverse = Traverse.Create(stack);
-            stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new SoundController(stack, this.Ingredient.soundPreset);
+            stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new global::PotionCraft.ObjectBased.Stack.SoundController(stack, this.Ingredient.soundPreset);
             stackTraverse.Field<float>("assemblingSpeed").Value = 3;
+
+            prefab.AddComponent<StackHighlight>();
 
             var visualEffects = prefab.AddComponent<StackVisualEffects>();
             visualEffects.stackScript = stack;
 
-            prefab.AddComponent<Rigidbody2D>();
+            var tooltipProvider = prefab.AddComponent<StackTooltipContentProvider>();
+            Traverse.Create(tooltipProvider).Field("stack").SetValue(stack);
+            tooltipProvider.fadingType = TooltipContentProvider.FadingType.SceneElement;
+
+            // These seem to be the same for each ingredient. Manually specifying them for now.
+            tooltipProvider.positioningSettings = new List<PositioningSettings>
+            {
+                new PositioningSettings
+                {
+                    bindingPoint = PositioningSettings.BindingPoint.ColliderLeftBottom,
+                    freezeX = false,
+                    freezeY = true,
+                    position = new Vector2(0, -0.05f),
+                    tooltipCorner = PositioningSettings.TooltipCorner.LeftTop,
+                },
+                new PositioningSettings
+                {
+                    bindingPoint = PositioningSettings.BindingPoint.ColliderRightTop,
+                    freezeX = true,
+                    freezeY = false,
+                    position = new Vector2(0.05f, 0),
+                    tooltipCorner = PositioningSettings.TooltipCorner.LeftTop,
+                },
+                new PositioningSettings
+                {
+                    bindingPoint = PositioningSettings.BindingPoint.ColliderLeftTop,
+                    freezeX = false,
+                    freezeY = true,
+                    position = new Vector2(0, 0.05f),
+                    tooltipCorner = PositioningSettings.TooltipCorner.LeftBottom,
+                },
+                new PositioningSettings
+                {
+                    bindingPoint = PositioningSettings.BindingPoint.ColliderLeftTop,
+                    freezeX = true,
+                    freezeY = false,
+                    position = new Vector2(-0.05f, 0),
+                    tooltipCorner = PositioningSettings.TooltipCorner.RightTop,
+                },
+            };
 
             // Not sure what settings this wants.
             // It seems to remove itself automatically, as this component does not exist when inspecting the game object later.
             prefab.AddComponent<SortingOrderSetter>();
+
+            var slotObject = new GameObject
+            {
+                name = "SlotObject",
+            };
+            slotObject.transform.parent = prefab.transform;
+            var slot = slotObject.AddComponent<Slot>();
+            slot.conditions = new[] { Condition.EmptyHand };
+            slotObject.AddComponent<ItemFromInventorySectionFinder>();
+            var positionProvider = slotObject.AddComponent<StackSlotPositionProvider>();
+            Traverse.Create(positionProvider).Field("stack").SetValue(stack);
+            var slotSpriteRenderer = slotObject.AddComponent<SpriteRenderer>();
+            slotSpriteRenderer.sprite = SpriteUtilities.CreateBlankSprite(1, 1, Color.clear).WithName("Crucible empty slot sprite");
+
+            // These objects are destroyed after activation but are needed during initialization.
+            slot.lineSubObject = slotObject.AddComponent<SlotSubLine>();
+            slot.cursorAnchorSubObject = slotObject.AddComponent<SlotSubCursorAnchor>();
+            slot.mainAnchorSubObject = slotObject.AddComponent<SlotSubMainAnchor>();
+            slot.forbiddenAngleSubObject = slotObject.AddComponent<SlotSubSector>();
 
             foreach (var rootItem in rootItems)
             {
@@ -426,11 +522,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Gets an enumerable enumerating the potion path for this ingredient.
         /// </summary>
         /// <returns>An enumerable of the potion path for this ingredient.</returns>
-        public IEnumerable<CrucibleIngredientPathSegment> GetPath()
+        public IEnumerable<CrucibleBezierCurve> GetPath()
         {
             foreach (var part in this.Ingredient.path.path)
             {
-                yield return CrucibleIngredientPathSegment.FromPotioncraftCurve(part);
+                yield return CrucibleBezierCurve.FromPotioncraftCurve(part);
             }
         }
 
@@ -438,7 +534,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// Sets the ingredient's potion path to the given path.
         /// </summary>
         /// <param name="path">The path to set the ingredient's path to.</param>
-        public void SetPath(IEnumerable<CrucibleIngredientPathSegment> path)
+        public void SetPath(IEnumerable<CrucibleBezierCurve> path)
         {
             var list = new List<CubicBezierCurve>();
 
@@ -451,6 +547,22 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             this.Ingredient.path.path = list;
+            this.Ingredient.path.CalculateEvenlySpacedPoints();
+
+            // This will calculate element potentials for the ingredient based on path
+            // It appears that normally this is done as a build task and so there exists no calls to this method in code
+            // TODO is there a way to cache this to a prefab similarly to how it is being done in game?
+            Traverse.Create(this.Ingredient).Method("CalculatePotentials", new[] { typeof(IngredientPath) }).GetValue(this.Ingredient.path);
+        }
+
+        private static Ingredient GetBaseIngredientForOldId(string oldId)
+        {
+            if (!OldIngredientIdConvert.IngredientConvertDict.TryGetValue(oldId, out string newId))
+            {
+                return null;
+            }
+
+            return Ingredient.allIngredients.Find(x => x.name == oldId);
         }
 
         private static void SetIngredientIcon(Ingredient ingredient, Texture2D texture)
@@ -506,6 +618,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 if (StackOverriddenIngredients.Contains(ingredient))
                 {
                     e.Stack.gameObject.SetActive(true);
+
+                    // These were only useful to prevent exceptions while initializing the stack so they can now be destroyed
+                    // These objects are automatically destroyed under normal conditions for base game ingredients
+                    UnityEngine.Object.Destroy(e.Stack.slot.cursorAnchorSubObject);
+                    UnityEngine.Object.Destroy(e.Stack.slot.lineSubObject);
+                    UnityEngine.Object.Destroy(e.Stack.slot.mainAnchorSubObject);
+                    UnityEngine.Object.Destroy(e.Stack.slot.forbiddenAngleSubObject);
                 }
             };
         }
@@ -526,7 +645,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 name = $"{this.ID} Stack Item {depth}",
             };
-            stackItem.transform.parent = GameObjectUtilities.DisabledRoot.transform;
+            stackItem.transform.parent = GameObjectUtilities.CruciblePrefabRoot.transform;
             stackItem.transform.localPosition = crucibleStackItem.PositionInStack;
             stackItem.transform.localRotation = Quaternion.Euler(0, 0, crucibleStackItem.AngleInStack);
 
@@ -550,14 +669,14 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             goOuter.transform.localRotation = Quaternion.identity;
             var colliderInner = goInner.AddComponent<PolygonCollider2D>();
 
-            var positionCorrectedCollider = crucibleStackItem.ColliderPolygon;
-            var positionCorrectedInnerCollider = crucibleStackItem.InnerColliderPolygon ?? crucibleStackItem.ColliderPolygon;
+            var colliderOuterPolygon = crucibleStackItem.ColliderPolygon;
+            var colliderInnerPolygon = crucibleStackItem.InnerColliderPolygon ?? crucibleStackItem.ColliderPolygon;
 
-            if (positionCorrectedCollider?.Count > 0)
+            if (colliderOuterPolygon?.Count > 0)
             {
                 colliderOuter.pathCount = 1;
 
-                colliderOuter.SetPath(0, positionCorrectedCollider);
+                colliderOuter.SetPath(0, colliderOuterPolygon);
             }
             else
             {
@@ -571,11 +690,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 colliderOuter.SetPath(0, dummyCollider);
             }
 
-            if (positionCorrectedInnerCollider?.Count > 0)
+            if (colliderInnerPolygon?.Count > 0)
             {
                 colliderInner.pathCount = 1;
 
-                colliderInner.SetPath(0, positionCorrectedInnerCollider);
+                colliderInner.SetPath(0, colliderInnerPolygon);
             }
             else
             {
@@ -597,6 +716,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ifs.colliderOuter = colliderOuter;
             ifs.colliderInner = colliderInner;
             ifs.NextStagePrefabs = crucibleStackItem.GrindChildren.Select(x => this.CreateStackItem(x, depth + 1)).ToArray();
+
+            var sortGroup = stackItem.AddComponent<SortingGroup>();
 
             return stackItem;
         }

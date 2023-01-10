@@ -17,8 +17,8 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
+    using global::PotionCraft.LocalizationSystem;
     using HarmonyLib;
-    using LocalizationSystem;
     using UnityEngine;
 
     /// <summary>
@@ -53,30 +53,55 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 return;
             }
 
-            var getTextMethod = AccessTools.Method(typeof(Key), "GetText");
+            var getTextMethod = AccessTools.Method(typeof(LocalizationManager), "GetText", new[] { typeof(string), typeof(LocalizationManager.Locale) });
             if (getTextMethod == null)
             {
-                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to find Key GetText function!");
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to find LocalizationManager GetText function!");
             }
             else
             {
-                var prefixMethod = AccessTools.Method(typeof(KeyGetTextEvent), nameof(Prefix));
+                var prefixMethod = AccessTools.Method(typeof(KeyGetTextEvent), nameof(GetTextPrefix));
                 HarmonyInstance.Instance.Patch(getTextMethod, prefix: new HarmonyMethod(prefixMethod));
+            }
+
+            var containsKeyMethod = AccessTools.Method(typeof(LocalizationManager), "ContainsKey", new[] { typeof(string) });
+            if (containsKeyMethod == null)
+            {
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to find LocalizationManager ContainsKey function!");
+            }
+            else
+            {
+                var prefixMethod = AccessTools.Method(typeof(KeyGetTextEvent), nameof(ContainsKeyPrefix));
+                HarmonyInstance.Instance.Patch(containsKeyMethod, prefix: new HarmonyMethod(prefixMethod));
             }
 
             patchApplied = true;
         }
 
 #pragma warning disable SA1313
-        private static bool Prefix(Key __instance, ref string __result)
+        private static bool GetTextPrefix(LocalizationManager __instance, string key, ref string __result)
 #pragma warning restore SA1313
         {
-            var key = Traverse.Create(__instance).Field<string>("key").Value;
             var e = new KeyGetTextEventArgs(key);
             onGetText?.Invoke(__instance, e);
             if (e.Result != null)
             {
                 __result = e.Result;
+                return false;
+            }
+
+            return true;
+        }
+
+#pragma warning disable SA1313
+        private static bool ContainsKeyPrefix(LocalizationManager __instance, string key, ref bool __result)
+#pragma warning restore SA1313
+        {
+            var e = new KeyGetTextEventArgs(key);
+            onGetText?.Invoke(__instance, e);
+            if (e.Result != null)
+            {
+                __result = true;
                 return false;
             }
 

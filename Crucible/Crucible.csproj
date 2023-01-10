@@ -22,9 +22,15 @@
     <Reference Include="UnityEngine.CoreModule" CopyToPublishDirectory="Never">
       <HintPath>..\externals\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.IMGUIModule" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
     
-    <Reference Include="Assembly-CSharp" CopyToPublishDirectory="Never">
-      <HintPath>..\externals\Assembly-CSharp.dll</HintPath>
+    <Reference Include="PotionCraft.Core" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\PotionCraft.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="PotionCraft.Scripts" CopyToPublishDirectory="Never">
+      <HintPath>..\externals\PotionCraft.Scripts.dll</HintPath>
     </Reference>
   </ItemGroup>
 

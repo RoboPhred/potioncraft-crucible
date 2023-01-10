@@ -21,13 +21,15 @@ namespace RoboPhredDev.PotionCraft.Crucible
     using System.IO;
     using System.Linq;
     using BepInEx;
+    using global::PotionCraft.NotificationSystem;
+    using RoboPhredDev.PotionCraft.Crucible.CruciblePackages;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI;
     using UnityEngine;
 
     /// <summary>
     /// BepInEx plugin for Crucible Config mods.
     /// </summary>
-    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible", "Crucible Modding Framework", "1.0.0.0")]
+    [BepInPlugin("net.RoboPhredDev.PotionCraft.Crucible", "Crucible Modding Framework", "1.1.1.0")]
     public class CruciblePlugin : BaseUnityPlugin
     {
         private ICollection<CruciblePackageMod> mods;
@@ -108,17 +110,27 @@ namespace RoboPhredDev.PotionCraft.Crucible
 
         private static ICollection<CruciblePackageMod> LoadAllConfigMods()
         {
+            var mods = new List<CruciblePackageMod>();
+
             var path = Path.Combine("crucible", "mods");
             if (!Directory.Exists(path))
             {
-                return new List<CruciblePackageMod>();
+                Directory.CreateDirectory(path);
+                return mods;
             }
 
-            var folders = Directory.GetDirectories(path);
-            return folders.Select(folder => TryLoadMod(folder)).Where(x => x != null).ToList();
+            var directories = Directory.GetDirectories(path);
+            var directoryMods = directories.Select(folder => TryLoadDirectoryMod(folder)).Where(x => x != null);
+            mods.AddRange(directoryMods);
+
+            var zipFiles = Directory.GetFiles(path, "*.zip");
+            var zipMods = zipFiles.Select(file => TryLoadFileMod(file)).Where(x => x != null);
+            mods.AddRange(zipMods);
+
+            return mods;
         }
 
-        private static CruciblePackageMod TryLoadMod(string modFolder)
+        private static CruciblePackageMod TryLoadDirectoryMod(string modFolder)
         {
             try
             {
@@ -128,7 +140,22 @@ namespace RoboPhredDev.PotionCraft.Crucible
             }
             catch (CruciblePackageModLoadException ex)
             {
-                Debug.Log(ex.ToExpandedString());
+                CrucibleLog.Log($"Failed to load mod at \"{modFolder}\": {ex.ToExpandedString()}");
+                return null;
+            }
+        }
+
+        private static CruciblePackageMod TryLoadFileMod(string zipFilePath)
+        {
+            try
+            {
+                var mod = CruciblePackageMod.LoadFromZip(zipFilePath);
+                CrucibleLog.Log($"> Loaded mod \"{mod.Name}\".");
+                return mod;
+            }
+            catch (CruciblePackageModLoadException ex)
+            {
+                CrucibleLog.Log($"Failed to load mod at \"{zipFilePath}\": {ex.ToExpandedString()}");
                 return null;
             }
         }

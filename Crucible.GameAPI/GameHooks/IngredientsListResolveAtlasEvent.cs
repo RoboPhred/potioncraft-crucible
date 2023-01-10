@@ -20,7 +20,13 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using System.Collections.Generic;
     using System.Reflection;
     using System.Reflection.Emit;
-    using Books.RecipeBook;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ManagersSystem.TMP;
+    using global::PotionCraft.ObjectBased.Mortar;
+    using global::PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
+    using global::PotionCraft.ObjectBased.UIElements.PotionCraftPanel;
+    using global::PotionCraft.ScriptableObjects.Potion;
+    using global::PotionCraft.Settings;
     using HarmonyLib;
     using UnityEngine;
 
@@ -58,7 +64,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
             patchApplied = true;
 
-            var panelUpdateIngredientsMethod = AccessTools.Method(typeof(PotionCraftPanel.PotionCraftPanel), "UpdateIngredientsList");
+            var panelUpdateIngredientsMethod = AccessTools.Method(typeof(PotionCraftPanel), "UpdateIngredientsList");
             if (panelUpdateIngredientsMethod == null)
             {
                 Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate potion craft panel ingredients list update function!");
@@ -80,16 +86,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 HarmonyInstance.Instance.Patch(recipeUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpiler));
             }
 
-            var mortarRemoveCurrentStackMethod = AccessTools.Method(typeof(Mortar), "RemoveCurrentStack");
-            if (mortarRemoveCurrentStackMethod == null)
-            {
-                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate mortar remove current stack function!");
-            }
-            else
-            {
-                var transpiler = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(TranspileMortarRemoveCurrentStack));
-                HarmonyInstance.Instance.Patch(mortarRemoveCurrentStackMethod, transpiler: new HarmonyMethod(transpiler));
-            }
+            /* TODO: patch Ingredient.SpawnCollectedItemText */
 
             var potionGetLocalizedIngredientsListMethod = AccessTools.Method(typeof(Potion), "GetLocalizedIngredientsList");
             if (potionGetLocalizedIngredientsListMethod == null)
@@ -109,7 +106,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             return GetAtlasForUsedComponent(component);
         }
 
-        private static string GetAtlasForUsedComponent(Potion.UsedComponent component)
+        private static string GetAtlasForUsedComponent(PotionUsedComponent component)
         {
             return GetAtlasForScriptableObject(component.componentObject);
         }
@@ -124,7 +121,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
         {
             var e = new ScriptableObjectAtlasRequestEventArgs(scriptableObject);
             onAtlasRequest?.Invoke(null, e);
-            return e.AtlasResult ?? Managers.TmpAtlas.settings.IngredientsAtlasName;
+            return e.AtlasResult ?? Settings<TMPManagerSettings>.Asset.IngredientsAtlasName;
         }
 
         private static IEnumerable<CodeInstruction> TranspilePotionCraftPanelUpdateIngredientsList(IEnumerable<CodeInstruction> instructions)
@@ -159,7 +156,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             var found = false;
             foreach (var instruction in instructions)
             {
-                if (!found && instruction.opcode == OpCodes.Ldloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 5 && localBuilder.LocalType == typeof(Potion.UsedComponent))
+                if (!found && instruction.opcode == OpCodes.Ldloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 5 && localBuilder.LocalType == typeof(PotionUsedComponent))
                 {
                     // We should now be right before the if statement checking if the current potion is in stock
                     found = true;
@@ -185,43 +182,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             }
         }
 
-        private static IEnumerable<CodeInstruction> TranspileMortarRemoveCurrentStack(IEnumerable<CodeInstruction> instructions)
-        {
-            var getAtlasForScriptableObjectMethod = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(GetAtlasForScriptableObject));
-            var found = false;
-            foreach (var instruction in instructions)
-            {
-                if (!found && instruction.opcode == OpCodes.Ldfld && instruction.operand is FieldInfo fieldInfo && fieldInfo.DeclaringType == typeof(TMPAtlasManagerSettings) && fieldInfo.Name == "IngredientsAtlasName")
-                {
-                    found = true;
-
-                    // pop the previous ldfld's result
-                    // Do not yield return the current ldfld
-                    // Note: This is a bit sloppy.  We should remove the call/ldfld/ldfld instructions and replace it with our own.
-                    yield return new CodeInstruction(OpCodes.Pop);
-
-                    yield return new CodeInstruction(OpCodes.Ldloc_0); // inventoryItem
-                    yield return new CodeInstruction(OpCodes.Call, getAtlasForScriptableObjectMethod);
-
-                    // Next instruction will be a stloc_1, which will store our result.
-                }
-                else
-                {
-                    yield return instruction;
-                }
-            }
-
-            if (!found)
-            {
-                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to inject atlas replacement for MortarRemoveCurrentStack!");
-            }
-        }
-
         private static IEnumerable<CodeInstruction> TranspilePotionGetLocalizedIngredientsList(IEnumerable<CodeInstruction> instructions)
         {
             var getAtlasForPotionUsedComponentIndex = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(GetAtlasForPotionUsedComponentIndex));
             var usedComponentsField = AccessTools.Field(typeof(Potion), nameof(Potion.usedComponents));
-            var componentObjectField = AccessTools.Field(typeof(Potion.UsedComponent), nameof(Potion.UsedComponent.componentObject));
+            var componentObjectField = AccessTools.Field(typeof(PotionUsedComponent), nameof(PotionUsedComponent.componentObject));
             var found = false;
             foreach (var instruction in instructions)
             {

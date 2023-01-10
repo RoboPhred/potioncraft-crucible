@@ -16,13 +16,16 @@
 
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
+    using System;
+    using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ScriptableObjects;
     using HarmonyLib;
     using UnityEngine;
 
     /// <summary>
     /// Provides a stable API for working with PotionCraft <see cref="InventoryItem"/>s.
     /// </summary>
-    public abstract class CrucibleInventoryItem
+    public class CrucibleInventoryItem : IEquatable<CrucibleInventoryItem>, ICrucibleInventoryItemProvider
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CrucibleInventoryItem"/> class.
@@ -78,9 +81,37 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         }
 
         /// <summary>
+        /// Gets or sets the default required closeness level for this item to appear in a trader's inventory.
+        /// This is a crucible specific field and will not actually be saved to the Potion Craft inventory object.
+        /// </summary>
+        public int DefaultClosenessRequirement { get; set; }
+
+        /// <summary>
         /// Gets the game item being controlled by this api wrapper.
         /// </summary>
         internal InventoryItem InventoryItem { get; }
+
+        /// <summary>
+        /// Gets the inventory item with the specified name.
+        /// </summary>
+        /// <param name="inventoryItemName">The inventory item name to look up.</param>
+        /// <returns>The inventory item with the specified name.</returns>
+        public static CrucibleInventoryItem GetByName(string inventoryItemName)
+        {
+            return new CrucibleInventoryItem(InventoryItem.GetByName(inventoryItemName));
+        }
+
+        /// <inheritdoc/>
+        CrucibleInventoryItem ICrucibleInventoryItemProvider.GetInventoryItem()
+        {
+            return this;
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(CrucibleInventoryItem other)
+        {
+            return this.InventoryIcon == other.InventoryIcon;
+        }
 
         /// <summary>
         /// Gives the item to the player.

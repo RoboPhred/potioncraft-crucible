@@ -42,12 +42,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             add
             {
                 EnsureInitialized();
-                RecipeMapObjectAwakeEvent.OnRecipeMapObjectAwake += value;
+                GameInitEvent.OnGameInitialized += value;
             }
 
             remove
             {
-                RecipeMapObjectAwakeEvent.OnRecipeMapObjectAwake -= value;
+                GameInitEvent.OnGameInitialized -= value;
             }
         }
 
