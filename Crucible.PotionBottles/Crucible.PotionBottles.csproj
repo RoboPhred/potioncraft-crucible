@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>RoboPhredDev.PotionCraft.Crucible.PotionBottles</RootNamespace>
@@ -29,5 +29,10 @@
 
   <ItemGroup>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Examples\TestPotionBottlesMod\uglyIcon\" />
+    <Folder Include="Examples\TestPotionBottlesMod\ugly\" />
   </ItemGroup>
 </Project>
