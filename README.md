@@ -9,8 +9,8 @@ Out of the box, Crucible provides support for creating code-free PotionCraft mod
 
 -   Custom ingredients
 -   Custom potion bottles, including labels and icons
--   Custom potion bases and maps
--   Custom potion effects
+-   Custom potion bases and maps (Not yet updated for 1.0)
+-   Custom potion effects (Not yet updated for 1.0)
 -   Custom customers
 -   Custom traders
 
@@ -28,7 +28,7 @@ Additionally, Crucible provides an API for other BepInEx mods that provides:
 
 ### Installing Crucible
 
--   Download and install [BepInEx 5.x 64 bit](https://github.com/BepInEx/BepInEx/releases)
+-   Download and install [BepInEx 5.x 64 bit](https://github.com/BepInEx/BepInEx/releases/latest)
     -   The contents of the BepInEx zip should be extracted to your PotionCraft steam directory.
     -   If properly installed, you should see a `winhttp.dll` file and `BepInEx` folder alongside your `Potion Craft.exe`
 -   Download and install [Crucible](https://github.com/RoboPhred/potioncraft-crucible/releases)
