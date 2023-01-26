@@ -358,6 +358,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
 
             var bottle = ScriptableObject.CreateInstance<Bottle>();
+            bottle.name = id;
             var blankSprite = SpriteUtilities.CreateBlankSprite(200, 200, Color.clear);
             bottle.bunchOfLiquidSprites = new Bottle.BunchOfLiquidSprites
             {

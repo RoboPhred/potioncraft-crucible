@@ -1,0 +1,39 @@
+name: TestPotionBottlesMod
+author: fahlgorithm
+version: 1.0.0
+
+dependencies:
+  - bepInExGUID: net.RoboPhredDev.PotionCraft.Crucible.PotionBottles
+
+potionBottles:
+  - id: ugly
+    bottleIcon: ugly/bottleIcon.png
+    bottleForeground: ugly/bottleForeground.png
+    bottleScratches: ugly/bottleScratches.png
+    bottleShadows: ugly/bottleShadows.png
+    bottleCork: ugly/bottleCork.png
+    bottleMask: ugly/bottleMask.png
+    liquidMain: ugly/liquidMain.png
+    liquid2Of2: ugly/liquid2Of2.png
+    liquid1Of3: ugly/liquid1Of3.png
+    liquid3Of3: ugly/liquid3Of3.png
+    liquid1Of4: ugly/liquid1Of4.png
+    liquid3Of4: ugly/liquid3Of4.png
+    liquid4Of4: ugly/liquid4Of4.png
+    liquid1Of5: ugly/liquid1Of5.png
+    liquid2Of5: ugly/liquid2Of5.png
+    liquid4Of5: ugly/liquid4Of5.png
+    liquid5Of5: ugly/liquid5Of5.png
+    bottleCollision: M -0.5 0.7 L 0.5 0.7 L 0.5 -0.7 L 0 -0.7 L -0.2 -0.7
+
+potionBottleStickers:
+  - id: uglystick1
+    background: uglyLabels/uglystick1b.png
+    menuIcon: uglyLabels/uglystick1a.png
+  - id: uglystick2
+    background: uglyLabels/uglystick2b.png
+    menuIcon: uglyLabels/uglystick2a.png
+    
+potionBottleIcons:
+  - id: uglyicon
+    icon: uglyicon/bottleIcon.png
