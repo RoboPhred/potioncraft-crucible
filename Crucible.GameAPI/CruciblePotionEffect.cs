@@ -322,9 +322,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             settings.lockedEffectIcon = defaultSettings.lockedEffectIcon;
             settings.effectSlotActiveSprite = defaultSettings.effectSlotActiveSprite;
             settings.effectSlotIdleSprite = defaultSettings.effectSlotIdleSprite;
-            settings.idleSepiaSettings = defaultSettings.idleSepiaSettings;
-            settings.unknownSepiaSettings = defaultSettings.unknownSepiaSettings;
-            settings.collectedSepiaSettings = defaultSettings.collectedSepiaSettings;
+
+            // TODO AF 12/13/23 Do these settings live somewhere else now or can they be deleted?
+            // settings.idleSepiaSettings = defaultSettings.idleSepiaSettings;
+            // settings.unknownSepiaSettings = defaultSettings.unknownSepiaSettings;
+            // settings.collectedSepiaSettings = defaultSettings.collectedSepiaSettings;
             settings.collectAnimationTime = defaultSettings.collectAnimationTime;
 
             EffectSettings.Add(effect, settings);
