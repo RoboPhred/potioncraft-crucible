@@ -156,16 +156,16 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             var found = false;
             foreach (var instruction in instructions)
             {
-                if (!found && instruction.opcode == OpCodes.Ldloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 5 && localBuilder.LocalType == typeof(PotionUsedComponent))
+                if (!found && instruction.opcode == OpCodes.Ldloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 6 && localBuilder.LocalType == typeof(PotionUsedComponent))
                 {
                     // We should now be right before the if statement checking if the current potion is in stock
                     found = true;
 
-                    yield return new CodeInstruction(OpCodes.Ldloc_S, 5); // currentPotion
+                    yield return new CodeInstruction(OpCodes.Ldloc_S, 6); // currentPotion
                     yield return new CodeInstruction(OpCodes.Call, getAtlasForUsedComponentMethod);
 
                     // Store the result into ingredientsAtlasName so it will be used in one of the two branching string constructions.
-                    yield return new CodeInstruction(OpCodes.Stloc_0);
+                    yield return new CodeInstruction(OpCodes.Stloc_1);
 
                     // Return the first part of the if-check and continue as normal.
                     yield return instruction;
