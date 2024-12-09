@@ -20,7 +20,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System.Collections.Generic;
     using System.Linq;
     using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow;
-    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow.PotionCustomizationWindow;
+    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow.AlchemySubstanceCustomizationWindow;
     using global::PotionCraft.ScriptableObjects;
     using HarmonyLib;
     using UnityEngine;
@@ -391,7 +391,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             Bottle.allPotionBottles.Add(bottle);
 
             // Add the bottle to the bottle chooser UI.
-            var skinChangerWindow = GameObject.FindObjectOfType<PotionSkinChangerWindow>();
+            var skinChangerWindow = GameObject.FindFirstObjectByType<AlchemySubstanceSkinChangerWindow>();
             var panelGroup = Traverse.Create(skinChangerWindow).Field<ElementChangerPanelGroup>("bottleSkinChangerPanelGroup").Value;
             var mainPanel = panelGroup.mainPanel as ElementChangerPanelWithElements;
             if (mainPanel != null)

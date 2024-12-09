@@ -91,7 +91,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         private static void PopulatePrefabs()
         {
             capturedPrefabs = new Dictionary<string, GameObject>();
-            var parts = GameObject.FindObjectsOfType<VortexMapItem>();
+            var parts = GameObject.FindObjectsByType<VortexMapItem>(FindObjectsSortMode.None);
             CapturePrefab("VortexMedium", parts);
             CapturePrefab("VortexLarge", parts);
         }

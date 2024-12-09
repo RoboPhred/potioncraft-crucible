@@ -17,9 +17,9 @@
 namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
-    using global::PotionCraft.ObjectBased.UIElements.Tooltip;
     using global::PotionCraft.ScriptableObjects.Ingredient;
     using HarmonyLib;
+    using TooltipSystem;
     using UnityEngine;
 
     /// <summary>

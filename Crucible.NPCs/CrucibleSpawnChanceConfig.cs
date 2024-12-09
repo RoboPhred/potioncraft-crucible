@@ -31,6 +31,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
         /// <summary>
         /// Gets or sets the chance of this faction spawning.
         /// </summary>
-        public float ChanceToAppear { get; set; } = 50f; //TODO figure out a reasonable default here
+        public float ChanceToAppear { get; set; } = 50f; // TODO figure out a reasonable default here
     }
 }

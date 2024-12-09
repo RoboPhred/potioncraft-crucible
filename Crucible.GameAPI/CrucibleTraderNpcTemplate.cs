@@ -157,7 +157,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var baseTemplate = CreateNpcTemplate(name, copyFromTemplate);
             var template = new CrucibleTraderNpcTemplate(baseTemplate);
-            template.NpcTemplate.closenessLevelUpIcon = copyFromTemplate.NpcTemplate.closenessLevelUpIcon;
             template.NpcTemplate.dayTimeForSpawn = copyFromTemplate.NpcTemplate.dayTimeForSpawn;
 
             template.Appearance.CopyFrom(copyFromTemplate);

@@ -87,7 +87,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
-
         /// <summary>
         /// Gets or sets the minimum days of cooldown for this npc to appear again. If this value is the same as <see cref="MaximumDaysOfCooldownForSpawn"/> the days of cooldown will not be random.
         /// </summary>
@@ -171,7 +170,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 this.NpcTemplate.visualMood = parsed;
             }
         }
-
 
         /// <summary>
         /// Gets the ID of this npc template.
@@ -368,6 +366,128 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             }
         }
 
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"[CrucibleNpcTemplate {this.ID}]";
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(CrucibleNpcTemplate other)
+        {
+            return this.NpcTemplate == other.NpcTemplate;
+        }
+
+        /// <summary>
+        /// Adds a tag to this npc template.
+        /// </summary>
+        /// <param name="tag">The tag to apply to this template.</param>
+        public void AddTag(string tag)
+        {
+            if (!NpcTemplateTagsById.ContainsKey(this.ID))
+            {
+                NpcTemplateTagsById.Add(this.ID, new HashSet<string>());
+            }
+
+            NpcTemplateTagsById[this.ID].Add(tag);
+        }
+
+        /// <summary>
+        /// Checks to see if this npc template has the given tag.
+        /// </summary>
+        /// <param name="tag">The tag to check for.</param>
+        /// <returns>True if the npc template is tagged with the given tag, or False otherwise.</returns>
+        public bool HasTag(string tag)
+        {
+            if (!NpcTemplateTagsById.TryGetValue(this.ID, out var tags))
+            {
+                return false;
+            }
+
+            return tags.Contains(tag);
+        }
+
+        /// <summary>
+        /// Gets all tags associated with this npc template.
+        /// </summary>
+        /// <returns>The collection of tags associated with this npc template.</returns>
+        public IReadOnlyCollection<string> GetTags()
+        {
+            if (!NpcTemplateTagsById.TryGetValue(this.ID, out var tags))
+            {
+                return new string[0];
+            }
+
+            return tags.ToArray();
+        }
+
+        /// <summary>
+        /// If this NPC Template is a customer, gets the API object for manipulating its customer data.
+        /// </summary>
+        /// <returns>The customer npc template, if this NPC template represents a customer.</returns>
+        public CrucibleCustomerNpcTemplate AsCustomer()
+        {
+            if (!this.IsCustomer)
+            {
+                throw new InvalidOperationException("This NPC template is not a customer.");
+            }
+
+            return new CrucibleCustomerNpcTemplate(this.NpcTemplate);
+        }
+
+        /// <summary>
+        /// If this NPC Template is a trader, gets the API object for manipulating its trader data.
+        /// </summary>
+        /// <returns>The trader npc template, if this NPC template represents a trader.</returns>
+        public CrucibleTraderNpcTemplate AsTrader()
+        {
+            if (!this.IsTrader)
+            {
+                throw new InvalidOperationException("This NPC template is not a trader.");
+            }
+
+            return new CrucibleTraderNpcTemplate(this.NpcTemplate);
+        }
+
+        /// <summary>
+        /// Adds this npc template to the queue.
+        /// </summary>
+        public void AddNpcToQueue()
+        {
+            Managers.Npc.AddToQueueForSpawn(this.NpcTemplate);
+            Managers.Npc.TryToSpawnNpc();
+        }
+
+        /// <summary>
+        /// Applies a given CrucibleDialogueNode to this npc for a given closeness level.
+        /// </summary>
+        /// <param name="closenessLevel">The closeness level the given dialogue should appear at.</param>
+        /// <param name="startingDialogue">The dialogue which should appear at the given closeness level.</param>
+        /// <param name="showQuestDialogue">Indicates whether or not the quest dialogue node (and answers leading up to that node) should be displayed.</param>
+        public void ApplyDialogueForClosenessLevel(int closenessLevel, CrucibleDialogueData.CrucibleDialogueNode startingDialogue, bool showQuestDialogue)
+        {
+            if (startingDialogue == null)
+            {
+                return;
+            }
+
+            if (this.ClosenessParts.Count <= closenessLevel)
+            {
+                throw new ArgumentException($"Given closenessLevel is too large. Maximum closeness for this NPC is: {this.ClosenessParts.Count}");
+            }
+
+            var closenessPart = this.ClosenessParts[closenessLevel];
+            var dialogueData = CrucibleDialogueData.CreateDialogueData($"{this.ID}_{closenessLevel}", startingDialogue, showQuestDialogue, this is CrucibleTraderNpcTemplate);
+            var dialogueIndex = closenessPart.parts.FindIndex(p => p is DialogueData);
+            if (dialogueIndex == -1)
+            {
+                closenessPart.parts.Add(dialogueData.DialogueData);
+                return;
+            }
+
+            closenessPart.parts[dialogueIndex] = dialogueData.DialogueData;
+        }
+
         /// <summary>
         /// Creates a new blank NPC template based on another template.
         /// </summary>
@@ -403,7 +523,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             {
                 gender.gender = parentGender.gender;
             }
-
 
             var animationOnHaggle = ScriptableObject.CreateInstance<AnimationOnHaggle>();
             var parentAnimationOnHaggle = copyFrom.baseParts.OfType<AnimationOnHaggle>().FirstOrDefault();
@@ -503,6 +622,23 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             return returnValue;
         }
 
+        /// <summary>
+        /// Gets the non appearance part of the specified type, or throw.
+        /// </summary>
+        /// <typeparam name="T">The type of the part to get.</typeparam>
+        /// <returns>The requested part.</returns>
+        protected T RequireBasePart<T>()
+            where T : NonAppearancePart
+        {
+            var part = this.NpcTemplate.baseParts.OfType<T>().FirstOrDefault();
+            if (part == null)
+            {
+                throw new InvalidOperationException($"NPC template {this.ID} does not have a {typeof(T).Name} part.");
+            }
+
+            return part;
+        }
+
         private static Theme GetHaggleTheme(string themeId)
         {
             return Theme.GetByName(themeId);
@@ -529,144 +665,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 applyExtraCharge = source.applyExtraCharge,
                 item = source.item,
             };
-        }
-
-        /// <inheritdoc/>
-        public override string ToString()
-        {
-            return $"[CrucibleNpcTemplate {this.ID}]";
-        }
-
-        /// <inheritdoc/>
-        public bool Equals(CrucibleNpcTemplate other)
-        {
-            return this.NpcTemplate == other.NpcTemplate;
-        }
-
-        /// <summary>
-        /// Adds a tag to this npc template.
-        /// </summary>
-        /// <param name="tag">The tag to apply to this template.</param>
-        public void AddTag(string tag)
-        {
-            if (!NpcTemplateTagsById.ContainsKey(this.ID))
-            {
-                NpcTemplateTagsById.Add(this.ID, new HashSet<string>());
-            }
-
-            NpcTemplateTagsById[this.ID].Add(tag);
-        }
-
-        /// <summary>
-        /// Checks to see if this npc template has the given tag.
-        /// </summary>
-        /// <param name="tag">The tag to check for.</param>
-        /// <returns>True if the npc template is tagged with the given tag, or False otherwise.</returns>
-        public bool HasTag(string tag)
-        {
-            if (!NpcTemplateTagsById.TryGetValue(this.ID, out var tags))
-            {
-                return false;
-            }
-
-            return tags.Contains(tag);
-        }
-
-        /// <summary>
-        /// Gets all tags associated with this npc template.
-        /// </summary>
-        /// <returns>The collection of tags associated with this npc template.</returns>
-        public IReadOnlyCollection<string> GetTags()
-        {
-            if (!NpcTemplateTagsById.TryGetValue(this.ID, out var tags))
-            {
-                return new string[0];
-            }
-
-            return tags.ToArray();
-        }
-
-        /// <summary>
-        /// If this NPC Template is a customer, gets the API object for manipulating its customer data.
-        /// </summary>
-        /// <returns>The customer npc template, if this NPC template represents a customer.</returns>
-        public CrucibleCustomerNpcTemplate AsCustomer()
-        {
-            if (!this.IsCustomer)
-            {
-                throw new InvalidOperationException("This NPC template is not a customer.");
-            }
-
-            return new CrucibleCustomerNpcTemplate(this.NpcTemplate);
-        }
-
-        /// <summary>
-        /// If this NPC Template is a trader, gets the API object for manipulating its trader data.
-        /// </summary>
-        /// <returns>The trader npc template, if this NPC template represents a trader.</returns>
-        public CrucibleTraderNpcTemplate AsTrader()
-        {
-            if (!this.IsTrader)
-            {
-                throw new InvalidOperationException("This NPC template is not a trader.");
-            }
-
-            return new CrucibleTraderNpcTemplate(this.NpcTemplate);
-        }
-
-        /// <summary>
-        /// Adds this npc template to the queue.
-        /// </summary>
-        public void AddNpcToQueue()
-        {
-            Managers.Npc.AddToQueueForSpawn(this.NpcTemplate);
-            Managers.Npc.TryToSpawnNpc();
-        }
-
-        /// <summary>
-        /// Applies a given CrucibleDialogueNode to this npc for a given closeness level.
-        /// </summary>
-        /// <param name="closenessLevel">The closeness level the given dialogue should appear at.</param>
-        /// <param name="startingDialogue">The dialogue which should appear at the given closeness level.</param>
-        public void ApplyDialogueForClosenessLevel(int closenessLevel, CrucibleDialogueData.CrucibleDialogueNode startingDialogue, bool showQuestDialogue)
-        {
-            if (startingDialogue == null)
-            {
-                return;
-            }
-
-            if (this.ClosenessParts.Count <= closenessLevel)
-            {
-                throw new ArgumentException($"Given closenessLevel is too large. Maximum closeness for this NPC is: {this.ClosenessParts.Count}");
-            }
-
-            var closenessPart = this.ClosenessParts[closenessLevel];
-            var dialogueData = CrucibleDialogueData.CreateDialogueData($"{this.ID}_{closenessLevel}", startingDialogue, showQuestDialogue, this is CrucibleTraderNpcTemplate);
-            var dialogueIndex = closenessPart.parts.FindIndex(p => p is DialogueData);
-            if (dialogueIndex == -1)
-            {
-                closenessPart.parts.Add(dialogueData.DialogueData);
-                return;
-            }
-
-            closenessPart.parts[dialogueIndex] = dialogueData.DialogueData;
-        }
-
-        /// <summary>
-        /// Gets the non appearance part of the specified type, or throw.
-        /// </summary>
-        /// <typeparam name="T">The type of the part to get.</typeparam>
-        /// <returns>The requested part.</returns>
-        protected T RequireBasePart<T>()
-            where T : NonAppearancePart
-        {
-            var part = this.NpcTemplate.baseParts.OfType<T>().FirstOrDefault();
-            if (part == null)
-            {
-                throw new InvalidOperationException($"NPC template {this.ID} does not have a {typeof(T).Name} part.");
-            }
-
-            return part;
         }
     }
 }

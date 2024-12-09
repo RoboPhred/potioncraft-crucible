@@ -18,11 +18,10 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
     using System.Reflection.Emit;
     using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ManagersSystem.Potion.Entities;
     using global::PotionCraft.ManagersSystem.TMP;
-    using global::PotionCraft.ObjectBased.Mortar;
     using global::PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
     using global::PotionCraft.ObjectBased.UIElements.PotionCraftPanel;
     using global::PotionCraft.ScriptableObjects.Potion;
@@ -75,7 +74,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 HarmonyInstance.Instance.Patch(panelUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpiler));
             }
 
-            var recipeUpdateIngredientsMethod = AccessTools.Method(typeof(RecipeBookLeftPageContent), "UpdateIngredientsList");
+            var recipeUpdateIngredientsMethod = AccessTools.Method(typeof(RecipeBookLeftPageContent), "UpdateIngredientsList"); // TODO this needs to be replaced by a transpile to PotionManager.GetLocalizedReagentsList
             if (recipeUpdateIngredientsMethod == null)
             {
                 Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate recipe book ingredients list update function!");
@@ -88,7 +87,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
             /* TODO: patch Ingredient.SpawnCollectedItemText */
 
-            var potionGetLocalizedIngredientsListMethod = AccessTools.Method(typeof(Potion), "GetLocalizedIngredientsList");
+            var potionGetLocalizedIngredientsListMethod = AccessTools.Method(typeof(Potion), "GetLocalizedIngredientsList"); // TODO this may no longer be needed now that this methods seems to have been replaced with PotionManager.GetLocalizedReagentsList
             if (potionGetLocalizedIngredientsListMethod == null)
             {
                 Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate potion get localized ingredients list method!");
@@ -102,18 +101,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
 
         private static string GetAtlasForCurrentPotionUsedComponentIndex(int usedComponentIndex)
         {
-            var component = Managers.Potion.usedComponents[usedComponentIndex];
+            var component = Managers.Potion.PotionUsedComponents.GetSummaryComponents()[usedComponentIndex];
             return GetAtlasForUsedComponent(component);
         }
 
-        private static string GetAtlasForUsedComponent(PotionUsedComponent component)
+        private static string GetAtlasForUsedComponent(AlchemySubstanceComponent component)
         {
-            return GetAtlasForScriptableObject(component.componentObject);
+            return GetAtlasForScriptableObject(component.Component);
         }
 
         private static string GetAtlasForPotionUsedComponentIndex(Potion potion, int usedComponentIndex)
         {
-            var component = potion.usedComponents[usedComponentIndex];
+            var component = potion.usedComponents.GetSummaryComponents()[usedComponentIndex];
             return GetAtlasForUsedComponent(component);
         }
 
@@ -130,12 +129,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             var found = false;
             foreach (var instruction in instructions)
             {
-                // TODO: We shouldn't trust that this code always uses loc.0 for this value...
+                // TODO: We shouldn't trust that this code always uses loc.1 for this value...
                 // Probably should look for ldstr "<voffset=0.1em><size=270%><sprite=\"", then skip over its stelem.ref, the array dup, and lcd.i4.3 which prepares the next array index.
-                if (!found && instruction.opcode == OpCodes.Ldloc_0)
+                if (!found && instruction.opcode == OpCodes.Ldloc_1)
                 {
                     found = true;
-                    yield return new CodeInstruction(OpCodes.Ldloc_3); // index
+                    yield return new CodeInstruction(OpCodes.Ldloc_S, 4); // index
                     yield return new CodeInstruction(OpCodes.Call, getAtlasForUsedComponentIndexMethod);
                 }
                 else
@@ -156,7 +155,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             var found = false;
             foreach (var instruction in instructions)
             {
-                if (!found && instruction.opcode == OpCodes.Ldloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 6 && localBuilder.LocalType == typeof(PotionUsedComponent))
+                if (!found && instruction.opcode == OpCodes.Ldloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 6 && localBuilder.LocalType == typeof(AlchemySubstanceComponent))
                 {
                     // We should now be right before the if statement checking if the current potion is in stock
                     found = true;
@@ -186,7 +185,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
         {
             var getAtlasForPotionUsedComponentIndex = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(GetAtlasForPotionUsedComponentIndex));
             var usedComponentsField = AccessTools.Field(typeof(Potion), nameof(Potion.usedComponents));
-            var componentObjectField = AccessTools.Field(typeof(PotionUsedComponent), nameof(PotionUsedComponent.componentObject));
+            var componentObjectField = AccessTools.Field(typeof(AlchemySubstanceComponent), nameof(AlchemySubstanceComponent.Component));
             var found = false;
             foreach (var instruction in instructions)
             {

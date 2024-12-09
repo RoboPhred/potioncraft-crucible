@@ -59,6 +59,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="localizationKey">The localization key specific to this dialogue's parent subject..</param>
         /// <param name="startingDialogue">The starting dialogue node which links to all other dialogue options.</param>
         /// <param name="showQuestDialogue">Indicates whether or not the quest dialogue node (and answers leading up to that node) should be displayed.</param>
+        /// <param name="isTrader">Indicates whether or not the dialogue data is for an NPC trader.</param>
         /// <returns>A <see cref="CrucibleDialogueData"/> based on the provided CruiclbeDialogNode.</returns>
         public static CrucibleDialogueData CreateDialogueData(string localizationKey, CrucibleDialogueNode startingDialogue, bool showQuestDialogue, bool isTrader)
         {
@@ -556,7 +557,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             /// Gets or sets a value indicating whether or not this node is the answer which goes to the trade screen.
             /// </summary>
             public bool IsTradeAnswer { get; set; }
-
 
             /// <summary>
             /// Gets a value indicating whether or not this or any child node can go back to the parent node.
