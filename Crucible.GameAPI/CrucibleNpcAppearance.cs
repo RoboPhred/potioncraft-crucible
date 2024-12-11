@@ -22,7 +22,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using global::PotionCraft.Npc.MonoBehaviourScripts.Settings;
     using global::PotionCraft.Npc.Parts;
     using global::PotionCraft.Npc.Parts.Appearance;
+    using global::PotionCraft.Npc.Parts.Appearance.Accessories;
     using global::PotionCraft.Npc.Parts.Settings;
+    using HarmonyLib;
     using UnityEngine;
 
     /// <summary>
@@ -561,13 +563,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             this.npcTemplate.appearance = new AppearanceContainer
             {
-                aboveHairFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.aboveHairFeature1, sourcePrefab.appearanceParts),
-                aboveHairFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.aboveHairFeature2, sourcePrefab.appearanceParts),
-                behindBodyFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.behindBodyFeature1, sourcePrefab.appearanceParts),
-                behindBodyFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.behindBodyFeature2, sourcePrefab.appearanceParts),
                 body = ClonePartContainerGroup(sourceTemplate.appearance.body, sourcePrefab.appearanceParts),
-                bodyFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.bodyFeature1, sourcePrefab.appearanceParts),
-                bodyFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.bodyFeature2, sourcePrefab.appearanceParts),
                 breastSize = ClonePartContainerGroup(sourceTemplate.appearance.breastSize, sourcePrefab.appearanceParts),
                 clothesColor1 = ClonePartContainerGroup(sourceTemplate.appearance.clothesColor1, sourcePrefab.appearanceParts),
                 clothesColor2 = ClonePartContainerGroup(sourceTemplate.appearance.clothesColor2, sourcePrefab.appearanceParts),
@@ -576,23 +572,58 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
                 eyes = ClonePartContainerGroup(sourceTemplate.appearance.eyes, sourcePrefab.appearanceParts),
                 face = ClonePartContainerGroup(sourceTemplate.appearance.face, sourcePrefab.appearanceParts),
                 beard = ClonePartContainerGroup(sourceTemplate.appearance.beard, sourcePrefab.appearanceParts),
-                faceFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.faceFeature1, sourcePrefab.appearanceParts),
-                faceFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.faceFeature2, sourcePrefab.appearanceParts),
                 hairColor = ClonePartContainerGroup(sourceTemplate.appearance.hairColor, sourcePrefab.appearanceParts),
                 hairstyle = ClonePartContainerGroup(sourceTemplate.appearance.hairstyle, sourcePrefab.appearanceParts),
                 hat = ClonePartContainerGroup(sourceTemplate.appearance.hat, sourcePrefab.appearanceParts),
-                handBackFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.handBackFeature1, sourcePrefab.appearanceParts),
-                handBackFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.handBackFeature2, sourcePrefab.appearanceParts),
-                handFrontFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.handFrontFeature2, sourcePrefab.appearanceParts),
-                handFrontFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.handFrontFeature1, sourcePrefab.appearanceParts),
                 skinColor = ClonePartContainerGroup(sourceTemplate.appearance.skinColor, sourcePrefab.appearanceParts),
-                shortHairFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.shortHairFeature2, sourcePrefab.appearanceParts),
-                shortHairFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.shortHairFeature1, sourcePrefab.appearanceParts),
                 skullShape = ClonePartContainerGroup(sourceTemplate.appearance.skullShape, sourcePrefab.appearanceParts),
-                skullShapeFeature1 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature1, sourcePrefab.appearanceParts),
-                skullShapeFeature2 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature2, sourcePrefab.appearanceParts),
-                skullShapeFeature3 = ClonePartContainerGroup(sourceTemplate.appearance.skullShapeFeature3, sourcePrefab.appearanceParts),
             };
+
+            var destinationAppearanceTraverse = Traverse.Create(this.npcTemplate.appearance);
+            var sourceAppearanceTraverse = Traverse.Create(this.npcTemplate.appearance);
+#pragma warning disable SA1300 // Element should begin with upper-case letter (AF disabling since it seems linter does not have rules for local funtions)
+            void updateNpcTemplateAppearance<T>(string fieldName)
+            {
+                var sourceAppearance = sourceAppearanceTraverse.Field<PartContainerGroup<T>>(fieldName).Value;
+                var clonedPartContainer = ClonePartContainerGroup(sourceAppearance, sourcePrefab.appearanceParts);
+                destinationAppearanceTraverse.Field<PartContainerGroup<T>>(fieldName).Value = clonedPartContainer;
+            }
+#pragma warning restore SA1300 // Element should begin with upper-case letter
+
+#pragma warning disable SA1101 // Prefix local calls with this (AF disabling since it seems linter does not have rules for local funtions)
+            updateNpcTemplateAppearance<AccessoryAboveHair>("aboveHairFeature1");
+            updateNpcTemplateAppearance<AccessoryAboveHair>("aboveHairFeature2");
+            updateNpcTemplateAppearance<AccessoryAboveHair>("aboveHairFeature3");
+            updateNpcTemplateAppearance<AccessoryAboveHair>("aboveHairFeature4");
+            updateNpcTemplateAppearance<AccessoryShortHair>("shortHairFeature1");
+            updateNpcTemplateAppearance<AccessoryShortHair>("shortHairFeature2");
+            updateNpcTemplateAppearance<AccessoryShortHair>("shortHairFeature3");
+            updateNpcTemplateAppearance<AccessoryShortHair>("shortHairFeature4");
+            updateNpcTemplateAppearance<AccessoryFace>("faceFeature1");
+            updateNpcTemplateAppearance<AccessoryFace>("faceFeature2");
+            updateNpcTemplateAppearance<AccessoryFace>("faceFeature3");
+            updateNpcTemplateAppearance<AccessoryFace>("faceFeature4");
+            updateNpcTemplateAppearance<AccessorySkullShape>("skullShapeFeature1");
+            updateNpcTemplateAppearance<AccessorySkullShape>("skullShapeFeature2");
+            updateNpcTemplateAppearance<AccessorySkullShape>("skullShapeFeature3");
+            updateNpcTemplateAppearance<AccessorySkullShape>("skullShapeFeature4");
+            updateNpcTemplateAppearance<AccessoryHandFront>("handFrontFeature1");
+            updateNpcTemplateAppearance<AccessoryHandFront>("handFrontFeature2");
+            updateNpcTemplateAppearance<AccessoryHandFront>("handFrontFeature3");
+            updateNpcTemplateAppearance<AccessoryHandFront>("handFrontFeature4");
+            updateNpcTemplateAppearance<AccessoryBody>("bodyFeature1");
+            updateNpcTemplateAppearance<AccessoryBody>("bodyFeature2");
+            updateNpcTemplateAppearance<AccessoryBody>("bodyFeature3");
+            updateNpcTemplateAppearance<AccessoryBody>("bodyFeature4");
+            updateNpcTemplateAppearance<AccessoryHandBack>("handBackFeature1");
+            updateNpcTemplateAppearance<AccessoryHandBack>("handBackFeature2");
+            updateNpcTemplateAppearance<AccessoryHandBack>("handBackFeature3");
+            updateNpcTemplateAppearance<AccessoryHandBack>("handBackFeature4");
+            updateNpcTemplateAppearance<AccessoryBehindBody>("behindBodyFeature1");
+            updateNpcTemplateAppearance<AccessoryBehindBody>("behindBodyFeature2");
+            updateNpcTemplateAppearance<AccessoryBehindBody>("behindBodyFeature3");
+            updateNpcTemplateAppearance<AccessoryBehindBody>("behindBodyFeature4");
+#pragma warning restore SA1101 // Prefix local calls with this
         }
 
         private static NpcSettings CloneSettings(NpcSettings settings)

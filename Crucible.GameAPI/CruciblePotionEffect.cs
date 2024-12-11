@@ -400,7 +400,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             foreach (var mapState in MapStatesManager.MapStates)
             {
-                var mapObject = mapState.transform.gameObject;
+                var mapObject = mapState.referencesContainer.transform.gameObject;
                 foreach (var potionEffectItem in mapObject.GetComponentsInChildren<PotionEffectMapItem>())
                 {
                     if (potionEffectItem.Effect != effect)
@@ -423,7 +423,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // bottle sprites.  We should restrict our search to base game effects.
             foreach (var mapState in MapStatesManager.MapStates)
             {
-                var mapObject = mapState.transform.gameObject;
+                var mapObject = mapState.referencesContainer.transform.gameObject;
                 var mapItem = mapObject.GetComponentInChildren<PotionEffectMapItem>();
                 if (mapItem != null)
                 {

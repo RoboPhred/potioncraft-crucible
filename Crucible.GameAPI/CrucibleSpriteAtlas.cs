@@ -181,7 +181,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             asset.name = this.AtlasName;
             asset.spriteInfoList = new List<TMP_Sprite>();
 
-            var texture = new Texture2D(0, 0, TextureFormat.ARGB32, false, false)
+            var texture = new Texture2D(2, 2, TextureFormat.ARGB32, false, false)
             {
                 filterMode = FilterMode.Bilinear,
             };

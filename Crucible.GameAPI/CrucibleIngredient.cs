@@ -27,7 +27,6 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using global::PotionCraft.ObjectBased.RecipeMap.Path;
     using global::PotionCraft.ObjectBased.Stack;
     using global::PotionCraft.ObjectBased.Stack.StackItem;
-    using global::PotionCraft.ObjectBased.UIElements.Tooltip;
     using global::PotionCraft.ScriptableObjects;
     using global::PotionCraft.ScriptableObjects.Ingredient;
     using global::PotionCraft.Utils.BezierCurves;
@@ -35,6 +34,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using HarmonyLib;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.BackwardsCompatibility;
     using RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks;
+    using TooltipSystem;
     using UnityEngine;
     using UnityEngine.Rendering;
 
@@ -293,7 +293,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var crucibleIngredient = new CrucibleIngredient(ingredient)
             {
-                InventoryIcon = ingredientBase.inventoryIconObject,
+                InventoryIcon = ingredientBase.GetInventoryIcon(),
                 RecipeStepIcon = ingredientBase.recipeMarkIcon,
 
                 // We cannot copy the existing icon because it is a non-readable texture.
@@ -322,14 +322,18 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             ingredient.viscosityDown = ingredientBase.viscosityDown;
             ingredient.viscosityUp = ingredientBase.viscosityUp;
             ingredient.isSolid = ingredientBase.isSolid;
-            ingredient.spotPlantPrefab = ingredientBase.spotPlantPrefab;
-            ingredient.spotPlantSpawnTypes = new List<GrowingSpotType>();
             ingredient.soundPreset = ingredientBase.soundPreset;
 
             // These are calculated on awake, or with our ReinitializeIngredient function.
             ingredient.grindStatusByLeafGrindingCurve = ingredientBase.grindStatusByLeafGrindingCurve;
             ingredient.substanceGrindingSettings = ingredientBase.substanceGrindingSettings;
             ingredient.grindedSubstanceMaxAmount = ingredientBase.grindedSubstanceMaxAmount;
+
+            ingredient.growthData = ScriptableObject.CreateInstance<GrowthData>();
+            ingredient.growthData.fertilized = CloneGrowthPhaseData(ingredientBase.growthData.fertilized);
+            ingredient.growthData.harvested = CloneGrowthPhaseData(ingredientBase.growthData.harvested);
+            ingredient.growthData.growthPhases = ingredientBase.growthData.growthPhases.Select(CloneGrowthPhaseData).ToList();
+            ingredient.plantData = ingredientBase.plantData;
 
             ingredient.OnAwake();
 
@@ -430,9 +434,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             prefab.AddComponent<Rigidbody2D>();
 
             var stack = prefab.AddComponent<Stack>();
-            stack.inventoryItem = this.InventoryItem;
             var stackTraverse = Traverse.Create(stack);
-            stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new global::PotionCraft.ObjectBased.Stack.SoundController(stack, this.Ingredient.soundPreset);
+            stackTraverse.Property<InventoryItem>("InventoryItem").Value = this.InventoryItem;
+            stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new global::PotionCraft.ObjectBased.Stack.SoundController(stack, this.Ingredient.soundPreset); // TODO this is causing a null ref error in the constructor
             stackTraverse.Field<float>("assemblingSpeed").Value = 3;
 
             prefab.AddComponent<StackHighlight>();
@@ -442,42 +446,42 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var tooltipProvider = prefab.AddComponent<StackTooltipContentProvider>();
             Traverse.Create(tooltipProvider).Field("stack").SetValue(stack);
-            tooltipProvider.fadingType = TooltipContentProvider.FadingType.SceneElement;
+            tooltipProvider.fadingType = TooltipContentProviderFadingType.SceneElement;
 
             // These seem to be the same for each ingredient. Manually specifying them for now.
-            tooltipProvider.positioningSettings = new List<PositioningSettings>
+            tooltipProvider.positioningSettings = new List<TooltipPositioningSettings>
             {
-                new PositioningSettings
+                new TooltipPositioningSettings
                 {
-                    bindingPoint = PositioningSettings.BindingPoint.ColliderLeftBottom,
+                    bindingPoint = TooltipBindingPoint.ColliderLeftBottom,
                     freezeX = false,
                     freezeY = true,
                     position = new Vector2(0, -0.05f),
-                    tooltipCorner = PositioningSettings.TooltipCorner.LeftTop,
+                    tooltipCorner = TooltipCorner.LeftTop,
                 },
-                new PositioningSettings
+                new TooltipPositioningSettings
                 {
-                    bindingPoint = PositioningSettings.BindingPoint.ColliderRightTop,
+                    bindingPoint = TooltipBindingPoint.ColliderRightTop,
                     freezeX = true,
                     freezeY = false,
                     position = new Vector2(0.05f, 0),
-                    tooltipCorner = PositioningSettings.TooltipCorner.LeftTop,
+                    tooltipCorner = TooltipCorner.LeftTop,
                 },
-                new PositioningSettings
+                new TooltipPositioningSettings
                 {
-                    bindingPoint = PositioningSettings.BindingPoint.ColliderLeftTop,
+                    bindingPoint = TooltipBindingPoint.ColliderLeftTop,
                     freezeX = false,
                     freezeY = true,
                     position = new Vector2(0, 0.05f),
-                    tooltipCorner = PositioningSettings.TooltipCorner.LeftBottom,
+                    tooltipCorner = TooltipCorner.LeftBottom,
                 },
-                new PositioningSettings
+                new TooltipPositioningSettings
                 {
-                    bindingPoint = PositioningSettings.BindingPoint.ColliderLeftTop,
+                    bindingPoint = TooltipBindingPoint.ColliderLeftTop,
                     freezeX = true,
                     freezeY = false,
                     position = new Vector2(-0.05f, 0),
-                    tooltipCorner = PositioningSettings.TooltipCorner.RightTop,
+                    tooltipCorner = TooltipCorner.RightTop,
                 },
             };
 
@@ -555,6 +559,17 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             Traverse.Create(this.Ingredient).Method("CalculatePotentials", new[] { typeof(IngredientPath) }).GetValue(this.Ingredient.path);
         }
 
+        private static GrowthPhaseData CloneGrowthPhaseData(GrowthPhaseData data)
+        {
+            var newData = new GrowthPhaseData(data.sprite);
+            newData.particleSystemMesh = data.particleSystemMesh;
+            newData.shapes = data.shapes;
+            newData.particleSystemGroup = data.particleSystemGroup;
+            newData.slotPosition = data.slotPosition;
+            newData.wateringShapes = data.wateringShapes;
+            return newData;
+        }
+
         private static Ingredient GetBaseIngredientForOldId(string oldId)
         {
             if (!OldIngredientIdConvert.IngredientConvertDict.TryGetValue(oldId, out string newId))
@@ -610,7 +625,8 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             // However, we need to activate them on spawn to let their logic wake up and work properly.
             StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
             {
-                if (e.Stack.inventoryItem is not Ingredient ingredient)
+                var stackTraverse = Traverse.Create(e.Stack);
+                if (stackTraverse.Property<InventoryItem>("InventoryItem").Value is not Ingredient ingredient)
                 {
                     return;
                 }
@@ -621,10 +637,11 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
                     // These were only useful to prevent exceptions while initializing the stack so they can now be destroyed
                     // These objects are automatically destroyed under normal conditions for base game ingredients
-                    UnityEngine.Object.Destroy(e.Stack.slot.cursorAnchorSubObject);
-                    UnityEngine.Object.Destroy(e.Stack.slot.lineSubObject);
-                    UnityEngine.Object.Destroy(e.Stack.slot.mainAnchorSubObject);
-                    UnityEngine.Object.Destroy(e.Stack.slot.forbiddenAngleSubObject);
+                    var stackSlot = e.Stack.GetSlot();
+                    UnityEngine.Object.Destroy(stackSlot.cursorAnchorSubObject);
+                    UnityEngine.Object.Destroy(stackSlot.lineSubObject);
+                    UnityEngine.Object.Destroy(stackSlot.mainAnchorSubObject);
+                    UnityEngine.Object.Destroy(stackSlot.forbiddenAngleSubObject);
                 }
             };
         }
@@ -635,7 +652,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var ingredientTraverse = Traverse.Create(this.Ingredient);
             ingredientTraverse.Method("CalculateStatesAndPrefabs").GetValue();
             ingredientTraverse.Property<int>("MaxItems").Value = this.Ingredient.itemStackPrefab.transform.childCount;
-            ingredientTraverse.Method("CalculateTotalCurveValue").GetValue();
+            ingredientTraverse.Method("CalculateLeavesGrindChanges").GetValue();
             Traverse.Create(this.Ingredient.substanceGrindingSettings).Method("CalculateTotalCurveValue").GetValue();
         }
 

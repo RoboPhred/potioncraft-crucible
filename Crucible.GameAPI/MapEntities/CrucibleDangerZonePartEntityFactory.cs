@@ -101,7 +101,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.MapEntities
         private static void PopulatePrefabs()
         {
             capturedPrefabs = new Dictionary<string, GameObject>();
-            var parts = GameObject.FindObjectsOfType<StrongDangerZonePart>();
+            var parts = GameObject.FindObjectsByType<StrongDangerZonePart>(FindObjectsSortMode.None);
             CapturePrefab("Fang1", parts);
             CapturePrefab("Fang2", parts);
             CapturePrefab("Bone1", parts);

@@ -21,8 +21,9 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
     using System.Reflection;
     using System.Reflection.Emit;
     using global::PotionCraft.ManagersSystem;
+    using global::PotionCraft.ManagersSystem.Potion;
+    using global::PotionCraft.ManagersSystem.Potion.Entities;
     using global::PotionCraft.ManagersSystem.TMP;
-    using global::PotionCraft.ObjectBased.Mortar;
     using global::PotionCraft.ObjectBased.UIElements.Books.RecipeBook;
     using global::PotionCraft.ObjectBased.UIElements.PotionCraftPanel;
     using global::PotionCraft.ScriptableObjects.Potion;
@@ -75,45 +76,34 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 HarmonyInstance.Instance.Patch(panelUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpiler));
             }
 
-            var recipeUpdateIngredientsMethod = AccessTools.Method(typeof(RecipeBookLeftPageContent), "UpdateIngredientsList");
+            var recipeUpdateIngredientsMethod = AccessTools.Method(typeof(PotionManager), "GetLocalizedReagentsList");
             if (recipeUpdateIngredientsMethod == null)
             {
-                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate recipe book ingredients list update function!");
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate potion manager get localized reagents list function!");
             }
             else
             {
-                var transpiler = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(TranspileRecipeBookLeftPageContentUpdateIngredientsList));
+                var transpiler = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(TranspilePotionManagerGetLocalizedReagentsList));
                 HarmonyInstance.Instance.Patch(recipeUpdateIngredientsMethod, transpiler: new HarmonyMethod(transpiler));
             }
 
             /* TODO: patch Ingredient.SpawnCollectedItemText */
-
-            var potionGetLocalizedIngredientsListMethod = AccessTools.Method(typeof(Potion), "GetLocalizedIngredientsList");
-            if (potionGetLocalizedIngredientsListMethod == null)
-            {
-                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to locate potion get localized ingredients list method!");
-            }
-            else
-            {
-                var transpiler = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(TranspilePotionGetLocalizedIngredientsList));
-                HarmonyInstance.Instance.Patch(potionGetLocalizedIngredientsListMethod, transpiler: new HarmonyMethod(transpiler));
-            }
         }
 
         private static string GetAtlasForCurrentPotionUsedComponentIndex(int usedComponentIndex)
         {
-            var component = Managers.Potion.usedComponents[usedComponentIndex];
+            var component = Managers.Potion.PotionUsedComponents.GetSummaryComponents()[usedComponentIndex];
             return GetAtlasForUsedComponent(component);
         }
 
-        private static string GetAtlasForUsedComponent(PotionUsedComponent component)
+        private static string GetAtlasForUsedComponent(AlchemySubstanceComponent component)
         {
-            return GetAtlasForScriptableObject(component.componentObject);
+            return GetAtlasForScriptableObject(component.Component);
         }
 
         private static string GetAtlasForPotionUsedComponentIndex(Potion potion, int usedComponentIndex)
         {
-            var component = potion.usedComponents[usedComponentIndex];
+            var component = potion.usedComponents.GetSummaryComponents()[usedComponentIndex];
             return GetAtlasForUsedComponent(component);
         }
 
@@ -135,7 +125,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
                 if (!found && instruction.opcode == OpCodes.Ldloc_0)
                 {
                     found = true;
-                    yield return new CodeInstruction(OpCodes.Ldloc_3); // index
+                    yield return new CodeInstruction(OpCodes.Ldloc_S, 4); // index
                     yield return new CodeInstruction(OpCodes.Call, getAtlasForUsedComponentIndexMethod);
                 }
                 else
@@ -150,69 +140,53 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI.GameHooks
             }
         }
 
-        private static IEnumerable<CodeInstruction> TranspileRecipeBookLeftPageContentUpdateIngredientsList(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> TranspilePotionManagerGetLocalizedReagentsList(IEnumerable<CodeInstruction> instructions)
         {
+            // IL_01b4: ldfld   string PotionCraft.ManagersSystem.TMP.TMPManagerSettings::IngredientsAtlasName
             var getAtlasForUsedComponentMethod = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(GetAtlasForUsedComponent));
             var found = false;
+            CodeInstruction lastInstruction = null;
             foreach (var instruction in instructions)
             {
-                if (!found && instruction.opcode == OpCodes.Ldloc_S && instruction.operand is LocalBuilder localBuilder && localBuilder.LocalIndex == 6 && localBuilder.LocalType == typeof(PotionUsedComponent))
+                if (!found && instruction.opcode == OpCodes.Ldfld
+                    && instruction.operand is FieldInfo fieldInfo
+                    && fieldInfo.FieldType == typeof(string)
+                    && fieldInfo.Name.Equals("IngredientsAtlasName"))
                 {
-                    // We should now be right before the if statement checking if the current potion is in stock
+                    // We should now be right before the assignment of IngredientsAtlasName to str9
                     found = true;
 
-                    yield return new CodeInstruction(OpCodes.Ldloc_S, 6); // currentPotion
+                    // Set the last instruction to null so it isn't returned in the next iteration
+                    lastInstruction = null;
+
+                    // Put the current used component on the call stack and call getAtlasForUsedComponent to return the correct atlas for the component
+                    yield return new CodeInstruction(OpCodes.Ldloc_S, 16); // substanceComponent1
                     yield return new CodeInstruction(OpCodes.Call, getAtlasForUsedComponentMethod);
-
-                    // Store the result into ingredientsAtlasName so it will be used in one of the two branching string constructions.
-                    yield return new CodeInstruction(OpCodes.Stloc_1);
-
-                    // Return the first part of the if-check and continue as normal.
-                    yield return instruction;
-                }
-                else
-                {
-                    yield return instruction;
-                }
-            }
-
-            if (!found)
-            {
-                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to inject atlas replacement for RecipeBookLeftPageContent!");
-            }
-        }
-
-        private static IEnumerable<CodeInstruction> TranspilePotionGetLocalizedIngredientsList(IEnumerable<CodeInstruction> instructions)
-        {
-            var getAtlasForPotionUsedComponentIndex = AccessTools.Method(typeof(IngredientsListResolveAtlasEvent), nameof(GetAtlasForPotionUsedComponentIndex));
-            var usedComponentsField = AccessTools.Field(typeof(Potion), nameof(Potion.usedComponents));
-            var componentObjectField = AccessTools.Field(typeof(PotionUsedComponent), nameof(PotionUsedComponent.componentObject));
-            var found = false;
-            foreach (var instruction in instructions)
-            {
-                // FIXME: Potentially dangerous injection.  Relying on local 0 to be the atlas name.
-                if (!found && instruction.opcode == OpCodes.Ldloc_0)
-                {
-                    found = true;
-
-                    // We are at the instruction to load the ingredients atlas name.
-                    // Rather than allowing that, fetch the atlas for the current custom component.
-                    yield return new CodeInstruction(OpCodes.Ldarg_0); // this (Potion)
-                    yield return new CodeInstruction(OpCodes.Ldloc_2); // index
-                    yield return new CodeInstruction(OpCodes.Call, getAtlasForPotionUsedComponentIndex);
 
                     // Do not yield return instruction.
                     // Leave our result on the call stack to take its place.
                 }
                 else
                 {
-                    yield return instruction;
+                    // Only return the last instruction since we need to modify a set of two instructions
+                    if (lastInstruction != null)
+                    {
+                        yield return lastInstruction;
+                    }
+
+                    lastInstruction = instruction;
                 }
+            }
+
+            // Return the last instruction since we didn't do that as part of the loop
+            if (lastInstruction != null)
+            {
+                yield return lastInstruction;
             }
 
             if (!found)
             {
-                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to inject atlas replacement for Potion GetLocalizedIngredientsList!");
+                Debug.Log("[RoboPhredDev.PotionCraft.Crucible] Failed to inject atlas replacement for PotionManager.GetLocalizedReagentsList!");
             }
         }
     }

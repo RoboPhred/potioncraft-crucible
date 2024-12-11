@@ -18,7 +18,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 {
     using System;
     using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow;
-    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow.PotionCustomizationWindow;
+    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow.AlchemySubstanceCustomizationWindow;
     using global::PotionCraft.ScriptableObjects;
     using HarmonyLib;
     using UnityEngine;
@@ -123,7 +123,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         private static void AddStickerToUI(Sticker sticker)
         {
-            var skinChangerWindow = GameObject.FindObjectOfType<PotionSkinChangerWindow>();
+            var skinChangerWindow = GameObject.FindFirstObjectByType<AlchemySubstanceSkinChangerWindow>();
             if (skinChangerWindow == null)
             {
                 return;

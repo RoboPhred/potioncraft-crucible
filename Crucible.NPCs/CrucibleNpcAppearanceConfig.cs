@@ -265,7 +265,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.NPCs
 
             public void Apply(CrucibleNpcTemplate npc)
             {
-                npc.Appearance.AddBeard(Background ?? BlankSprite, Contour ?? BlankSprite, Scratches ?? BlankSprite, this.Chance);
+                npc.Appearance.AddBeard(this.Background ?? BlankSprite, this.Contour ?? BlankSprite, this.Scratches ?? BlankSprite, this.Chance);
             }
         }
     }
