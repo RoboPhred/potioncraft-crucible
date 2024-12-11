@@ -435,7 +435,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             var stack = prefab.AddComponent<Stack>();
             var stackTraverse = Traverse.Create(stack);
-            stackTraverse.Property<InventoryItem>("inventoryItem").Value = this.InventoryItem;
+            stackTraverse.Property<InventoryItem>("InventoryItem").Value = this.InventoryItem;
             stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new global::PotionCraft.ObjectBased.Stack.SoundController(stack, this.Ingredient.soundPreset); // TODO this is causing a null ref error in the constructor
             stackTraverse.Field<float>("assemblingSpeed").Value = 3;
 
@@ -626,7 +626,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             StackSpawnNewItemEvent.OnSpawnNewItemPreInititialize += (object _, StackSpawnNewItemEventArgs e) =>
             {
                 var stackTraverse = Traverse.Create(e.Stack);
-                if (stackTraverse.Property<InventoryItem>("inventoryItem").Value is not Ingredient ingredient)
+                if (stackTraverse.Property<InventoryItem>("InventoryItem").Value is not Ingredient ingredient)
                 {
                     return;
                 }
@@ -652,7 +652,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var ingredientTraverse = Traverse.Create(this.Ingredient);
             ingredientTraverse.Method("CalculateStatesAndPrefabs").GetValue();
             ingredientTraverse.Property<int>("MaxItems").Value = this.Ingredient.itemStackPrefab.transform.childCount;
-            ingredientTraverse.Method("CalculateTotalCurveValue").GetValue();
+            ingredientTraverse.Method("CalculateLeavesGrindChanges").GetValue();
             Traverse.Create(this.Ingredient.substanceGrindingSettings).Method("CalculateTotalCurveValue").GetValue();
         }
 
