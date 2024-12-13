@@ -154,20 +154,21 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
         private static NodeData CreateDialogueNode(string localizationKey, ref int localizationKeyUniqueId, CrucibleDialogueData dialogueData, CrucibleDialogueNode dialogueNode, string parentGuid, bool showQuestDialogue, bool isTrader)
         {
-            if (!showQuestDialogue)
-            {
-                var nextDialogue = dialogueNode.NextNonQuestNode;
-                if (nextDialogue == null)
-                {
-                    return null;
-                }
-
-                return CreateDialogueNode(localizationKey, ref localizationKeyUniqueId, dialogueData, nextDialogue, parentGuid, showQuestDialogue, isTrader);
-            }
-
             NodeData newNode;
             if (dialogueNode.IsQuestNode)
             {
+                // Remove quest nodes if we are not showing quest dialogue
+                if (!showQuestDialogue)
+                {
+                    var nextDialogue = dialogueNode.NextNonQuestNode;
+                    if (nextDialogue == null)
+                    {
+                        return null;
+                    }
+
+                    return CreateDialogueNode(localizationKey, ref localizationKeyUniqueId, dialogueData, nextDialogue, parentGuid, showQuestDialogue, isTrader);
+                }
+
                 NodeData newQuestNode;
                 if (isTrader)
                 {
