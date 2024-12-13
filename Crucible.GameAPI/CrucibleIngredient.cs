@@ -436,7 +436,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
             var stack = prefab.AddComponent<Stack>();
             var stackTraverse = Traverse.Create(stack);
             stackTraverse.Property<InventoryItem>("InventoryItem").Value = this.InventoryItem;
-            stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new global::PotionCraft.ObjectBased.Stack.SoundController(stack, this.Ingredient.soundPreset); // TODO this is causing a null ref error in the constructor
+            stackTraverse.Property<ItemFromInventoryController>("SoundController").Value = new global::PotionCraft.ObjectBased.Stack.SoundController(stack, this.Ingredient.soundPreset);
             stackTraverse.Field<float>("assemblingSpeed").Value = 3;
 
             prefab.AddComponent<StackHighlight>();
