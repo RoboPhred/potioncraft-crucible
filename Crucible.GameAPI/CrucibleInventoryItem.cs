@@ -54,12 +54,12 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         {
             get
             {
-                return this.InventoryItem.inventoryIconObject;
+                return this.InventoryItem.GetInventoryIcon();
             }
 
             set
             {
-                this.InventoryItem.inventoryIconObject = value;
+                this.InventoryItem.SetInventoryIcon(value);
             }
         }
 
@@ -119,7 +119,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
         /// <param name="count">The number of items to give.</param>
         public void GiveToPlayer(int count)
         {
-            Managers.Player.inventory.AddItem(this.InventoryItem, count, true, true);
+            Managers.Player.Inventory.AddItem(this.InventoryItem, count, true, true);
         }
     }
 }

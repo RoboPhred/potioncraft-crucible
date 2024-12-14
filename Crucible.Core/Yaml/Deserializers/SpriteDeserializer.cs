@@ -70,7 +70,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.Yaml.Deserializers
             var data = CrucibleResources.ReadAllBytes(resource);
 
             // Do not create mip levels for this texture, use it as-is.
-            var tex = new Texture2D(0, 0, TextureFormat.ARGB32, false, false)
+            var tex = new Texture2D(2, 2, TextureFormat.ARGB32, false, false)
             {
                 filterMode = FilterMode.Bilinear,
             };

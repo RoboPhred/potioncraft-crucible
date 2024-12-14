@@ -19,7 +19,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
     using System;
     using System.Collections;
     using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow;
-    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow.PotionCustomizationWindow;
+    using global::PotionCraft.ObjectBased.UIElements.ElementChangerWindow.AlchemySubstanceCustomizationWindow;
     using global::PotionCraft.ScriptableObjects;
     using HarmonyLib;
     using UnityEngine;
@@ -166,7 +166,7 @@ namespace RoboPhredDev.PotionCraft.Crucible.GameAPI
 
             // FIXME: Does every single icon get displayed here?
             // Should probably make this optional.
-            var skinChangerWindow = GameObject.FindObjectOfType<PotionSkinChangerWindow>();
+            var skinChangerWindow = GameObject.FindFirstObjectByType<AlchemySubstanceSkinChangerWindow>();
             if (skinChangerWindow == null)
             {
                 return;
