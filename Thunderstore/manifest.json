@@ -1,0 +1,10 @@
+﻿{
+  "name": "Crucible_Modding_Framework",
+  "version_number": "2.0.1",
+  "website_url": "https://github.com/RoboPhred/potioncraft-crucible",
+  "description": "Crucible is a modding framework for PotionCraft with support for custom ingredients, custom npcs, and custom potion bottles.",
+  "dependencies": [
+    "BepInEx-BepInExPack_PotionCraft-5.4.18"
+  ]
+
+}

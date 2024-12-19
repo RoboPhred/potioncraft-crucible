@@ -112,6 +112,9 @@ namespace RoboPhredDev.PotionCraft.Crucible
         {
             var mods = new List<CruciblePackageMod>();
 
+            var pluginsDirectoryMods = TryLoadPluginsDirectoryMods();
+            mods.AddRange(pluginsDirectoryMods);
+
             var path = Path.Combine("crucible", "mods");
             if (!Directory.Exists(path))
             {
@@ -126,6 +129,28 @@ namespace RoboPhredDev.PotionCraft.Crucible
             var zipFiles = Directory.GetFiles(path, "*.zip");
             var zipMods = zipFiles.Select(file => TryLoadFileMod(file)).Where(x => x != null);
             mods.AddRange(zipMods);
+
+            return mods;
+        }
+
+        /// <summary>
+        /// This method will search for mods in the BepInEx plugins directory.
+        /// This allows support for mod loaders which can only put mods in the plugins directory.
+        /// </summary>
+        private static IEnumerable<CruciblePackageMod> TryLoadPluginsDirectoryMods()
+        {
+            var mods = new List<CruciblePackageMod>();
+
+            var pluginLocation = Paths.PluginPath;
+
+            var zipFiles = Directory.GetFiles(pluginLocation, "*.zip", SearchOption.AllDirectories);
+            var zipMods = zipFiles.Select(file => TryLoadFileMod(file)).Where(x => x != null);
+            mods.AddRange(zipMods);
+
+            var packageFiles = Directory.GetFiles(pluginLocation, "package.yml", SearchOption.AllDirectories);
+            var directories = packageFiles.Select(Directory.GetParent).Select(d => d.FullName);
+            var directoryMods = directories.Select(folder => TryLoadDirectoryMod(folder)).Where(x => x != null);
+            mods.AddRange(directoryMods);
 
             return mods;
         }
